@@ -9,41 +9,24 @@
 
 rm(list = ls(all.names = TRUE))
 
-### INITIAL CONFIGURATION ---------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------ #
+# Cargar librerias.
+# ------------------------------------------------------------------------------------ #
 
-## install pacman
-if(!require(pacman)) install.packages("pacman") ; require(pacman)
+list.of.packages = c("readr", "readxl", "lubridate", "tidyverse", "pacman", "rio", 
+                     "skimr", "caret", "rvest")
 
-## require/install packages on this session
-require(pacman)
-p_load(rio, # import/export data
-       tidyverse, # tidy-data
-       skimr, # summary data
-       caret) # Classification And REgression Training
+new.packages = list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+sapply(list.of.packages, require, character.only = TRUE)
+
+# ------------------------------------------------------------------------------------ #
+# Cargar los datos.
+# ------------------------------------------------------------------------------------ #
+# Link: https://ignaciomsarmiento.github.io/GEIH2018 sample/
 
 ## set seed
 set.seed(0000)
 
-#Separate each section with labels
-# Clean the workspace -----------------------------------------------------
-rm(list=ls())
-cat("\014")
-local({r <- getOption("repos"); r["CRAN"] <- "http://cran.r-project.org"; options(repos=r)}) #set repo
+base <- import("https://github.com/ignaciomsarmiento/datasets/blob/main/GEIH_sample1.Rds?raw=true")
 
-
-
-# Load Packages -----------------------------------------------------------
-pkg<-list("dplyr","here")
-lapply(pkg, require, character.only=T)
-rm(pkg)
-
-
-
-# Load data ---------------------------------------------------------------
-# I recomend you using the package here
-dta<-read.table(here("stores","US90.txt"), sep="", header=TRUE)
-
-
-# plot data ---------------------------------------------------------------
-
-plot(dta$gdpgr, dta$gdpcapgr, pch="*")
