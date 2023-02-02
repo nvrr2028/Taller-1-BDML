@@ -34,7 +34,9 @@ sapply(list.of.packages, require, character.only = TRUE)
 
 # 2a. Descripción de la base de datos (GEIH - DANE) ---------------------------------- #
 
-
+# La Gran Encuesta Integrada de Hogares (GEIH) del DANE, tiene como objetivo suministrar 
+# información sobre el mercado laboral colombiano y las condiciones sociodemográficas de 
+# la población en el territorio nacional.
 
 # 2b. Cargar los datos --------------------------------------------------------------- #
 
@@ -58,7 +60,7 @@ ini <- data %>%
 
 base <- data %>%
   # 1. Renombrando variable de interés
-  rename(ing_hr=y_ingLab_m_ha) %>%                       # y_ingLab_m_ha pasaría a ser ing_hr
+  rename(ing_hr=y_ingLab_m_ha) %>%                             # y_ingLab_m_ha pasaría a ser ing_hr
   # 2. Filtrando por edad y empleado
   filter(age>=18,                                              # Población mayor a 18
          dsi==0) %>%                                           # Población ocupada
@@ -85,6 +87,20 @@ base <- data %>%
 #       p6240 - ¿En que actividad ocupó...... la mayor parte del tiempo la semana pasada?
 #       relab -	type of occupation
 #       sizeFirm -size of the firm by categories
+
+# Crear variable full-time 
+base <- base %>%
+  mutate(fulltime=(totalHoursWorked>=40)*1)
+
+### Estadística descriptiva: análisis preliminar 
+base1 <- base %>%
+  select(ing_hr, maxEducLevel, age, oficio, formal, informal, sex, estrato1, fulltime, p6240, relab, sizeFirm) # Seleccionar variables de
+
+any(is.na(base1)) # No hay datos vacios
+
+stargazer(base1, header=FALSE, type='text',title="Variable") 
+
+### Análisis por variable
 
 # maxEducLevel - max. education level attained
 summary(data$maxEducLevel)
@@ -118,6 +134,7 @@ ggplot(data = data , mapping = aes(x = age , y = totalHoursWorked )) +
 ggplot(data = data , 
        mapping = aes(x = totalHoursWorked , y = y_ingLab_m , group=as.factor(formal) , color=as.factor(formal))) +
   geom_point()
+
 # oficio - occupation
 summary(data$occupation)
 
@@ -143,15 +160,30 @@ ingreso_sexo <- ggplot(data=data) +
   geom_histogram(mapping = aes(x=y_ingLab_m , group=as.factor(sex) , fill=as.factor(sex)))
 ingreso_sexo
 ingreso_sexo + scale_fill_manual(values = c("0"="red" , "1"="blue") , label = c("0"="Hombre" , "1"="Mujer") , name = "Sexo")
-###
 
-# 1. Análisis de salario por hora de acuerdo con el nivel 
-data <- base %>%
-  mutate(fulltime=(totalHoursWorked>=40)*1)
+## Estrato socioeconómico: estrato1 - Estrato de energía para las 13 a.M., y sextil de icv para otras cabeceras y rest 
+base1 %>%
+  group_by(estrato1) %>%
+  summarise(n = n())
 
-str(data$estrato1)
+ggplot(base1) + 
+  geom_boxplot(mapping = aes(as.factor(estrato1) , ing_hr, fill=as.factor(estrato1))) + 
+  labs(title = "Boxplot del ingreso por hora según el estrato", x = "Estrato", y = "Ingreso por hora (pesos)") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(legend.title = element_blank())
 
-summary(basereg$oficio)
+## Tipo de contrato (tiempo completo o no): fulltime - Trabaja más de 40 horas a la semana
+base1 %>%
+  group_by(fulltime) %>%
+  summarise(n = n())
+
+ggplot(base1) + 
+  geom_bar(mapping = aes(as.factor(fulltime) , ing_hr, fill=as.factor(fulltime)), 
+               position = "dodge", stat = "summary", fun = "median") + 
+  labs(title = "Ingreso por hora mediano según el tipo de contrato", x = "Tipo de contrato (tiempo completo)", y = "Ingreso por hora (pesos)") +
+  scale_x_discrete(labels=c('No', 'Si')) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(legend.title = element_blank())
 
 
 data %>%
