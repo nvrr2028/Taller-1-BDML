@@ -86,6 +86,65 @@ base <- data %>%
 #       relab -	type of occupation
 #       sizeFirm -size of the firm by categories
 
+# maxEducLevel - max. education level attained
+summary(data$maxEducLevel)
+box_plot <- ggplot(data=data , mapping = aes(as.factor(maxEducLevel) , y_ingLab_m)) + 
+  geom_boxplot() 
+box_plot
+
+box_plot <- box_plot +
+  geom_point(aes(colour=as.factor(formal))) +
+  scale_color_manual(values = c("0"="red" , "1"="blue") , label = c("0"="Informal" , "1"="formal") , name = "Empleo")
+box_plot
+
+# age - edad
+summary(data$age)
+ggplot(data = data , mapping = aes(x = age , y = y_ingLab_m)) +
+  geom_point(col = "green" , size = 0.8)
+
+ggplot(data = data , 
+       mapping = aes(x = age , y = y_ingLab_m , group=as.factor(formal) , color=as.factor(formal))) +
+  geom_point()
+
+ggplot(data = data , mapping = aes(x = totalHoursWorked , y = y_ingLab_m)) +
+  geom_point(col = "orange" , size = 0.8)
+
+# totalHoursWorked - cuantas horas en total trabajo
+summary(data$totalHoursWorked)
+
+ggplot(data = data , mapping = aes(x = age , y = totalHoursWorked )) +
+  geom_point(col = "purple" , size = 0.8)
+
+ggplot(data = data , 
+       mapping = aes(x = totalHoursWorked , y = y_ingLab_m , group=as.factor(formal) , color=as.factor(formal))) +
+  geom_point()
+# oficio - occupation
+summary(data$occupation)
+
+box_plot2 <- ggplot(data=data , mapping = aes(as.factor(occupation) , y_ingLab_m)) + 
+  geom_boxplot() 
+box_plot2
+
+box_plot2 <- box_plot +
+  geom_point(aes(colour=as.factor(sex))) +
+  scale_color_manual(values = c("0"="red" , "1"="blue") , label = c("0"="Hombre" , "1"="Mujer") , name = "Sexo")
+box_plot2
+
+# formal - =1 if formal (social security); =0 otherwise
+summary(data$formal)
+
+ingreso_tipo_empleo <- ggplot(data=data) + 
+  geom_histogram(mapping = aes(x=y_ingLab_m , group=as.factor(formal) , fill=as.factor(formal)))
+ingreso_tipo_empleo
+
+# Sex - =1 male, =0 female
+summary(data$Sex)
+ingreso_sexo <- ggplot(data=data) + 
+  geom_histogram(mapping = aes(x=y_ingLab_m , group=as.factor(sex) , fill=as.factor(sex)))
+ingreso_sexo
+ingreso_sexo + scale_fill_manual(values = c("0"="red" , "1"="blue") , label = c("0"="Hombre" , "1"="Mujer") , name = "Sexo")
+###
+
 # 1. Análisis de salario por hora de acuerdo con el nivel 
 data <- base %>%
   mutate(fulltime=(totalHoursWorked>=40)*1)
