@@ -205,8 +205,8 @@ sum(is.na(data$totalHoursWorked))
 
 # 3a. Tabla de regresión ------------------------------------------------------------- #
 
-age2 <- base1$age^2 
-
+base1$age2 <- base1$age^2 
+view(base1)
 
 
 # 3b. Interpretación de los coeficientes --------------------------------------------- #
