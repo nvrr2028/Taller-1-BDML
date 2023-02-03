@@ -207,6 +207,8 @@ sum(is.na(data$totalHoursWorked))
 
 age2 <- base1$age^2 
 
+
+
 # 3b. Interpretación de los coeficientes --------------------------------------------- #
 
 # 3c. Discusión of the model's in sample fit ----------------------------------------- #
