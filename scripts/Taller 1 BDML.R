@@ -110,8 +110,9 @@ box_plot
 
 box_plot <- box_plot +
   geom_point(aes(colour=as.factor(formal))) +
-  scale_color_manual(values = c("0"="red" , "1"="blue") , label = c("0"="Informal" , "1"="formal") , name = "Empleo")
+  scale_color_manual(values = c("0"="red" , "1"="blue") , label = c("0"="Informal" , "1"="Formal") , name = "Empleo")
 box_plot
+### Cambiar color ###
 
 # age - edad
 summary(data$age)
@@ -146,6 +147,7 @@ box_plot2 <- box_plot +
   geom_point(aes(colour=as.factor(sex))) +
   scale_color_manual(values = c("0"="red" , "1"="blue") , label = c("0"="Hombre" , "1"="Mujer") , name = "Sexo")
 box_plot2
+### Cambiar color ###
 
 # formal - =1 if formal (social security); =0 otherwise
 summary(data$formal)
