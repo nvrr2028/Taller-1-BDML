@@ -207,7 +207,7 @@ sum(is.na(data$totalHoursWorked))
 
 #Primero creamos la variable edad al cuadrado
 base1$age2 <- base1$age^2
-base1$logw <-base1$log(ing_hr)
+#base1$logw <-base1$log(ing_hr)
 
 #Procedemos a hacer la regresión
 regw_age<- lm(log(ing_hr)~ age+ age2, data = base1)
@@ -219,17 +219,37 @@ stargazer(regw_age, type = "text")
 ggplot(data=base1, aes(x=age, y=log(ing_hr)))+ 
     geom_point() +
   stat_smooth(formula = 'y ~ x', method = lm, se = FALSE, 
-              size = 1) +  #fit the linear model in the plot
-  theme_bw() + #black and white theme
+              size = 1, color="blue") +  
+  #stat_smooth(formula = 'y ~ x+ x^2', method = lm, se = FALSE,                              #creempos que esta sobra
+              #size = 1, color="red")+
+  theme_bw() +
   labs(x = "Edad",  
        y = "Ingreso",
-       title = "Model Sample fit") # labels
+       title = "Model Sample fit") 
   
 
 # 3d. Gráfico de la estimación del perfil edad-ganancias ----------------------------- #
+lmw_summary <- summary(regw_age)$coefficients
 
+coefswage = data.frame(
+  Features = rownames(lmw_summary),
+  Estimate = lmw_summary[,'Estimate'],
+  std_error = lmw_summary[,'Std. Error']
+)
 
+alpha = 0.05 # 95% Confidence Interval
+coefswage$lower = coefswage$Estimate - qnorm(alpha/2) * coefswage$std_error
+coefswage$upper = coefswage$Estimate + qnorm(alpha/2) * coefswage$std_error
+coefswage = coefswage[!(coefswage$Features == '(Intercept)'),]
 
+ggplot(coefswage) +
+  geom_vline(xintercept = 0, linetype = 4)+
+  geom_point(aes(x = Estimate, y = Features)) + #point estimate
+  geom_segment(aes(y = Features, yend = Features, x = lower, xend = upper),
+     arrow = arrow(angle = 90, ends = 'both', 
+    length = unit(0.1, 'cm'))) + #segment representing the CI
+  labs(x = 'Coeffienient estimate') +
+  theme_bw()
 # ------------------------------------------------------------------------------------ #
 # 4. The gender earnings GAP
 # ------------------------------------------------------------------------------------ #
