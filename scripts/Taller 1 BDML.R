@@ -1,7 +1,7 @@
 #**************************************************************************************#
 #                                    TALLER 1 BDML                                     #
 #                        Uniandes: Sofia Charry Tobar                                  #
-#                                  Laura Manuela Rodríguez Morales                     #
+#                                  Laura Manuela Rodriguez Morales                     #
 #                                  Nicol Valeria Rodríguez Rodríguez                   #
 #                                  Brayan Alexander Vargas Rojas                       #
 #                          Fuente: GEIH DANE                                           #
@@ -15,7 +15,7 @@ rm(list = ls(all.names = TRUE))
 # ------------------------------------------------------------------------------------ #
 
 list.of.packages = c("readr", "readxl", "lubridate", "tidyverse", "pacman", "rio", 
-                     "skimr", "caret", "rvest")
+                     "skimr", "caret", "rvest", "stargazer")
 
 new.packages = list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -100,7 +100,7 @@ any(is.na(base1)) # No hay datos vacios
 
 stargazer(base1, header=FALSE, type='text',title="Variable") 
 
-### Análisis por variable
+### Análisis por variable ---- #Agregar labels lindos y escala
 
 # maxEducLevel - max. education level attained
 summary(data$maxEducLevel)
@@ -111,12 +111,12 @@ box_plot
 box_plot <- box_plot +
   geom_point(aes(colour=as.factor(formal))) +
   scale_color_manual(values = c("0"="red" , "1"="blue") , label = c("0"="Informal" , "1"="formal") , name = "Empleo")
-box_plot
+box_plot #Agregar labels lindos
 
 # age - edad
 summary(data$age)
 ggplot(data = data , mapping = aes(x = age , y = y_ingLab_m)) +
-  geom_point(col = "green" , size = 0.8)
+  geom_point(col = "green" , size = 0.8) #Agregar labels lindos y escala
 
 ggplot(data = data , 
        mapping = aes(x = age , y = y_ingLab_m , group=as.factor(formal) , color=as.factor(formal))) +
@@ -138,9 +138,9 @@ ggplot(data = data ,
 # oficio - occupation
 summary(data$occupation)
 
-box_plot2 <- ggplot(data=data , mapping = aes(as.factor(occupation) , y_ingLab_m)) + 
+box_plot2 <- ggplot(data=data , mapping = aes(as.factor("occupation") , y_ingLab_m)) + 
   geom_boxplot() 
-box_plot2
+box_plot2 #REVISARRR
 
 box_plot2 <- box_plot +
   geom_point(aes(colour=as.factor(sex))) +
@@ -203,15 +203,6 @@ sum(is.na(data$totalHoursWorked))
 # 3. Age-wage profile
 # ------------------------------------------------------------------------------------ #
 
-# 3a. Tabla de regresión ------------------------------------------------------------- #
-
-
-
-# 3b. Interpretación de los coeficientes --------------------------------------------- #
-
-# 3c. Discusión of the model's in sample fit ----------------------------------------- #
-
-# 3d. Gráfico de la estimación del perfil edad-ganancias ----------------------------- #
 
 
 
