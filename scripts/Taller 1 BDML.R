@@ -218,6 +218,12 @@ stargazer(regw_age, type = "text")
 # 3c. Discusión of the model's in sample fit ----------------------------------------- #
 ggplot(data=base1, aes(x=age, y=log(ing_hr)))+ 
     geom_point() +
+  stat_smooth(formula = 'y ~ x', method = lm, se = FALSE, 
+              size = 1) +  #fit the linear model in the plot
+  theme_bw() + #black and white theme
+  labs(x = "Edad",  
+       y = "Ingreso",
+       title = "Model Sample fit") # labels
   
 
 # 3d. Gráfico de la estimación del perfil edad-ganancias ----------------------------- #
