@@ -1,7 +1,7 @@
 #**************************************************************************************#
 #                                    TALLER 1 BDML                                     #
 #                        Uniandes: Sofia Charry Tobar                                  #
-#                                  Laura Manuela Rodriguez Morales                     #
+#                                  Laura Manuela Rodríguez Morales                     #
 #                                  Nicol Valeria Rodríguez Rodríguez                   #
 #                                  Brayan Alexander Vargas Rojas                       #
 #                          Fuente: GEIH DANE                                           #
@@ -203,6 +203,15 @@ sum(is.na(data$totalHoursWorked))
 # 3. Age-wage profile
 # ------------------------------------------------------------------------------------ #
 
+# 3a. Tabla de regresión ------------------------------------------------------------- #
+
+
+
+# 3b. Interpretación de los coeficientes --------------------------------------------- #
+
+# 3c. Discusión of the model's in sample fit ----------------------------------------- #
+
+# 3d. Gráfico de la estimación del perfil edad-ganancias ----------------------------- #
 
 
 
