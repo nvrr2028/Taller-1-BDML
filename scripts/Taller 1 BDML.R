@@ -15,7 +15,7 @@ rm(list = ls(all.names = TRUE))
 # ------------------------------------------------------------------------------------ #
 
 list.of.packages = c("readr", "readxl", "lubridate", "tidyverse", "pacman", "rio", 
-                     "skimr", "caret", "rvest")
+                     "skimr", "caret", "rvest", "stargazer")
 
 new.packages = list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -207,14 +207,18 @@ sum(is.na(data$totalHoursWorked))
 
 #Primero creamos la variable edad al cuadrado
 base1$age2 <- base1$age^2
+base1$logw <-base1$log(ing_hr)
 
 #Procedemos a hacer la regresión
-reg1<- lm(log(ing_hr)~ age+ age2, data = base1)
-stargazer(reg1, type = "text")
+regw_age<- lm(log(ing_hr)~ age+ age2, data = base1)
+stargazer(regw_age, type = "text")
 
 # 3b. Interpretación de los coeficientes --------------------------------------------- #
 
 # 3c. Discusión of the model's in sample fit ----------------------------------------- #
+ggplot(data=base1, aes(x=age, y=log(ing_hr)))+ 
+    geom_point() +
+  
 
 # 3d. Gráfico de la estimación del perfil edad-ganancias ----------------------------- #
 
