@@ -205,9 +205,12 @@ sum(is.na(data$totalHoursWorked))
 
 # 3a. Tabla de regresión ------------------------------------------------------------- #
 
-age2 <- base1$age^2 
+#Primero creamos la variable edad al cuadrado
+base1$age2 <- base1$age^2
 
-
+#Procedemos a hacer la regresión
+reg1<- lm(log(ing_hr)~ age+ age2, data = base1)
+stargazer(reg1, type = "text")
 
 # 3b. Interpretación de los coeficientes --------------------------------------------- #
 
