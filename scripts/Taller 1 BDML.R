@@ -248,30 +248,73 @@ ggplot(base1) +
 
 # 3a. Tabla de regresión ------------------------------------------------------------- #
 
-#Primero creamos la variable edad al cuadrado
+#Primero creamos la variable edad al cuadrado y el logaritmo del salario
 base1$age2 <- base1$age^2
-#base1$logw <-base1$log(ing_hr)
+base1$lnwage <- log(base1$ing_hr)
+view(base1)
+
+#base1$logw <-base1$lnwage
 
 #Procedemos a hacer la regresión
-regw_age<- lm(log(ing_hr)~ age+ age2, data = base1)
+regw_age2<- lm(lnwage~ age+ age2, data = base1)
 stargazer(regw_age, type = "text")
 
 # 3b. Interpretación de los coeficientes --------------------------------------------- #
 
 # 3c. Discusión of the model's in sample fit ----------------------------------------- #
-ggplot(data=base1, aes(x=age, y=log(ing_hr)))+ 
+
+# Ajuste lineal
+ggplot(data=base1, aes(x=age, y=lnwage))+ 
     geom_point() +
   stat_smooth(formula = 'y ~ x', method = lm, se = FALSE, 
-              size = 1, color="blue") +  
+              size = 1, color="blue")   
   #stat_smooth(formula = 'y ~ x+ x^2', method = lm, se = FALSE,                              #creempos que esta sobra
               #size = 1, color="red")+
   theme_bw() +
   labs(x = "Edad",  
        y = "Ingreso",
        title = "Model Sample fit") 
+
+#Ahora veremos un ajuste cuadrático
   
+ggplot(base1, aes(x=age, y=lnwage)) +
+  geom_point()+
+  stat_smooth(se=F)+
+  labs(x = "Edad",  
+       y = "Ingreso",
+       title = "Model Sample fit cuadrático") 
+
 
 # 3d. Gráfico de la estimación del perfil edad-ganancias ----------------------------- #
+
+# Perfil edad-ganancias
+##Creamos nuevamente la regresión
+#regw_age2<- lm(lnwage~ age+ age2, data = base1)
+#summary(regw_age2)
+
+#guardamos las predicciones del modelo
+#estim_regw_age2 <- predict(regw_age2)
+
+#ggplot(data=base1, aes(x=lnwage, y=age2)) +
+  #geom_point(color="blue") +
+  #geom_line(color="red", data = estim_regw_age2, aes(x=lnwage_estim, y=age2))
+
+#https://community.rstudio.com/t/insert-regression-model-into-ggplot2/2439/5
+
+stargazer(regw_age, type = "text")
+
+
+
+ggplot(base1,aes(x=age)) + 
+  geom_point(aes(y = lnwage), shape = 16) +
+  stat_smooth(aes(y= lnwage)), method = "lm", formula = lnwage ~ age + I(age^2), size = 1, color = "red")
+
+
+plot(age, lnwage, pch=16, xlab = "Edad", ylab = "Logaritmo del salario por hora", cex.lab = 1.3, col = "blue")
+
+lines(age, estimedadganancias, col = "darkgreen", lwd = 3)
+
+# Bootstrap para construir los intervalos de confianza
 lmw_summary <- summary(regw_age)$coefficients
 
 coefswage = data.frame(
@@ -293,6 +336,9 @@ ggplot(coefswage) +
     length = unit(0.1, 'cm'))) + #segment representing the CI
   labs(x = 'Coeffienient estimate') +
   theme_bw()
+
+
+
 # ------------------------------------------------------------------------------------ #
 # 4. The gender earnings GAP
 # ------------------------------------------------------------------------------------ #
