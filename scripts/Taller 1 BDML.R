@@ -95,14 +95,13 @@ base <- data %>%
 #       Informal - =1 if informal (social security); =0 otherwiseinformal
 #       Sex - =1 male, =0 female
 #       estrato1 - Estrato de energía para las 13 a.M., y sextil de icv para otras cabeceras y rest
-#       full-time - Trabaja más de 40 horas a la semana
-#       p6240 - ¿En que actividad ocupó...... la mayor parte del tiempo la semana pasada?
+#       full-time - Trabaja más de 40 horas a la semana, construida a partir de hoursWorkUsual (usual weekly hours worked - principal occ.)
 #       relab -	type of occupation
-#       sizeFirm -size of the firm by categories
+#       sizeFirm - size of the firm by categories
 
 # Crear variable full-time 
 base <- base %>%
-  mutate(fulltime=(totalHoursWorked>=40)*1)
+  mutate(fulltime=ifelse(hoursWorkUsual>=40, 1, 0)) # El tipo de contrato es tiempo completo si trabaja más de 40 horas a la semana
 
 ### Estadística descriptiva: análisis preliminar 
 base1 <- base %>%
@@ -184,6 +183,7 @@ base1 %>%
   group_by(estrato1) %>%
   summarise(n = n())
 
+# Gráfico
 ggplot(base1) + 
   geom_boxplot(mapping = aes(as.factor(estrato1) , ing_hr, fill=as.factor(estrato1))) + 
   labs(title = "Boxplot del ingreso por hora según el estrato", x = "Estrato", y = "Ingreso por hora (pesos)") +
@@ -195,23 +195,52 @@ base1 %>%
   group_by(fulltime) %>%
   summarise(n = n())
 
+# Gráfico
 ggplot(base1) + 
-  geom_bar(mapping = aes(as.factor(fulltime) , ing_hr, fill=as.factor(fulltime)), 
+  geom_bar(mapping = aes(as.factor(fulltime), ing_hr, group=as.factor(formal), fill=as.factor(formal)), 
                position = "dodge", stat = "summary", fun = "median") + 
   labs(title = "Ingreso por hora mediano según el tipo de contrato", x = "Tipo de contrato (tiempo completo)", y = "Ingreso por hora (pesos)") +
-  scale_x_discrete(labels=c('No', 'Si')) +
+  scale_x_discrete(labels=c("0"='No', "1"='Si')) +
+  scale_fill_manual(values = c("0"="#ffc425" , "1"="#00aedb") , label = c("0"="Informal" , "1"="Formal")) +
   theme(plot.title = element_text(hjust = 0.5)) +
   theme(legend.title = element_blank())
 
-
-data %>%
-  group_by(totalHoursWorked) %>%
+## Tipo de ocupación: relab -	type of occupation
+base1 %>%
+  group_by(relab) %>%
   summarise(n = n())
 
-sum(is.na(data$totalHoursWorked))
+# Gráfico
+labels = c('Obrero o empleado de empresa particular', 'Obrero o empleado del gobierno', 'Empleado doméstico', 'Jornalero o peon')
+ggplot(base1) + 
+  geom_bar(mapping = aes(as.factor(relab) , ing_hr, fill=as.factor(relab)), 
+           position = "dodge", stat = "summary", fun = "median") + 
+  labs(title = "Ingreso por hora mediano según el tipo de ocupación", x = "Tipo de ocupación", y = "Ingreso por hora (pesos)") +
+  scale_x_discrete(labels = function(x) str_wrap(labels, width = 10)) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(legend.title = element_blank()) 
 
-# na.omit()
-# filter(!age==0)
+## Tamaño de la empresa: sizeFirm - size of the firm by categories
+
+# ¿Qué categorías tiene sizefirm?
+base1 %>%
+  group_by(sizeFirm) %>%
+  summarise(n = n()) 
+
+# ¿Cuál es el ingreso por hora mediano de acuerdo con el tamaño de la empresa?
+base1 %>% 
+  group_by(sizeFirm) %>% 
+  summarise('median_ing' = round(median(ing_hr), digits = 0)) 
+
+# Gráfico
+labels1 = c('Independiente', '2-5 empleados', '6-10 empleados', '11-50 empleados', '>50 empleados')
+ggplot(base1) + 
+  geom_bar(mapping = aes(as.factor(sizeFirm) , ing_hr, fill=as.factor(sizeFirm)), 
+           position = "dodge", stat = "summary", fun = "median") + 
+  labs(title = "Ingreso por hora mediano según el tamaño de la empresa", x = "Tamaño de la empresa", y = "Ingreso por hora (pesos)") +
+  scale_x_discrete(labels = function(x) str_wrap(labels1, width = 6)) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(legend.title = element_blank()) 
 
 # ------------------------------------------------------------------------------------ #
 # 3. Age-wage profile
