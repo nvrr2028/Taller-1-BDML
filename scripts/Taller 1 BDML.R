@@ -284,6 +284,14 @@ ggplot(base, aes(x=age, y=lnwage)) +
        y = "Ingreso",
        title = "Model Sample fit cuadrático") 
 
+ggplot(base, 
+       aes(x = age, 
+           y = lnwage)) +
+  geom_point(color= "steelblue") +
+  geom_smooth(method = "lm", 
+              formula = y ~ poly(x, 2), 
+              color = "indianred3")
+
 
 # 3d. Gráfico de la estimación del perfil edad-ganancias ----------------------------- #
 
