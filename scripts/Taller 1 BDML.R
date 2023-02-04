@@ -251,7 +251,8 @@ ggplot(base1) +
 #Primero creamos la variable edad al cuadrado y el logaritmo del salario
 base$age2 <- base$age^2
 base$lnwage <- log(base$ing_hr)
-view(base1)
+
+view(base)
 
 #base1$logw <-base1$lnwage
 
@@ -277,13 +278,6 @@ ggplot(data=base, aes(x=age, y=lnwage))+
 
 #Ahora veremos un ajuste cuadrático
   
-ggplot(base, aes(x=age, y=lnwage)) +
-  geom_point()+
-  stat_smooth(se=F)+
-  labs(x = "Edad",  
-       y = "Ingreso",
-       title = "Model Sample fit cuadrático") 
-
 ggplot(base, 
        aes(x = age, 
            y = lnwage)) +
