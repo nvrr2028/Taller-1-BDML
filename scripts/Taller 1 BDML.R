@@ -249,14 +249,14 @@ ggplot(base1) +
 # 3a. Tabla de regresión ------------------------------------------------------------- #
 
 #Primero creamos la variable edad al cuadrado y el logaritmo del salario
-base1$age2 <- base1$age^2
-base1$lnwage <- log(base1$ing_hr)
+base$age2 <- base$age^2
+base$lnwage <- log(base$ing_hr)
 view(base1)
 
 #base1$logw <-base1$lnwage
 
 #Procedemos a hacer la regresión
-regw_age2<- lm(lnwage~ age+ age2, data = base1)
+regw_age2<- lm(lnwage~ age+ age2, data = base)
 stargazer(regw_age, type = "text")
 
 # 3b. Interpretación de los coeficientes --------------------------------------------- #
@@ -264,7 +264,7 @@ stargazer(regw_age, type = "text")
 # 3c. Discusión of the model's in sample fit ----------------------------------------- #
 
 # Ajuste lineal
-ggplot(data=base1, aes(x=age, y=lnwage))+ 
+ggplot(data=base, aes(x=age, y=lnwage))+ 
     geom_point() +
   stat_smooth(formula = 'y ~ x', method = lm, se = FALSE, 
               size = 1, color="blue")   
@@ -277,7 +277,7 @@ ggplot(data=base1, aes(x=age, y=lnwage))+
 
 #Ahora veremos un ajuste cuadrático
   
-ggplot(base1, aes(x=age, y=lnwage)) +
+ggplot(base, aes(x=age, y=lnwage)) +
   geom_point()+
   stat_smooth(se=F)+
   labs(x = "Edad",  
