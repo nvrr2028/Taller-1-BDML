@@ -288,7 +288,7 @@ ggplot(base,
 # Perfil edad-ganancias
 ##Veamos el gráfico de la regresión en cuestión
 regw_age2<- lm(lnwage~ age+ age2, data = base)
-summary(regw_age2)
+stargazer(regw_age2, type = "text")
 
 ggplot(base, 
        aes(x = age, 
@@ -298,7 +298,7 @@ ggplot(base,
               formula = y ~ poly(x, 2), 
               color = "indianred3")
 
-#guardamos las predicciones del modelo
+#ELIMINAR guardamos las predicciones del modelo
 #estim_regw_age2 <- predict(regw_age2)
 
 #ggplot(data=base, aes(x=lnwage, y=age2)) +
@@ -307,21 +307,9 @@ ggplot(base,
 
 #https://community.rstudio.com/t/insert-regression-model-into-ggplot2/2439/5
 
-stargazer(regw_age, type = "text")
-
-
-
-ggplot(base,aes(x=age)) + 
-  geom_point(aes(y = lnwage), shape = 16) +
-  stat_smooth(aes(y= lnwage)), method = "lm", formula = lnwage ~ age + I(age^2), size = 1, color = "red")
-
-
-plot(age, lnwage, pch=16, xlab = "Edad", ylab = "Logaritmo del salario por hora", cex.lab = 1.3, col = "blue")
-
-lines(age, estimedadganancias, col = "darkgreen", lwd = 3)
 
 # Bootstrap para construir los intervalos de confianza
-lmw_summary <- summary(regw_age)$coefficients
+lmw_summary <- summary(regw_age2)$coefficients
 
 coefswage = data.frame(
   Features = rownames(lmw_summary),
@@ -340,7 +328,7 @@ ggplot(coefswage) +
   geom_segment(aes(y = Features, yend = Features, x = lower, xend = upper),
      arrow = arrow(angle = 90, ends = 'both', 
     length = unit(0.1, 'cm'))) + #segment representing the CI
-  labs(x = 'Coeffienient estimate') +
+  labs(x = 'Coeffiecient estimate') +
   theme_bw()
 
 
