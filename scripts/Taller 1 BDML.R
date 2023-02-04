@@ -49,6 +49,7 @@ prov <- import("https://github.com/ignaciomsarmiento/datasets/blob/main/GEIH_sam
 # Vector con los nombres de las columans
 names <- colnames(prov)
 # Loop para obtener la información de los 10 chuncks.
+links <- list()
 for (i in 1:10) {
   links[[i]] <- import(paste("https://ignaciomsarmiento.github.io/GEIH2018_sample/pages/geih_page_", i, ".html", sep=""))
 }
