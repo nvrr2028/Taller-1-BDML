@@ -286,9 +286,17 @@ ggplot(base,
 # 3d. Gráfico de la estimación del perfil edad-ganancias ----------------------------- #
 
 # Perfil edad-ganancias
-##Creamos nuevamente la regresión
-#regw_age2<- lm(lnwage~ age+ age2, data = base)
-#summary(regw_age2)
+##Veamos el gráfico de la regresión en cuestión
+regw_age2<- lm(lnwage~ age+ age2, data = base)
+summary(regw_age2)
+
+ggplot(base, 
+       aes(x = age, 
+           y = lnwage)) +
+  geom_point(color= "steelblue") +
+  geom_smooth(method = "lm", 
+              formula = y ~ poly(x, 2), 
+              color = "indianred3")
 
 #guardamos las predicciones del modelo
 #estim_regw_age2 <- predict(regw_age2)
