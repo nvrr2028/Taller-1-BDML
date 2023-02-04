@@ -15,7 +15,7 @@ rm(list = ls(all.names = TRUE))
 # ------------------------------------------------------------------------------------ #
 
 list.of.packages = c("readr", "readxl", "lubridate", "tidyverse", "pacman", "rio", 
-                     "skimr", "caret", "rvest", "stargazer")
+                     "skimr", "caret", "rvest", "stargazer", "rlist")
 
 new.packages = list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -42,8 +42,19 @@ sapply(list.of.packages, require, character.only = TRUE)
 
 # Link general: https://ignaciomsarmiento.github.io/GEIH2018 sample/
 
-set.seed(0000) # Establecer semilla
-data <- import("https://github.com/ignaciomsarmiento/datasets/blob/main/GEIH_sample1.Rds?raw=true")
+# Establecer semilla
+set.seed(0000) 
+# Base provisional para obtener los nombres de las columnas
+prov <- import("https://github.com/ignaciomsarmiento/datasets/blob/main/GEIH_sample1.Rds?raw=true") 
+# Vector con los nombres de las columans
+names <- colnames(prov)
+# Loop para obtener la información de los 10 chuncks.
+for (i in 1:10) {
+  links[[i]] <- import(paste("https://ignaciomsarmiento.github.io/GEIH2018_sample/pages/geih_page_", i, ".html", sep=""))
+}
+# Juntar la base de datos por filas.
+data <- list.rbind(links)
+colnames(data) <- names
 
 # 2c. Limpiar datos ------------------------------------------------------------------ #
 
@@ -94,11 +105,15 @@ base <- base %>%
 
 ### Estadística descriptiva: análisis preliminar 
 base1 <- base %>%
-  select(ing_hr, maxEducLevel, age, oficio, formal, informal, sex, estrato1, fulltime, p6240, relab, sizeFirm) # Seleccionar variables de
+  select(ing_hr, maxEducLevel, age, oficio, formal, informal, sex, estrato1, fulltime, p6240, relab, sizeFirm) %>% # Seleccionar variables de interés
+  drop_na()
 
 any(is.na(base1)) # No hay datos vacios
 
-stargazer(base1, header=FALSE, type='text',title="Variable") 
+stargazer(base1, header=FALSE, type='text',title="Variable")
+
+### Mapa de correlaciones 
+
 
 ### Análisis por variable
 
@@ -196,10 +211,6 @@ sum(is.na(data$totalHoursWorked))
 
 # na.omit()
 # filter(!age==0)
-
-
-# 2d. Análisis de la base de datos --------------------------------------------------- #
-
 
 # ------------------------------------------------------------------------------------ #
 # 3. Age-wage profile
