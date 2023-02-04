@@ -186,7 +186,7 @@ base1 %>%
 # Gráfico
 ggplot(base1) + 
   geom_boxplot(mapping = aes(as.factor(estrato1) , ing_hr, fill=as.factor(estrato1))) + 
-  labs(title = "Boxplot del ingreso por hora según el estrato", x = "Estrato", y = "Ingreso por hora (pesos)") +
+  labs(x = "Estrato", y = "Ingreso por hora (pesos)") +
   theme(plot.title = element_text(hjust = 0.5)) +
   theme(legend.title = element_blank())
 
@@ -199,7 +199,7 @@ base1 %>%
 ggplot(base1) + 
   geom_bar(mapping = aes(as.factor(fulltime), ing_hr, group=as.factor(formal), fill=as.factor(formal)), 
                position = "dodge", stat = "summary", fun = "median") + 
-  labs(title = "Ingreso por hora mediano según el tipo de contrato", x = "Tipo de contrato (tiempo completo)", y = "Ingreso por hora (pesos)") +
+  labs(x = "Tipo de contrato (tiempo completo)", y = "Ingreso por hora (pesos)") +
   scale_x_discrete(labels=c("0"='No', "1"='Si')) +
   scale_fill_manual(values = c("0"="#ffc425" , "1"="#00aedb") , label = c("0"="Informal" , "1"="Formal")) +
   theme(plot.title = element_text(hjust = 0.5)) +
@@ -215,7 +215,7 @@ labels = c('Obrero o empleado de empresa particular', 'Obrero o empleado del gob
 ggplot(base1) + 
   geom_bar(mapping = aes(as.factor(relab) , ing_hr, fill=as.factor(relab)), 
            position = "dodge", stat = "summary", fun = "median") + 
-  labs(title = "Ingreso por hora mediano según el tipo de ocupación", x = "Tipo de ocupación", y = "Ingreso por hora (pesos)") +
+  labs(x = "Tipo de ocupación", y = "Ingreso por hora (pesos)") +
   scale_x_discrete(labels = function(x) str_wrap(labels, width = 10)) +
   theme(plot.title = element_text(hjust = 0.5)) +
   theme(legend.title = element_blank()) 
@@ -237,7 +237,7 @@ labels1 = c('Independiente', '2-5 empleados', '6-10 empleados', '11-50 empleados
 ggplot(base1) + 
   geom_bar(mapping = aes(as.factor(sizeFirm) , ing_hr, fill=as.factor(sizeFirm)), 
            position = "dodge", stat = "summary", fun = "median") + 
-  labs(title = "Ingreso por hora mediano según el tamaño de la empresa", x = "Tamaño de la empresa", y = "Ingreso por hora (pesos)") +
+  labs(x = "Tamaño de la empresa", y = "Ingreso por hora (pesos)") +
   scale_x_discrete(labels = function(x) str_wrap(labels1, width = 6)) +
   theme(plot.title = element_text(hjust = 0.5)) +
   theme(legend.title = element_blank()) 
