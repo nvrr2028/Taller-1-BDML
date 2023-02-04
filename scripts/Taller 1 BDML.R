@@ -252,10 +252,6 @@ ggplot(base1) +
 base$age2 <- base$age^2
 base$lnwage <- log(base$ing_hr)
 
-view(base)
-
-#base1$logw <-base1$lnwage
-
 #Procedemos a hacer la regresión
 regw_age2<- lm(lnwage~ age+ age2, data = base)
 stargazer(regw_age, type = "text")
@@ -291,13 +287,13 @@ ggplot(base,
 
 # Perfil edad-ganancias
 ##Creamos nuevamente la regresión
-#regw_age2<- lm(lnwage~ age+ age2, data = base1)
+#regw_age2<- lm(lnwage~ age+ age2, data = base)
 #summary(regw_age2)
 
 #guardamos las predicciones del modelo
 #estim_regw_age2 <- predict(regw_age2)
 
-#ggplot(data=base1, aes(x=lnwage, y=age2)) +
+#ggplot(data=base, aes(x=lnwage, y=age2)) +
   #geom_point(color="blue") +
   #geom_line(color="red", data = estim_regw_age2, aes(x=lnwage_estim, y=age2))
 
@@ -307,7 +303,7 @@ stargazer(regw_age, type = "text")
 
 
 
-ggplot(base1,aes(x=age)) + 
+ggplot(base,aes(x=age)) + 
   geom_point(aes(y = lnwage), shape = 16) +
   stat_smooth(aes(y= lnwage)), method = "lm", formula = lnwage ~ age + I(age^2), size = 1, color = "red")
 
