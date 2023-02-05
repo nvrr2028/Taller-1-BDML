@@ -105,7 +105,7 @@ base <- base %>%
 
 ### Estadística descriptiva: análisis preliminar 
 base1 <- base %>%
-  select(ing_hr, maxEducLevel, age, oficio, formal, informal, sex, estrato1, fulltime, p6240, relab, sizeFirm) %>% # Seleccionar variables de interés
+  select(ing_hr, maxEducLevel, age, oficio, formal, sex, estrato1, fulltime, p6240, relab, sizeFirm) %>% # Seleccionar variables de interés
   drop_na()
 
 any(is.na(base1)) # No hay datos vacios
@@ -125,44 +125,52 @@ box_plot
 
 box_plot <- box_plot +
   geom_point(aes(colour=as.factor(formal))) +
-  scale_color_manual(values = c("0"="red" , "1"="blue") , label = c("0"="Informal" , "1"="Formal") , name = "Empleo")
-box_plot
+  scale_color_manual(values = c("0"="indianred3" , "1"="steelblue") , label = c("0"="Informal" , "1"="Formal") , name = "Empleo")
+box_plot ##SÍ 
 ### Cambiar color ###
 
 # age - edad
 summary(base$age)
 ggplot(data = base , mapping = aes(x = age , y = ing_hr)) +
   geom_point(col = "green" , size = 0.8)
+## NO
 
 ggplot(data = base , 
        mapping = aes(x = age , y = ing_hr , group=as.factor(formal) , color=as.factor(formal))) +
-  geom_point()
+  geom_point() ## SÍ
 
 ggplot(data = base , mapping = aes(x = totalHoursWorked , y = ing_hr)) +
-  geom_point(col = "orange" , size = 0.8)
+  geom_point(col = "indianred3" , size = 0.8)
+
+## SÍ
 
 # totalHoursWorked - cuantas horas en total trabajo
 summary(base$totalHoursWorked)
 
 ggplot(data = base , mapping = aes(x = age , y = totalHoursWorked )) +
-  geom_point(col = "purple" , size = 0.8)
-
+  geom_point(col = "steelblue" , size = 0.8)
+## NO
 ggplot(data = base , 
        mapping = aes(x = totalHoursWorked , y = ing_hr , group=as.factor(formal) , color=as.factor(formal))) +
   geom_point()
-
+## NO
 # oficio - occupation
-summary(base$occupation)
+summary(base$oficio)
+
+ggplot(data = base , 
+       mapping = aes(x = oficio , y = ing_hr , group=as.factor(sex) , color=as.factor(sex))) +
+  geom_point()
+## SÍ
 
 box_plot2 <- ggplot(data=base , mapping = aes(as.factor(occupation) , ing_hr)) + 
   geom_boxplot() 
 box_plot2
-
+## Cambiar
 box_plot2 <- box_plot +
   geom_point(aes(colour=as.factor(sex))) +
   scale_color_manual(values = c("0"="red" , "1"="blue") , label = c("0"="Hombre" , "1"="Mujer") , name = "Sexo")
 box_plot2
-### Cambiar color ###
+### NO
 
 # formal - =1 if formal (social security); =0 otherwise
 summary(base$formal)
@@ -170,14 +178,14 @@ summary(base$formal)
 ingreso_tipo_empleo <- ggplot(data=base) + 
   geom_histogram(mapping = aes(x=ing_hr , group=as.factor(formal) , fill=as.factor(formal)))
 ingreso_tipo_empleo
-
+##NO
 # Sex - =1 male, =0 female
 summary(base$Sex)
 ingreso_sexo <- ggplot(data=base) + 
   geom_histogram(mapping = aes(x=ing_hr , group=as.factor(sex) , fill=as.factor(sex)))
 ingreso_sexo
-ingreso_sexo + scale_fill_manual(values = c("0"="red" , "1"="blue") , label = c("0"="Hombre" , "1"="Mujer") , name = "Sexo")
-
+ingreso_sexo + scale_fill_manual(values = c("0"="indianred3" , "1"="steelblue") , label = c("0"="Hombre" , "1"="Mujer") , name = "Sexo")
+## SÍ
 ## Estrato socioeconómico: estrato1 - Estrato de energía para las 13 a.M., y sextil de icv para otras cabeceras y rest 
 base1 %>%
   group_by(estrato1) %>%
