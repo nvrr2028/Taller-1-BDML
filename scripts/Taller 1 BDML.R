@@ -118,8 +118,8 @@ stargazer(base1, header=FALSE, type='text',title="Variable")
 ### Análisis por variable
 
 # maxEducLevel - max. education level attained
-summary(data$maxEducLevel)
-box_plot <- ggplot(data=data , mapping = aes(as.factor(maxEducLevel) , y_ingLab_m)) + 
+summary(base$maxEducLevel)
+box_plot <- ggplot(data=base , mapping = aes(as.factor(maxEducLevel) , y_ingLab_m)) + 
   geom_boxplot() 
 box_plot
 
@@ -130,31 +130,31 @@ box_plot
 ### Cambiar color ###
 
 # age - edad
-summary(data$age)
-ggplot(data = data , mapping = aes(x = age , y = y_ingLab_m)) +
+summary(base$age)
+ggplot(data = base , mapping = aes(x = age , y = y_ingLab_m)) +
   geom_point(col = "green" , size = 0.8)
 
-ggplot(data = data , 
+ggplot(data = base , 
        mapping = aes(x = age , y = y_ingLab_m , group=as.factor(formal) , color=as.factor(formal))) +
   geom_point()
 
-ggplot(data = data , mapping = aes(x = totalHoursWorked , y = y_ingLab_m)) +
+ggplot(data = base , mapping = aes(x = totalHoursWorked , y = y_ingLab_m)) +
   geom_point(col = "orange" , size = 0.8)
 
 # totalHoursWorked - cuantas horas en total trabajo
-summary(data$totalHoursWorked)
+summary(base$totalHoursWorked)
 
-ggplot(data = data , mapping = aes(x = age , y = totalHoursWorked )) +
+ggplot(data = base , mapping = aes(x = age , y = totalHoursWorked )) +
   geom_point(col = "purple" , size = 0.8)
 
-ggplot(data = data , 
+ggplot(data = base , 
        mapping = aes(x = totalHoursWorked , y = y_ingLab_m , group=as.factor(formal) , color=as.factor(formal))) +
   geom_point()
 
 # oficio - occupation
-summary(data$occupation)
+summary(base$occupation)
 
-box_plot2 <- ggplot(data=data , mapping = aes(as.factor(occupation) , y_ingLab_m)) + 
+box_plot2 <- ggplot(data=base , mapping = aes(as.factor(occupation) , y_ingLab_m)) + 
   geom_boxplot() 
 box_plot2
 
@@ -165,15 +165,15 @@ box_plot2
 ### Cambiar color ###
 
 # formal - =1 if formal (social security); =0 otherwise
-summary(data$formal)
+summary(base$formal)
 
-ingreso_tipo_empleo <- ggplot(data=data) + 
+ingreso_tipo_empleo <- ggplot(data=base) + 
   geom_histogram(mapping = aes(x=y_ingLab_m , group=as.factor(formal) , fill=as.factor(formal)))
 ingreso_tipo_empleo
 
 # Sex - =1 male, =0 female
-summary(data$Sex)
-ingreso_sexo <- ggplot(data=data) + 
+summary(base$Sex)
+ingreso_sexo <- ggplot(data=base) + 
   geom_histogram(mapping = aes(x=y_ingLab_m , group=as.factor(sex) , fill=as.factor(sex)))
 ingreso_sexo
 ingreso_sexo + scale_fill_manual(values = c("0"="red" , "1"="blue") , label = c("0"="Hombre" , "1"="Mujer") , name = "Sexo")
