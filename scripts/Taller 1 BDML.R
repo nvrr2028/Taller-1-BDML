@@ -126,8 +126,7 @@ box_plot
 box_plot <- box_plot +
   geom_point(aes(colour=as.factor(formal))) +
   scale_color_manual(values = c("0"="indianred3" , "1"="steelblue") , label = c("0"="Informal" , "1"="Formal") , name = "Empleo")
-box_plot ##SÍ 
-### Cambiar color ###
+box_plot ##SI
 
 # age - edad
 summary(base$age)
@@ -137,7 +136,7 @@ ggplot(data = base , mapping = aes(x = age , y = ing_hr)) +
 
 ggplot(data = base , 
        mapping = aes(x = age , y = ing_hr , group=as.factor(formal) , color=as.factor(formal))) +
-  geom_point() ## SÍ
+  geom_point() ## SI
 
 ggplot(data = base , mapping = aes(x = totalHoursWorked , y = ing_hr)) +
   geom_point(col = "indianred3" , size = 0.8)
@@ -160,7 +159,7 @@ summary(base$oficio)
 ggplot(data = base , 
        mapping = aes(x = oficio , y = ing_hr , group=as.factor(sex) , color=as.factor(sex))) +
   geom_point()
-## SÍ
+## SI
 
 box_plot2 <- ggplot(data=base , mapping = aes(as.factor(occupation) , ing_hr)) + 
   geom_boxplot() 
@@ -185,7 +184,7 @@ ingreso_sexo <- ggplot(data=base) +
   geom_histogram(mapping = aes(x=ing_hr , group=as.factor(sex) , fill=as.factor(sex)))
 ingreso_sexo
 ingreso_sexo + scale_fill_manual(values = c("0"="indianred3" , "1"="steelblue") , label = c("0"="Hombre" , "1"="Mujer") , name = "Sexo")
-## SÍ
+## SI
 ## Estrato socioeconómico: estrato1 - Estrato de energía para las 13 a.M., y sextil de icv para otras cabeceras y rest 
 base1 %>%
   group_by(estrato1) %>%
@@ -351,3 +350,5 @@ ggplot(coefswage) +
 # ------------------------------------------------------------------------------------ #
 # 5. Predicting earnings
 # ------------------------------------------------------------------------------------ #
+
+
