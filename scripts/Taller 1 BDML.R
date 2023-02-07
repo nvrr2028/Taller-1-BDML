@@ -105,7 +105,7 @@ base <- base %>%
 
 ### Estadística descriptiva: análisis preliminar 
 base1 <- base %>%
-  select(ing_hr, maxEducLevel, age, oficio, formal, sex, estrato1, fulltime, p6240, relab, sizeFirm) %>% # Seleccionar variables de interés
+  select(ing_hr, maxEducLevel, age, oficio,totalHoursWorked, formal, sex, estrato1, fulltime, p6240, relab, sizeFirm) %>% # Seleccionar variables de interés
   drop_na()
 
 any(is.na(base1)) # No hay datos vacios
@@ -350,5 +350,63 @@ ggplot(coefswage) +
 # ------------------------------------------------------------------------------------ #
 # 5. Predicting earnings
 # ------------------------------------------------------------------------------------ #
+set.seed(10101)
 
+## a. 
+
+#use 70% of the dataset as a training set and 30% as a test set
+sample <- sample(c(TRUE, FALSE), nrow(base1), replace=TRUE, prob=c(0.7,0.3))
+
+train  <- base1[sample, ]
+test   <- base1[!sample, ]
+
+##b. 
+
+## Primer modelo ##
+model1<-lm(ing_hr~1,data=train)
+summary(model1)
+
+test$model1<-predict(model1,newdata = test)
+
+with(test,mean((ing_hr-model1)^2))
+
+## Segundo modelo ##
+
+model2<-lm(ing_hr~totalHoursWorked,data=train)
+test$model2<-predict(model2,newdata = test)
+
+with(test,mean((ing_hr-model2)^2))
+
+## Tercer modelo ##
+
+model3<-lm(ing_hr~totalHoursWorked+age+sex+maxEducLevel+formal,data=train)
+test$model3<-predict(model3,newdata = test)
+with(test,mean((ing_hr-model3)^2))
+
+## Cuarto modelo ##
+
+model4<-lm(ing_hr~totalHoursWorked+maxEducLevel+age+age^2+oficio+
+             formal+sex+estrato1+fulltime+p6240+relab+sizeFirm,data=train)
+test$model4<-predict(model4,newdata = test)
+
+with(test,mean((ing_hr-model4)^2))
+
+## Quinto modelo ##
+
+model5<-lm(ing_hr~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:oficio:relab:sizeFirm+p6240+fulltime+maxEducLevel+
+             estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE),data=train)
+test$model5<-predict(model5,newdata = test)
+
+with(test,mean((ing_hr-model5)^2))
+
+##c.
+## comparar los MSE 
+mse1<-with(test,round(mean((ing_hr-model1)^2),2))
+mse2<-with(test,round(mean((ing_hr-model2)^2),2))
+mse3<-with(test,round(mean((ing_hr-model3)^2),2))
+mse4<-with(test,round(mean((ing_hr-model4)^2),2))
+mse5<-with(test,round(mean((ing_hr-model5)^2),2))
+
+tabla<-data.frame(mse1,mse2,mse3,mse4,mse5)
+tabla
 
