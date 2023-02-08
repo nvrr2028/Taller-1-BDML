@@ -261,34 +261,12 @@ base$lnwage <- log(base$ing_hr)
 
 #Procedemos a hacer la regresión
 regw_age2<- lm(lnwage~ age+ age2, data = base)
-stargazer(regw_age, type = "text")
+stargazer(regw_age2, type = "text")
+stargazer(regw_age2, type = "latex")
 
 # 3b. Interpretación de los coeficientes --------------------------------------------- #
 
 # 3c. Discusión of the model's in sample fit ----------------------------------------- #
-
-# Ajuste lineal
-ggplot(data=base, aes(x=age, y=lnwage))+ 
-    geom_point() +
-  stat_smooth(formula = 'y ~ x', method = lm, se = FALSE, 
-              size = 1, color="blue")   
-  #stat_smooth(formula = 'y ~ x+ x^2', method = lm, se = FALSE,                              #creempos que esta sobra
-              #size = 1, color="red")+
-  theme_bw() +
-  labs(x = "Edad",  
-       y = "Ingreso",
-       title = "Model Sample fit") 
-
-#Ahora veremos un ajuste cuadrático
-  
-ggplot(base, 
-       aes(x = age, 
-           y = lnwage)) +
-  geom_point(color= "steelblue") +
-  geom_smooth(method = "lm", 
-              formula = y ~ poly(x, 2), 
-              color = "indianred3")
-
 
 # 3d. Gráfico de la estimación del perfil edad-ganancias ----------------------------- #
 
@@ -304,16 +282,6 @@ ggplot(base,
   geom_smooth(method = "lm", 
               formula = y ~ poly(x, 2), 
               color = "indianred3")
-
-#ELIMINAR guardamos las predicciones del modelo
-#estim_regw_age2 <- predict(regw_age2)
-
-#ggplot(data=base, aes(x=lnwage, y=age2)) +
-  #geom_point(color="blue") +
-  #geom_line(color="red", data = estim_regw_age2, aes(x=lnwage_estim, y=age2))
-
-#https://community.rstudio.com/t/insert-regression-model-into-ggplot2/2439/5
-
 
 # Bootstrap para construir los intervalos de confianza
 lmw_summary <- summary(regw_age2)$coefficients
@@ -337,8 +305,6 @@ ggplot(coefswage) +
     length = unit(0.1, 'cm'))) + #segment representing the CI
   labs(x = 'Coeffiecient estimate') +
   theme_bw()
-
-
 
 # ------------------------------------------------------------------------------------ #
 # 4. The gender earnings GAP
