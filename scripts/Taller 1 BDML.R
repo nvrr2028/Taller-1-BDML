@@ -108,7 +108,7 @@ base1 <- base %>%
   select(ing_hr, maxEducLevel, age, oficio,totalHoursWorked, formal, sex, estrato1, fulltime, p6240, relab, sizeFirm) %>% # Seleccionar variables de interés
   drop_na()
 
-any(is.na(base1)) # No hay datos vacios
+any(is.na(base1)) # No hay datos vacíos
 
 stargazer(base1, header=FALSE, type='text',title="Variable")
 
