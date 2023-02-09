@@ -15,7 +15,8 @@ rm(list = ls(all.names = TRUE))
 # ------------------------------------------------------------------------------------ #
 
 list.of.packages = c("readr", "readxl", "lubridate", "tidyverse", "pacman", "rio", 
-                     "skimr", "caret", "rvest", "stargazer", "rlist")
+                     "skimr", "caret", "rvest", "stargazer", "rlist", "Hmisc", 
+                     "corrplot")
 
 new.packages = list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -101,25 +102,32 @@ base <- data %>%
 
 # Crear variable full-time 
 base <- base %>%
-  mutate(fulltime=ifelse(hoursWorkUsual>=40, 1, 0)) # El tipo de contrato es tiempo completo si trabaja más de 40 horas a la semana
+  mutate(hoursworked=hoursWorkUsual+hoursWorkActualSecondJob) %>%  # Total de horas trabajadas en el trabajo principal y secundario
+  mutate(fulltime=ifelse(hoursworked>=40, 1, 0))                   # El tipo de contrato es tiempo completo si trabaja más de 40 horas a la semana
 
 ### Estadística descriptiva: análisis preliminar 
-base1 <- base %>%
-  select(ing_hr, maxEducLevel, age, oficio,totalHoursWorked, formal, sex, estrato1, fulltime, p6240, relab, sizeFirm) %>% # Seleccionar variables de interés
+base2 <- base %>%
+  select(ing_hr, maxEducLevel, age, oficio,totalHoursWorked, formal, sex, estrato1, fulltime, relab, sizeFirm) %>% # Seleccionar variables de interés
   drop_na()
 
-any(is.na(base1)) # No hay datos vacíos
+any(is.na(base2)) # No hay datos vacíos
 
-stargazer(base1, header=FALSE, type='text',title="Variable")
+stargazer(base2, header=FALSE, type='text',title="Variable")
 
 ### Mapa de correlaciones 
+corrm <- base2
+colnames(corrm) <- c("Ingreso por hora", "Máximo nivel de educación", "Edad", "Oficio", "Total de horas trabajadas", "Formal",
+                    "Sexo", "Estrato", "Fulltime", "Tipo de ocupación", "Tamaño de la firma")
+res2 <- rcorr(as.matrix(corrm)) # Coeficientes de correlación
 
+corrplot(res2$r, type="upper", order="hclust", 
+         p.mat = res2$P, sig.level = 0.05, insig = "blank", tl.col="black") # Las correlaciones no signitificativas se eliminan
 
 ### Análisis por variable
 
 # maxEducLevel - max. education level attained
-summary(base$maxEducLevel)
-box_plot <- ggplot(data=base , mapping = aes(as.factor(maxEducLevel) , ing_hr)) + 
+summary(base2$maxEducLevel)
+box_plot <- ggplot(data=base2 , mapping = aes(as.factor(maxEducLevel) , ing_hr)) + 
   geom_boxplot() 
 box_plot
 
@@ -129,39 +137,39 @@ box_plot <- box_plot +
 box_plot ##SI
 
 # age - edad
-summary(base$age)
-ggplot(data = base , mapping = aes(x = age , y = ing_hr)) +
+summary(base2$age)
+ggplot(data = base2, mapping = aes(x = age , y = ing_hr)) +
   geom_point(col = "green" , size = 0.8)
 ## NO
 
-ggplot(data = base , 
+ggplot(data = base2 , 
        mapping = aes(x = age , y = ing_hr , group=as.factor(formal) , color=as.factor(formal))) +
   geom_point() ## SI
 
-ggplot(data = base , mapping = aes(x = totalHoursWorked , y = ing_hr)) +
+ggplot(data = base1 , mapping = aes(x = totalHoursWorked , y = ing_hr)) +
   geom_point(col = "indianred3" , size = 0.8)
 
 ## SÍ
 
 # totalHoursWorked - cuantas horas en total trabajo
-summary(base$totalHoursWorked)
+summary(base2$totalHoursWorked)
 
-ggplot(data = base , mapping = aes(x = age , y = totalHoursWorked )) +
+ggplot(data = base2 , mapping = aes(x = age , y = totalHoursWorked )) +
   geom_point(col = "steelblue" , size = 0.8)
 ## NO
-ggplot(data = base , 
+ggplot(data = base2 , 
        mapping = aes(x = totalHoursWorked , y = ing_hr , group=as.factor(formal) , color=as.factor(formal))) +
   geom_point()
 ## NO
 # oficio - occupation
-summary(base$oficio)
+summary(base1$oficio)
 
-ggplot(data = base , 
+ggplot(data = base2 , 
        mapping = aes(x = oficio , y = ing_hr , group=as.factor(sex) , color=as.factor(sex))) +
   geom_point()
 ## SI
 
-box_plot2 <- ggplot(data=base , mapping = aes(as.factor(occupation) , ing_hr)) + 
+box_plot2 <- ggplot(data=base2 , mapping = aes(as.factor(occupation) , ing_hr)) + 
   geom_boxplot() 
 box_plot2
 ## Cambiar
@@ -172,38 +180,39 @@ box_plot2
 ### NO
 
 # formal - =1 if formal (social security); =0 otherwise
-summary(base$formal)
+summary(base2$formal)
 
-ingreso_tipo_empleo <- ggplot(data=base) + 
+ingreso_tipo_empleo <- ggplot(data=base2) + 
   geom_histogram(mapping = aes(x=ing_hr , group=as.factor(formal) , fill=as.factor(formal)))
 ingreso_tipo_empleo
 ##NO
 # Sex - =1 male, =0 female
-summary(base$Sex)
-ingreso_sexo <- ggplot(data=base) + 
+summary(base2$Sex)
+ingreso_sexo <- ggplot(data=base2) + 
   geom_histogram(mapping = aes(x=ing_hr , group=as.factor(sex) , fill=as.factor(sex)))
 ingreso_sexo
 ingreso_sexo + scale_fill_manual(values = c("0"="indianred3" , "1"="steelblue") , label = c("0"="Hombre" , "1"="Mujer") , name = "Sexo")
 ## SI
+
 ## Estrato socioeconómico: estrato1 - Estrato de energía para las 13 a.M., y sextil de icv para otras cabeceras y rest 
-base1 %>%
+base2 %>%
   group_by(estrato1) %>%
   summarise(n = n())
 
 # Gráfico
-ggplot(base1) + 
+ggplot(base2) + 
   geom_boxplot(mapping = aes(as.factor(estrato1) , ing_hr, fill=as.factor(estrato1))) + 
   labs(x = "Estrato", y = "Ingreso por hora (pesos)") +
   theme(plot.title = element_text(hjust = 0.5)) +
   theme(legend.title = element_blank())
 
 ## Tipo de contrato (tiempo completo o no): fulltime - Trabaja más de 40 horas a la semana
-base1 %>%
+base2 %>%
   group_by(fulltime) %>%
   summarise(n = n())
 
 # Gráfico
-ggplot(base1) + 
+ggplot(base2) + 
   geom_bar(mapping = aes(as.factor(fulltime), ing_hr, group=as.factor(formal), fill=as.factor(formal)), 
                position = "dodge", stat = "summary", fun = "median") + 
   labs(x = "Tipo de contrato (tiempo completo)", y = "Ingreso por hora (pesos)") +
@@ -213,13 +222,13 @@ ggplot(base1) +
   theme(legend.title = element_blank())
 
 ## Tipo de ocupación: relab -	type of occupation
-base1 %>%
+base2 %>%
   group_by(relab) %>%
   summarise(n = n())
 
 # Gráfico
 labels = c('Obrero o empleado de empresa particular', 'Obrero o empleado del gobierno', 'Empleado doméstico', 'Jornalero o peon')
-ggplot(base1) + 
+ggplot(base2) + 
   geom_bar(mapping = aes(as.factor(relab) , ing_hr, fill=as.factor(relab)), 
            position = "dodge", stat = "summary", fun = "median") + 
   labs(x = "Tipo de ocupación", y = "Ingreso por hora (pesos)") +
@@ -230,18 +239,18 @@ ggplot(base1) +
 ## Tamaño de la empresa: sizeFirm - size of the firm by categories
 
 # ¿Qué categorías tiene sizefirm?
-base1 %>%
+base2 %>%
   group_by(sizeFirm) %>%
   summarise(n = n()) 
 
 # ¿Cuál es el ingreso por hora mediano de acuerdo con el tamaño de la empresa?
-base1 %>% 
+base2 %>% 
   group_by(sizeFirm) %>% 
   summarise('median_ing' = round(median(ing_hr), digits = 0)) 
 
 # Gráfico
 labels1 = c('Independiente', '2-5 empleados', '6-10 empleados', '11-50 empleados', '>50 empleados')
-ggplot(base1) + 
+ggplot(base2) + 
   geom_bar(mapping = aes(as.factor(sizeFirm) , ing_hr, fill=as.factor(sizeFirm)), 
            position = "dodge", stat = "summary", fun = "median") + 
   labs(x = "Tamaño de la empresa", y = "Ingreso por hora (pesos)") +
@@ -310,7 +319,39 @@ ggplot(coefswage) +
 # 4. The gender earnings GAP
 # ------------------------------------------------------------------------------------ #
 
+#### Variable dependiente (Y)
+#       y_ingLab_m - Labor income salaried - nominal monthly - all occ. (includes tips and commission
+#       ing_hr - labor income salaried - nominal hourly - all occ. (includes tips and commissions)
 
+#### Variables explicativas (X)
+#       maxEducLevel - max. education level attained
+#       age - edad
+#       age2 - edad^2
+#       formal - =1 if formal (social security); =0 otherwise
+#       Sex - =1 male, =0 female
+#       full-time - Trabaja más de 40 horas a la semana, construida a partir de hoursWorkUsual (usual weekly hours worked - principal occ.)
+#       relab -	type of occupation
+
+# Base de datos punto 4
+base4 <- base %>%
+  select(ing_hr, y_ingLab_m, maxEducLevel, age, formal, sex, fulltime, relab) %>% # Seleccionar variables de interés
+  mutate(female=ifelse(sex==1, 0, 1), age2=age^2) %>%
+  drop_na()
+
+# a. Begin by estimating and discussing the unconditional wage gap:
+set.seed(1111)
+
+reg4a_m <- lm(y_ingLab_m ~ female, data=base4)
+reg4a_hr <- lm(ing_hr ~ female, data=base4)
+
+# b. Equal Pay for Equal Work?
+
+
+
+# COMPARACIÓN REGRESIONES
+stargazer()
+
+# c. Predicted age-wage profile
 
 
 # ------------------------------------------------------------------------------------ #
