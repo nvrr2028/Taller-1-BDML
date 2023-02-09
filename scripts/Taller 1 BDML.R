@@ -330,7 +330,7 @@ test   <- base1[!sample, ]
 
 ## Primer modelo ##
 model1<-lm(ing_hr~1,data=train)
-summary(model1)
+stargazer(model1, type="text")
 
 test$model1<-predict(model1,newdata = test)
 
@@ -356,6 +356,9 @@ model4<-lm(ing_hr~totalHoursWorked+maxEducLevel+age+age^2+oficio+
 test$model4<-predict(model4,newdata = test)
 
 with(test,mean((ing_hr-model4)^2))
+
+stargazer(model4, type = "text")
+
 
 ## Quinto modelo ##
 
