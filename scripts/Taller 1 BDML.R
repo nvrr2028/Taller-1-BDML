@@ -113,7 +113,7 @@ any(is.na(base2)) # No hay datos vacíos
 stargazer(base2, header=FALSE, type='text',title="Variable")
 
 ### Mapa de correlaciones 
-
+base$hoursWorkActualSecondJob
 
 ### Análisis por variable
 
@@ -257,12 +257,11 @@ ggplot(base2) +
 # 3a. Tabla de regresión ------------------------------------------------------------- #
 
 #Primero creamos la variable edad al cuadrado y el logaritmo del salario
-basep  <- base %>%
-  mutate(age2=age^2 , 
-         lnwage=log(ing_hr))
+base$age2 <- base$age^2
+base$lnwage <- log(base$ing_hr)
 
 #Procedemos a hacer la regresión
-regw_age2<- lm(lnwage~ age+ age2, data = basep)
+regw_age2<- lm(lnwage~ age+ age2, data = base)
 stargazer(regw_age2, type = "text")
 stargazer(regw_age2, type = "latex")
 
@@ -274,10 +273,10 @@ stargazer(regw_age2, type = "latex")
 
 # Perfil edad-ganancias
 ##Veamos el gráfico de la regresión en cuestión
-regw_age2<- lm(lnwage~ age+ age2, data = basep)
+regw_age2<- lm(lnwage~ age+ age2, data = base)
 stargazer(regw_age2, type = "text")
 
-ggplot(basep, 
+ggplot(base, 
        aes(x = age, 
            y = lnwage)) +
   geom_point(color= "steelblue") +
@@ -286,64 +285,27 @@ ggplot(basep,
               color = "indianred3")
 
 # Bootstrap para construir los intervalos de confianza
+lmw_summary <- summary(regw_age2)$coefficients
 
-p_load("boot")
+coefswage = data.frame(
+  Features = rownames(lmw_summary),
+  Estimate = lmw_summary[,'Estimate'],
+  std_error = lmw_summary[,'Std. Error']
+)
 
-#construimos el boot
-mod_peakage <- function(basep,index){
-  set.seed(9876)
-  #1. creamos un data frame con el summary de nuestra regresión
-  coef <- lm(lnwage~ age+ age2, data = basep, subset = index)$coefficients
-  
-  #2. extraemos los betas a escalares para plantear la fórmula
-  beta1 = coef[2]
-  beta2 = coef[3]
-  
-  #3. calcular peak age
-  peak_age = -(beta1/(2*beta2))
-  
-  return(peak_age)
-}
-
-mod_peakage(basep, 1: nrow(basep)) #comprobando que sale igual :)
-
-#Corremos el Bootstrap
-set.seed(9876)
-results_peakage <- boot(basep, mod_peakage, R=1000)
-results_peakage
-
-#ahora construyamos los confidence intervals 
-
-#1. necesito extraer los estadísticos a values
-peakage<- results_peakage$t0
-bias <- colMeans(results_peakage$t)-results_peakage$t0
-se <- apply(results_peakage$t,2,sd)
-
-#2. construimos los valores para el CI
 alpha = 0.05 # 95% Confidence Interval
-lower = peakage - qnorm(alpha/2) * se
-upper = peakage + qnorm(alpha/2) * se
+coefswage$lower = coefswage$Estimate - qnorm(alpha/2) * coefswage$std_error
+coefswage$upper = coefswage$Estimate + qnorm(alpha/2) * coefswage$std_error
+coefswage = coefswage[!(coefswage$Features == '(Intercept)'),]
 
-#para agregar en punto de peak age 
-#1. creamos un data frame con el summary de nuestra regresión
-lmw_summary <- data.frame(summary(regw_age2)$coefficients)
-
-#2. extraemos los betas a escalares para plantear la fórmula
-beta0 = lmw_summary[1,1]
-beta1 = lmw_summary[2,1]
-beta2 = lmw_summary[3,1]
-
-wage_pa = beta0 + beta1*peakage + beta2*(peakage)^2  #revisarrr
-
-pa = as.character(peakage)
-
-age_earnings
-
-ggplot(basep, 
-       aes(x = age, y = lnwage))+ 
-  geom_point(aes(x=peakage, y=wage_pa)) +
-  geom_errorbar(aes(ymin=lower,ymax=upper,width=0.2), position = pa)
-
+ggplot(coefswage) +
+  geom_vline(xintercept = 0, linetype = 4)+
+  geom_point(aes(x = Estimate, y = Features)) + #point estimate
+  geom_segment(aes(y = Features, yend = Features, x = lower, xend = upper),
+     arrow = arrow(angle = 90, ends = 'both', 
+    length = unit(0.1, 'cm'))) + #segment representing the CI
+  labs(x = 'Coeffiecient estimate') +
+  theme_bw()
 
 # ------------------------------------------------------------------------------------ #
 # 4. The gender earnings GAP
