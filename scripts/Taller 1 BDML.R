@@ -360,7 +360,11 @@ set.seed(10101)
 
 ## a. 
 
+<<<<<<< Updated upstream
 #use 70% of the dataset as a training set and 30% as a test set. La base tiene variables que nos interesan
+=======
+#use 70% of the dataset as a training set and 30% as a test set. La base1 tiene variables que nos interesan
+>>>>>>> Stashed changes
 sample <- sample(c(TRUE, FALSE), nrow(base), replace=TRUE, prob=c(0.7,0.3))
 
 train  <- base[sample, ]
@@ -385,6 +389,7 @@ with(test,mean((ing_hr-model2)^2))
 
 ## Tercer modelo ##
 ###Desglosamos la variable categórica maxEducLevel, que contiene 9 categorías de niveles educativos.
+<<<<<<< Updated upstream
 base2 <- base2 %>% 
   mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
 
@@ -404,6 +409,27 @@ base2 <- base2 %>%
   mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
 
 base2 <- base2 %>% 
+=======
+base <- base %>% 
+  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
+
+base <- base %>% 
+  mutate(maxprimariaincompleta=ifelse(maxEducLevel==3, 1, 0))
+
+base <- base %>% 
+  mutate(maxprimariacompleta=ifelse(maxEducLevel==4, 1, 0))
+
+base <- base %>% 
+  mutate(maxsecundariaincompleta=ifelse(maxEducLevel==5, 1, 0))
+         
+base <- base %>% 
+  mutate(maxsecundariacompleta=ifelse(maxEducLevel==6, 1, 0))
+
+base <- base %>% 
+  mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
+
+base <- base %>% 
+>>>>>>> Stashed changes
   mutate(maxeducnoaplica=ifelse(maxEducLevel==9, 1, 0))
 
 table(base$maxEducLevel)
@@ -413,10 +439,16 @@ model3<-lm(ing_hr~totalHoursWorked+age+sex+maxprimariaincompleta+maxprimariacomp
 test$model3<-predict(model3,newdata = test)
 with(test,mean((ing_hr-model3)^2))
 
+<<<<<<< Updated upstream
 model6<-lm(ing_hr~totalHoursWorked+maxEducLevel+age+age^2+oficio,data=train)
 test$model6<-predict(model6,newdata = test)
 stargazer(model6, type = "text")
 
+=======
+model6<-lm(ing_hr~totalHoursWorked+age+sex+maxEducLevel+formal,data=train)
+test$model6<-predict(model6,newdata = test)
+with(test,mean((ing_hr-model6)^2))
+>>>>>>> Stashed changes
 ## Cuarto modelo ##
 
 model4<-lm(ing_hr~totalHoursWorked+maxEducLevel+age+age^2+oficio+
@@ -443,7 +475,13 @@ mse2<-with(test,round(mean((ing_hr-model2)^2),2))
 mse3<-with(test,round(mean((ing_hr-model3)^2),2))
 mse4<-with(test,round(mean((ing_hr-model4)^2),2))
 mse5<-with(test,round(mean((ing_hr-model5)^2),2))
+<<<<<<< Updated upstream
 mse6<-with(test,round(mean((ing_hr-model6)^2),2))
 tabla<-data.frame(mse1,mse2,mse3,mse4,mse5,ms6)
+=======
+mse6<-with(test,round(mean((ing_hr-model5)^2),2))
+           
+tabla<-data.frame(mse1,mse2,mse3,mse4,mse5, mse6)
+>>>>>>> Stashed changes
 tabla
 
