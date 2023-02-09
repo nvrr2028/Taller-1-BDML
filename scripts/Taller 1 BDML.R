@@ -15,7 +15,8 @@ rm(list = ls(all.names = TRUE))
 # ------------------------------------------------------------------------------------ #
 
 list.of.packages = c("readr", "readxl", "lubridate", "tidyverse", "pacman", "rio", 
-                     "skimr", "caret", "rvest", "stargazer", "rlist")
+                     "skimr", "caret", "rvest", "stargazer", "rlist", "Hmisc", 
+                     "corrplot")
 
 new.packages = list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -101,7 +102,8 @@ base <- data %>%
 
 # Crear variable full-time 
 base <- base %>%
-  mutate(fulltime=ifelse(hoursWorkUsual>=40, 1, 0)) # El tipo de contrato es tiempo completo si trabaja más de 40 horas a la semana
+  mutate(hoursworked=hoursWorkUsual+hoursWorkActualSecondJob) %>%  # Total de horas trabajadas en el trabajo principal y secundario
+  mutate(fulltime=ifelse(hoursworked>=40, 1, 0))                   # El tipo de contrato es tiempo completo si trabaja más de 40 horas a la semana
 
 ### Estadística descriptiva: análisis preliminar 
 base2 <- base %>%
@@ -113,7 +115,13 @@ any(is.na(base2)) # No hay datos vacíos
 stargazer(base2, header=FALSE, type='text',title="Variable")
 
 ### Mapa de correlaciones 
-base$hoursWorkActualSecondJob
+corrm <- base2
+colnames(corrm) <- c("Ingreso por hora", "Máximo nivel de educación", "Edad", "Oficio", "Total de horas trabajadas", "Formal",
+                    "Sexo", "Estrato", "Fulltime", "Tipo de ocupación", "Tamaño de la firma")
+res2 <- rcorr(as.matrix(corrm)) # Coeficientes de correlación
+
+corrplot(res2$r, type="upper", order="hclust", 
+         p.mat = res2$P, sig.level = 0.05, insig = "blank", tl.col="black") # Las correlaciones no signitificativas se eliminan
 
 ### Análisis por variable
 
