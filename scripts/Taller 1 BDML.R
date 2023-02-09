@@ -108,7 +108,7 @@ base1 <- base %>%
   select(ing_hr, maxEducLevel, age, oficio,totalHoursWorked, formal, sex, estrato1, fulltime, relab, sizeFirm) %>% # Seleccionar variables de interés
   drop_na()
 
-any(is.na(base1)) # No hay datos vacios
+any(is.na(base1)) # No hay datos vacíos
 
 stargazer(base1, header=FALSE, type='text',title="Variable")
 
@@ -261,34 +261,12 @@ base$lnwage <- log(base$ing_hr)
 
 #Procedemos a hacer la regresión
 regw_age2<- lm(lnwage~ age+ age2, data = base)
-stargazer(regw_age, type = "text")
+stargazer(regw_age2, type = "text")
+stargazer(regw_age2, type = "latex")
 
 # 3b. Interpretación de los coeficientes --------------------------------------------- #
 
 # 3c. Discusión of the model's in sample fit ----------------------------------------- #
-
-# Ajuste lineal
-ggplot(data=base, aes(x=age, y=lnwage))+ 
-    geom_point() +
-  stat_smooth(formula = 'y ~ x', method = lm, se = FALSE, 
-              size = 1, color="blue")   
-  #stat_smooth(formula = 'y ~ x+ x^2', method = lm, se = FALSE,                              #creempos que esta sobra
-              #size = 1, color="red")+
-  theme_bw() +
-  labs(x = "Edad",  
-       y = "Ingreso",
-       title = "Model Sample fit") 
-
-#Ahora veremos un ajuste cuadrático
-  
-ggplot(base, 
-       aes(x = age, 
-           y = lnwage)) +
-  geom_point(color= "steelblue") +
-  geom_smooth(method = "lm", 
-              formula = y ~ poly(x, 2), 
-              color = "indianred3")
-
 
 # 3d. Gráfico de la estimación del perfil edad-ganancias ----------------------------- #
 
@@ -304,16 +282,6 @@ ggplot(base,
   geom_smooth(method = "lm", 
               formula = y ~ poly(x, 2), 
               color = "indianred3")
-
-#ELIMINAR guardamos las predicciones del modelo
-#estim_regw_age2 <- predict(regw_age2)
-
-#ggplot(data=base, aes(x=lnwage, y=age2)) +
-  #geom_point(color="blue") +
-  #geom_line(color="red", data = estim_regw_age2, aes(x=lnwage_estim, y=age2))
-
-#https://community.rstudio.com/t/insert-regression-model-into-ggplot2/2439/5
-
 
 # Bootstrap para construir los intervalos de confianza
 lmw_summary <- summary(regw_age2)$coefficients
@@ -337,8 +305,6 @@ ggplot(coefswage) +
     length = unit(0.1, 'cm'))) + #segment representing the CI
   labs(x = 'Coeffiecient estimate') +
   theme_bw()
-
-
 
 # ------------------------------------------------------------------------------------ #
 # 4. The gender earnings GAP
@@ -364,7 +330,7 @@ set.seed(10101)
 
 ## a. 
 
-#use 70% of the dataset as a training set and 30% as a test set
+#use 70% of the dataset as a training set and 30% as a test set. La base1 tiene variables que nos interesan
 sample <- sample(c(TRUE, FALSE), nrow(base1), replace=TRUE, prob=c(0.7,0.3))
 
 train  <- base1[sample, ]
@@ -374,7 +340,7 @@ test   <- base1[!sample, ]
 
 ## Primer modelo ##
 model1<-lm(ing_hr~1,data=train)
-summary(model1)
+stargazer(model1, type="text")
 
 test$model1<-predict(model1,newdata = test)
 
@@ -388,6 +354,17 @@ test$model2<-predict(model2,newdata = test)
 with(test,mean((ing_hr-model2)^2))
 
 ## Tercer modelo ##
+###Desglosamos la variable categórica maxEducLevel, que contiene 9 categorías de niveles educativos.
+base1$maxprescolar=base1$maxprescolar
+base1$maxprimariaincompleta
+base1$maxprimariacompleta
+base1$maxsecundariaincompleta
+base1$maxsecundariacompleta
+base1$maxterciaria
+
+base <- base %>%
+  mutate(fulltime=ifelse(hoursWorkUsual>=40, 1, 0)) # El tipo de contrato es tiempo completo si trabaja más de 40 horas a la semana
+
 
 model3<-lm(ing_hr~totalHoursWorked+age+sex+maxEducLevel+formal,data=train)
 test$model3<-predict(model3,newdata = test)
@@ -400,6 +377,9 @@ model4<-lm(ing_hr~totalHoursWorked+maxEducLevel+age+age^2+oficio+
 test$model4<-predict(model4,newdata = test)
 
 with(test,mean((ing_hr-model4)^2))
+
+stargazer(model4, type = "text")
+
 
 ## Quinto modelo ##
 
