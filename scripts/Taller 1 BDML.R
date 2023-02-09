@@ -361,11 +361,11 @@ set.seed(10101)
 
 ## a. 
 
-#use 70% of the dataset as a training set and 30% as a test set. La base1 tiene variables que nos interesan
-sample <- sample(c(TRUE, FALSE), nrow(base1), replace=TRUE, prob=c(0.7,0.3))
+#use 70% of the dataset as a training set and 30% as a test set. La base tiene variables que nos interesan
+sample <- sample(c(TRUE, FALSE), nrow(base), replace=TRUE, prob=c(0.7,0.3))
 
-train  <- base1[sample, ]
-test   <- base1[!sample, ]
+train  <- base[sample, ]
+test   <- base[!sample, ]
 
 ##b. 
 
