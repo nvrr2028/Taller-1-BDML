@@ -345,6 +345,16 @@ with(test,mean((ing_hr-model2)^2))
 
 ## Tercer modelo ##
 ###Desglosamos la variable categórica maxEducLevel, que contiene 9 categorías de niveles educativos.
+base1$maxprescolar=base1$maxprescolar
+base1$maxprimariaincompleta
+base1$maxprimariacompleta
+base1$maxsecundariaincompleta
+base1$maxsecundariacompleta
+base1$maxterciaria
+
+base <- base %>%
+  mutate(fulltime=ifelse(hoursWorkUsual>=40, 1, 0)) # El tipo de contrato es tiempo completo si trabaja más de 40 horas a la semana
+
 
 model3<-lm(ing_hr~totalHoursWorked+age+sex+maxEducLevel+formal,data=train)
 test$model3<-predict(model3,newdata = test)
