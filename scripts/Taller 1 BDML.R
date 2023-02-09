@@ -15,7 +15,8 @@ rm(list = ls(all.names = TRUE))
 # ------------------------------------------------------------------------------------ #
 
 list.of.packages = c("readr", "readxl", "lubridate", "tidyverse", "pacman", "rio", 
-                     "skimr", "caret", "rvest", "stargazer", "rlist", "boot")
+                     "skimr", "caret", "rvest", "stargazer", "rlist", "Hmisc", 
+                     "corrplot", "dplyr", "boot")
 
 new.packages = list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -101,7 +102,7 @@ base <- data %>%
 
 # Crear variable full-time 
 base <- base %>%
-  mutate(fulltime=ifelse(hoursWorkUsual>=40, 1, 0)) # El tipo de contrato es tiempo completo si trabaja más de 40 horas a la semana
+  mutate(fulltime=ifelse(totalHoursWorked>=40, 1, 0))                   # El tipo de contrato es tiempo completo si trabaja más de 40 horas a la semana
 
 ### Estadística descriptiva: análisis preliminar 
 base2 <- base %>%
@@ -113,7 +114,13 @@ any(is.na(base2)) # No hay datos vacíos
 stargazer(base2, header=FALSE, type='text',title="Variable")
 
 ### Mapa de correlaciones 
-base$hoursWorkActualSecondJob
+corrm <- base2
+colnames(corrm) <- c("Ingreso por hora", "Máximo nivel de educación", "Edad", "Oficio", "Total de horas trabajadas", "Formal",
+                    "Sexo", "Estrato", "Fulltime", "Tipo de ocupación", "Tamaño de la firma")
+res2 <- rcorr(as.matrix(corrm)) # Coeficientes de correlación
+
+corrplot(res2$r, type="upper", order="hclust", 
+         p.mat = res2$P, sig.level = 0.05, insig = "blank", tl.col="black") # Las correlaciones no signitificativas se eliminan
 
 ### Análisis por variable
 
@@ -138,7 +145,7 @@ ggplot(data = base2 ,
        mapping = aes(x = age , y = ing_hr , group=as.factor(formal) , color=as.factor(formal))) +
   geom_point() ## SI
 
-ggplot(data = base1 , mapping = aes(x = totalHoursWorked , y = ing_hr)) +
+ggplot(data = base2 , mapping = aes(x = totalHoursWorked , y = ing_hr)) +
   geom_point(col = "indianred3" , size = 0.8)
 
 ## SÍ
@@ -154,7 +161,7 @@ ggplot(data = base2 ,
   geom_point()
 ## NO
 # oficio - occupation
-summary(base1$oficio)
+summary(base2$oficio)
 
 ggplot(data = base2 , 
        mapping = aes(x = oficio , y = ing_hr , group=as.factor(sex) , color=as.factor(sex))) +
@@ -257,12 +264,11 @@ ggplot(base2) +
 # 3a. Tabla de regresión ------------------------------------------------------------- #
 
 #Primero creamos la variable edad al cuadrado y el logaritmo del salario
-basep  <- base %>%
-  mutate(age2=age^2 , 
-         lnwage=log(ing_hr))
+base$age2 <- base$age^2
+base$lnwage <- log(base$ing_hr)
 
 #Procedemos a hacer la regresión
-regw_age2<- lm(lnwage~ age+ age2, data = basep)
+regw_age2<- lm(lnwage~ age+ age2, data = base)
 stargazer(regw_age2, type = "text")
 stargazer(regw_age2, type = "latex")
 
@@ -274,10 +280,10 @@ stargazer(regw_age2, type = "latex")
 
 # Perfil edad-ganancias
 ##Veamos el gráfico de la regresión en cuestión
-regw_age2<- lm(lnwage~ age+ age2, data = basep)
+regw_age2<- lm(lnwage~ age+ age2, data = base)
 stargazer(regw_age2, type = "text")
 
-age_earnings<- ggplot(basep, 
+ggplot(base, 
        aes(x = age, 
            y = lnwage)) +
   geom_point(color= "steelblue") +
@@ -286,57 +292,27 @@ age_earnings<- ggplot(basep,
               color = "indianred3")
 
 # Bootstrap para construir los intervalos de confianza
-mod_peakage <- function(basep,index){
-  set.seed(9876)
-  #1. creamos un data frame con el summary de nuestra regresión
-  coef <- lm(lnwage~ age+ age2, data = basep, subset = index)$coefficients
-  
-  #2. extraemos los betas a escalares para plantear la fórmula
-  beta1 = coef[2]
-  beta2 = coef[3]
-  
-  #3. calcular peak age
-  peak_age = -(beta1/(2*beta2))
-  
-  return(peak_age)
-}
+lmw_summary <- summary(regw_age2)$coefficients
 
-mod_peakage(basep, 1: nrow(basep)) #comprobando que sale igual :)
+coefswage = data.frame(
+  Features = rownames(lmw_summary),
+  Estimate = lmw_summary[,'Estimate'],
+  std_error = lmw_summary[,'Std. Error']
+)
 
-#Corremos el Bootstrap
-set.seed(9876)
-results_peakage <- boot(basep, mod_peakage, R=1000)
-results_peakage
-
-#ahora construyamos los confidence intervals 
-
-#1. necesito extraer los estadísticos a values
-peakage<- results_peakage$t0
-bias <- colMeans(results_peakage$t)-results_peakage$t0
-se <- apply(results_peakage$t,2,sd)
-
-#para agregar en punto de peak age 
-#1. creamos un data frame con el summary de nuestra regresión
-lmw_summary <- data.frame(summary(regw_age2)$coefficients)
-
-#2. extraemos los betas a escalares para plantear la fórmula
-beta0 = lmw_summary[1,1]
-beta1 = lmw_summary[2,1]
-beta2 = lmw_summary[3,1]
-
-wage_pa = beta0 + beta1*peakage + beta2*(peakage)^2
-
-#2. construimos los valores para el CI     #la se de peak age la puedo usar con el wage?
 alpha = 0.05 # 95% Confidence Interval
-lower = wage_pa - qnorm(alpha/2) * se
-upper = wage_pa + qnorm(alpha/2) * se
+coefswage$lower = coefswage$Estimate - qnorm(alpha/2) * coefswage$std_error
+coefswage$upper = coefswage$Estimate + qnorm(alpha/2) * coefswage$std_error
+coefswage = coefswage[!(coefswage$Features == '(Intercept)'),]
 
-age_earnings+
-  geom_point(aes(x=peakage, y=wage_pa)) +
-  geom_segment(aes(y = lower, yend = upper, x = peakage, xend = peakage),
-               arrow = arrow(angle = 90, ends = 'both', 
-                             length = unit(0.1, 'cm')))  #segment representing the CI
-
+ggplot(coefswage) +
+  geom_vline(xintercept = 0, linetype = 4)+
+  geom_point(aes(x = Estimate, y = Features)) + #point estimate
+  geom_segment(aes(y = Features, yend = Features, x = lower, xend = upper),
+     arrow = arrow(angle = 90, ends = 'both', 
+    length = unit(0.1, 'cm'))) + #segment representing the CI
+  labs(x = 'Coeffiecient estimate') +
+  theme_bw()
 
 # ------------------------------------------------------------------------------------ #
 # 4. The gender earnings GAP
@@ -369,6 +345,13 @@ reg4a_hr <- lm(ing_hr ~ female, data=base4)
 
 # b. Equal Pay for Equal Work?
 
+# Bootstrap for coefficients
+eta.fn<-function(data,index){
+  coef(lm(consumption~price+income, data = base, subset = index))
+}
+
+# boot(datos, estadístico deseado, repeticiones)
+boot(base4, eta.fn, R = 5000)
 
 
 # COMPARACIÓN REGRESIONES
@@ -384,11 +367,15 @@ set.seed(10101)
 
 ## a. 
 
+<<<<<<< Updated upstream
+#use 70% of the dataset as a training set and 30% as a test set. La base tiene variables que nos interesan
+=======
 #use 70% of the dataset as a training set and 30% as a test set. La base1 tiene variables que nos interesan
-sample <- sample(c(TRUE, FALSE), nrow(base1), replace=TRUE, prob=c(0.7,0.3))
+>>>>>>> Stashed changes
+sample <- sample(c(TRUE, FALSE), nrow(base), replace=TRUE, prob=c(0.7,0.3))
 
-train  <- base1[sample, ]
-test   <- base1[!sample, ]
+train  <- base[sample, ]
+test   <- base[!sample, ]
 
 ##b. 
 
@@ -409,21 +396,66 @@ with(test,mean((ing_hr-model2)^2))
 
 ## Tercer modelo ##
 ###Desglosamos la variable categórica maxEducLevel, que contiene 9 categorías de niveles educativos.
-base1$maxprescolar=base1$maxprescolar
-base1$maxprimariaincompleta
-base1$maxprimariacompleta
-base1$maxsecundariaincompleta
-base1$maxsecundariacompleta
-base1$maxterciaria
+<<<<<<< Updated upstream
+base2 <- base2 %>% 
+  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
 
-base <- base %>%
-  mutate(fulltime=ifelse(hoursWorkUsual>=40, 1, 0)) # El tipo de contrato es tiempo completo si trabaja más de 40 horas a la semana
+base2 <- base2 %>% 
+  mutate(maxprimariaincompleta=ifelse(maxEducLevel==3, 1, 0))
 
+base2 <- base2 %>% 
+  mutate(maxprimariacompleta=ifelse(maxEducLevel==4, 1, 0))
 
-model3<-lm(ing_hr~totalHoursWorked+age+sex+maxEducLevel+formal,data=train)
+base2 <- base2 %>% 
+  mutate(maxsecundariaincompleta=ifelse(maxEducLevel==5, 1, 0))
+         
+base2 <- base2 %>% 
+  mutate(maxsecundariacompleta=ifelse(maxEducLevel==6, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
+
+base2 <- base2 %>% 
+=======
+base <- base %>% 
+  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
+
+base <- base %>% 
+  mutate(maxprimariaincompleta=ifelse(maxEducLevel==3, 1, 0))
+
+base <- base %>% 
+  mutate(maxprimariacompleta=ifelse(maxEducLevel==4, 1, 0))
+
+base <- base %>% 
+  mutate(maxsecundariaincompleta=ifelse(maxEducLevel==5, 1, 0))
+         
+base <- base %>% 
+  mutate(maxsecundariacompleta=ifelse(maxEducLevel==6, 1, 0))
+
+base <- base %>% 
+  mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
+
+base <- base %>% 
+>>>>>>> Stashed changes
+  mutate(maxeducnoaplica=ifelse(maxEducLevel==9, 1, 0))
+
+table(base$maxEducLevel)
+##Ninguna observación en la muestra reportó cursar prescolar como máximo nivel educativo ni respondió "N/A" para esta pregunta, por lo que no incluimos las variables maxprescolar ni maxeducnoaplica
+
+model3<-lm(ing_hr~totalHoursWorked+age+sex+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+formal,data=train)
 test$model3<-predict(model3,newdata = test)
 with(test,mean((ing_hr-model3)^2))
 
+<<<<<<< Updated upstream
+model6<-lm(ing_hr~totalHoursWorked+maxEducLevel+age+age^2+oficio,data=train)
+test$model6<-predict(model6,newdata = test)
+stargazer(model6, type = "text")
+
+=======
+model6<-lm(ing_hr~totalHoursWorked+age+sex+maxEducLevel+formal,data=train)
+test$model6<-predict(model6,newdata = test)
+with(test,mean((ing_hr-model6)^2))
+>>>>>>> Stashed changes
 ## Cuarto modelo ##
 
 model4<-lm(ing_hr~totalHoursWorked+maxEducLevel+age+age^2+oficio+
@@ -450,7 +482,13 @@ mse2<-with(test,round(mean((ing_hr-model2)^2),2))
 mse3<-with(test,round(mean((ing_hr-model3)^2),2))
 mse4<-with(test,round(mean((ing_hr-model4)^2),2))
 mse5<-with(test,round(mean((ing_hr-model5)^2),2))
-
-tabla<-data.frame(mse1,mse2,mse3,mse4,mse5)
+<<<<<<< Updated upstream
+mse6<-with(test,round(mean((ing_hr-model6)^2),2))
+tabla<-data.frame(mse1,mse2,mse3,mse4,mse5,ms6)
+=======
+mse6<-with(test,round(mean((ing_hr-model5)^2),2))
+           
+tabla<-data.frame(mse1,mse2,mse3,mse4,mse5, mse6)
+>>>>>>> Stashed changes
 tabla
 
