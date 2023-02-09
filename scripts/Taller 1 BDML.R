@@ -105,7 +105,7 @@ base <- base %>%
 
 ### Estadística descriptiva: análisis preliminar 
 base1 <- base %>%
-  select(ing_hr, maxEducLevel, age, oficio,totalHoursWorked, formal, sex, estrato1, fulltime, p6240, relab, sizeFirm) %>% # Seleccionar variables de interés
+  select(ing_hr, maxEducLevel, age, oficio,totalHoursWorked, formal, sex, estrato1, fulltime, relab, sizeFirm) %>% # Seleccionar variables de interés
   drop_na()
 
 any(is.na(base1)) # No hay datos vacíos
@@ -348,7 +348,17 @@ ggplot(basep,
 # 4. The gender earnings GAP
 # ------------------------------------------------------------------------------------ #
 
+#### Variable dependiente (Y)
+#       y_ingLab_m - Labor income salaried - nominal monthly - all occ. (includes tips and commission
+#       y_ingLab_m_ha - labor income salaried - nominal hourly - all occ. (includes tips and commissions)
 
+#### Variables explicativas (X)
+#       maxEducLevel - max. education level attained
+#       age - edad
+#       formal - =1 if formal (social security); =0 otherwise
+#       Sex - =1 male, =0 female
+#       full-time - Trabaja más de 40 horas a la semana, construida a partir de hoursWorkUsual (usual weekly hours worked - principal occ.)
+#       relab -	type of occupation
 
 
 # ------------------------------------------------------------------------------------ #
