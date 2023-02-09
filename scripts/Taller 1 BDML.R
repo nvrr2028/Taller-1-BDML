@@ -16,7 +16,7 @@ rm(list = ls(all.names = TRUE))
 
 list.of.packages = c("readr", "readxl", "lubridate", "tidyverse", "pacman", "rio", 
                      "skimr", "caret", "rvest", "stargazer", "rlist", "Hmisc", 
-                     "corrplot")
+                     "corrplot", "dplyr")
 
 new.packages = list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -387,30 +387,25 @@ with(test,mean((ing_hr-model2)^2))
 ## Tercer modelo ##
 ###Desglosamos la variable categórica maxEducLevel, que contiene 9 categorías de niveles educativos.
 base1 <- base1 %>% 
-  mutate(maxprescolar=ifelse(maxEducLevel=2, 1, 0)
+  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
 
-head(base1)
+base1 <- base1 %>% 
+  mutate(maxprimariaincompleta=ifelse(maxEducLevel==3, 1, 0))
+
+base1 <- base1 %>% 
+  mutate(maxprimariacompleta=ifelse(maxEducLevel==4, 1, 0))
+
+base1 <- base1 %>% 
+  mutate(maxsecundariaincompleta=ifelse(maxEducLevel==5, 1, 0))
          
 base1 <- base1 %>% 
-  mutate(maxprimariaincompleta=ifelse(maxEducLevel=3, 1, 0)
+  mutate(maxsecundariacompleta=ifelse(maxEducLevel==6, 1, 0))
 
 base1 <- base1 %>% 
-  mutate(maxprimariacompleta=ifelse(maxEducLevel=4, 1, 0)
+  mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
 
 base1 <- base1 %>% 
-  mutate(maxsecundariaincompleta=ifelse(maxEducLevel=5, 1, 0)
-         
-                
-base1$
-base1$maxprimariacompleta
-base1$
-base1$maxsecundariacompleta
-base1$maxterciaria
-
-
-
-base <- base %>%
-  mutate(fulltime=ifelse(hoursWorkUsual>=40, 1, 0)) # El tipo de contrato es tiempo completo si trabaja más de 40 horas a la semana
+  mutate(maxEducnoaplica=ifelse(maxEducLevel==9, 1, 0))
 
 
 model3<-lm(ing_hr~totalHoursWorked+age+sex+maxEducLevel+formal,data=train)
