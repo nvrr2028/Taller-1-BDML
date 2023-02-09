@@ -145,7 +145,7 @@ ggplot(data = base2 ,
        mapping = aes(x = age , y = ing_hr , group=as.factor(formal) , color=as.factor(formal))) +
   geom_point() ## SI
 
-ggplot(data = base1 , mapping = aes(x = totalHoursWorked , y = ing_hr)) +
+ggplot(data = base2 , mapping = aes(x = totalHoursWorked , y = ing_hr)) +
   geom_point(col = "indianred3" , size = 0.8)
 
 ## SÍ
@@ -161,7 +161,7 @@ ggplot(data = base2 ,
   geom_point()
 ## NO
 # oficio - occupation
-summary(base1$oficio)
+summary(base2$oficio)
 
 ggplot(data = base2 , 
        mapping = aes(x = oficio , y = ing_hr , group=as.factor(sex) , color=as.factor(sex))) +
@@ -385,25 +385,25 @@ with(test,mean((ing_hr-model2)^2))
 
 ## Tercer modelo ##
 ###Desglosamos la variable categórica maxEducLevel, que contiene 9 categorías de niveles educativos.
-base <- base %>% 
+base2 <- base2 %>% 
   mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
 
-base <- base %>% 
+base2 <- base2 %>% 
   mutate(maxprimariaincompleta=ifelse(maxEducLevel==3, 1, 0))
 
-base <- base %>% 
+base2 <- base2 %>% 
   mutate(maxprimariacompleta=ifelse(maxEducLevel==4, 1, 0))
 
-base <- base %>% 
+base2 <- base2 %>% 
   mutate(maxsecundariaincompleta=ifelse(maxEducLevel==5, 1, 0))
          
-base <- base %>% 
+base2 <- base2 %>% 
   mutate(maxsecundariacompleta=ifelse(maxEducLevel==6, 1, 0))
 
-base <- base %>% 
+base2 <- base2 %>% 
   mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
 
-base <- base %>% 
+base2 <- base2 %>% 
   mutate(maxeducnoaplica=ifelse(maxEducLevel==9, 1, 0))
 
 table(base$maxEducLevel)
@@ -412,6 +412,10 @@ table(base$maxEducLevel)
 model3<-lm(ing_hr~totalHoursWorked+age+sex+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+formal,data=train)
 test$model3<-predict(model3,newdata = test)
 with(test,mean((ing_hr-model3)^2))
+
+model6<-lm(ing_hr~totalHoursWorked+maxEducLevel+age+age^2+oficio,data=train)
+test$model6<-predict(model6,newdata = test)
+stargazer(model6, type = "text")
 
 ## Cuarto modelo ##
 
@@ -439,7 +443,7 @@ mse2<-with(test,round(mean((ing_hr-model2)^2),2))
 mse3<-with(test,round(mean((ing_hr-model3)^2),2))
 mse4<-with(test,round(mean((ing_hr-model4)^2),2))
 mse5<-with(test,round(mean((ing_hr-model5)^2),2))
-
-tabla<-data.frame(mse1,mse2,mse3,mse4,mse5)
+mse6<-with(test,round(mean((ing_hr-model6)^2),2))
+tabla<-data.frame(mse1,mse2,mse3,mse4,mse5,ms6)
 tabla
 
