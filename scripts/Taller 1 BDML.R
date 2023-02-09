@@ -16,7 +16,7 @@ rm(list = ls(all.names = TRUE))
 
 list.of.packages = c("readr", "readxl", "lubridate", "tidyverse", "pacman", "rio", 
                      "skimr", "caret", "rvest", "stargazer", "rlist", "Hmisc", 
-                     "corrplot", "dplyr")
+                     "corrplot", "dplyr", "boot")
 
 new.packages = list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -345,6 +345,13 @@ reg4a_hr <- lm(ing_hr ~ female, data=base4)
 
 # b. Equal Pay for Equal Work?
 
+# Bootstrap for coefficients
+eta.fn<-function(data,index){
+  coef(lm(consumption~price+income, data = base, subset = index))
+}
+
+# boot(datos, estadístico deseado, repeticiones)
+boot(base4, eta.fn, R = 5000)
 
 
 # COMPARACIÓN REGRESIONES
