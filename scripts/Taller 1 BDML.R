@@ -102,8 +102,7 @@ base <- data %>%
 
 # Crear variable full-time 
 base <- base %>%
-  mutate(hoursworked=hoursWorkUsual+hoursWorkActualSecondJob) %>%  # Total de horas trabajadas en el trabajo principal y secundario
-  mutate(fulltime=ifelse(hoursworked>=40, 1, 0))                   # El tipo de contrato es tiempo completo si trabaja más de 40 horas a la semana
+  mutate(fulltime=ifelse(totalHoursWorked>=40, 1, 0))                   # El tipo de contrato es tiempo completo si trabaja más de 40 horas a la semana
 
 ### Estadística descriptiva: análisis preliminar 
 base2 <- base %>%
