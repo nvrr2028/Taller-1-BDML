@@ -320,7 +320,7 @@ set.seed(10101)
 
 ## a. 
 
-#use 70% of the dataset as a training set and 30% as a test set
+#use 70% of the dataset as a training set and 30% as a test set. La base1 tiene variables que nos interesan
 sample <- sample(c(TRUE, FALSE), nrow(base1), replace=TRUE, prob=c(0.7,0.3))
 
 train  <- base1[sample, ]
@@ -344,6 +344,7 @@ test$model2<-predict(model2,newdata = test)
 with(test,mean((ing_hr-model2)^2))
 
 ## Tercer modelo ##
+###Desglosamos la variable categórica maxEducLevel, que contiene 9 categorías de niveles educativos.
 
 model3<-lm(ing_hr~totalHoursWorked+age+sex+maxEducLevel+formal,data=train)
 test$model3<-predict(model3,newdata = test)
