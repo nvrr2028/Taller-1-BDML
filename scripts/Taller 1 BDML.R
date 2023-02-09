@@ -386,31 +386,31 @@ with(test,mean((ing_hr-model2)^2))
 
 ## Tercer modelo ##
 ###Desglosamos la variable categórica maxEducLevel, que contiene 9 categorías de niveles educativos.
-base1 <- base1 %>% 
+base <- base %>% 
   mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
 
-base1 <- base1 %>% 
+base <- base %>% 
   mutate(maxprimariaincompleta=ifelse(maxEducLevel==3, 1, 0))
 
-base1 <- base1 %>% 
+base <- base %>% 
   mutate(maxprimariacompleta=ifelse(maxEducLevel==4, 1, 0))
 
-base1 <- base1 %>% 
+base <- base %>% 
   mutate(maxsecundariaincompleta=ifelse(maxEducLevel==5, 1, 0))
          
-base1 <- base1 %>% 
+base <- base %>% 
   mutate(maxsecundariacompleta=ifelse(maxEducLevel==6, 1, 0))
 
-base1 <- base1 %>% 
+base <- base %>% 
   mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
 
-base1 <- base1 %>% 
+base <- base %>% 
   mutate(maxeducnoaplica=ifelse(maxEducLevel==9, 1, 0))
 
-table(base1$maxEducLevel)
+table(base$maxEducLevel)
 ##Ninguna observación en la muestra reportó cursar prescolar como máximo nivel educativo ni respondió "N/A" para esta pregunta, por lo que no incluimos las variables maxprescolar ni maxeducnoaplica
 
-model3<-lm(ing_hr~totalHoursWorked+age+sex+maxprescolar+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+maxeducnoaplica+formal,data=train)
+model3<-lm(ing_hr~totalHoursWorked+age+sex+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+formal,data=train)
 test$model3<-predict(model3,newdata = test)
 with(test,mean((ing_hr-model3)^2))
 
