@@ -377,7 +377,6 @@ reg4a_m <- lm(y_ingLab_m ~ female, data=base4)
 reg4a_hr <- lm(ing_hr ~ female, data=base4)
 
 # b. Equal Pay for Equal Work?
-# b. Equal Pay for Equal Work?
 head(base4)
 reg4c_m <-lm(y_ingLab_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)
 reg4c_hr <- lm(ing_hr  ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)
@@ -387,6 +386,7 @@ stargazer(reg4a_hr, reg4c_hr, type="text")
 # FWL --------------
 p_load("tidyverse","rio","stargazer")
 
+#para mensual
 #1. Residuals of female~controles
 base4<-base4 %>% mutate(femaleResidF=lm(female~ maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)$residuals) #Residuals of female~controles 
 #2. Residuals of ingreso~controles (sin female) 
@@ -396,6 +396,15 @@ reg4_m_fwl<-lm(wageResidF~femaleResidF, base4) #esta ya nos arroja el coef que q
 
 stargazer(reg4c_m, reg4_m_fwl, type="text")
 
+#para horas
+#1. Residuals of female~controles
+base4<-base4 %>% mutate(femaleResidFhr=lm(female~ maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)$residuals) #Residuals of female~controles 
+#2. Residuals of ingreso~controles (sin female) 
+base4<-base4 %>% mutate(wageResidFhr=lm(ing_hr ~ maxEducLevel + age + age2+ formal + fulltime +relab , data=base4)$residuals) #<
+#3. Residuals de female en ingresos
+reg4_hr_fwl<-lm(wageResidFhr~femaleResidFhr, base4) #esta ya nos arroja el coef que queremos
+
+stargazer(reg4c_hr, reg4_hr_fwl, type="text")
 
 base4$maxEducLevel <- as.factor(base4$maxEducLevel) # Educación como dummy 
 base4$relab <- as.factor(base4$relab) # Tipo de ocupación como dummy como dummy 
