@@ -68,3 +68,27 @@ reg4_m_fwl<-lm(wageResidF~femaleResidF, base4) #esta ya nos arroja el coef que q
 stargazer(reg4c_m, reg4_m_fwl, type="text")
 
 
+# FWL --------------
+p_load("tidyverse","rio","stargazer")
+
+#para mensual
+#1. Residuals of female~controles
+base4<-base4 %>% mutate(femaleResidF=lm(female~ maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)$residuals) #Residuals of female~controles 
+#2. Residuals of ingreso~controles (sin female) 
+base4<-base4 %>% mutate(wageResidF=lm(y_ingLab_m ~ maxEducLevel + age + age2+ formal + fulltime +relab , data=base4)$residuals) #<
+#3. Residuals de female en ingresos
+reg4_m_fwl<-lm(wageResidF~femaleResidF, base4) #esta ya nos arroja el coef que queremos
+
+stargazer(reg4c_m, reg4_m_fwl, type="text")
+
+#para horas mmmmm
+#1. Residuals of female~controles
+base4<-base4 %>% mutate(femaleResidFhr=lm(female~ maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)$residuals) #Residuals of female~controles 
+#2. Residuals of ingreso~controles (sin female) 
+base4<-base4 %>% mutate(wageResidFhr=lm(ing_hr ~ maxEducLevel + age + age2+ formal + fulltime +relab , data=base4)$residuals) #<
+#3. Residuals de female en ingresos
+reg4_hr_fwl<-lm(wageResidFhr~femaleResidFhr, base4) #esta ya nos arroja el coef que queremos
+
+stargazer(reg4c_hr, reg4_hr_fwl, type="text")
+
+

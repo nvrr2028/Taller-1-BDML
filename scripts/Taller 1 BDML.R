@@ -396,7 +396,7 @@ reg4_m_fwl<-lm(wageResidF~femaleResidF, base4) #esta ya nos arroja el coef que q
 
 stargazer(reg4c_m, reg4_m_fwl, type="text")
 
-#para horas mmmmm
+#para horas
 #1. Residuals of female~controles
 base4<-base4 %>% mutate(femaleResidFhr=lm(female~ maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)$residuals) #Residuals of female~controles 
 #2. Residuals of ingreso~controles (sin female) 
