@@ -136,61 +136,29 @@ box_plot <- box_plot +
   labs(x = "Nivel de educación", y = "Ingreso por hora (pesos)")
 box_plot
 
-# age - edad
+# age - edad y Horas
 summary(base2$age)
 ggplot(data = base2, mapping = aes(x = age , y = ing_hr)) +
   geom_point(col = "green3" , size = 0.8) +
-  labs(x = "Edad del encuestado", y = "Ingreso por hora (pesos)") + 
-  geom_polygon(degree = 2, alpha = 0.5)
-
-
+  labs(x = "Edad del encuestado", y = "Ingreso por hora (pesos)") 
 
 ggplot(data = base2 ,
        mapping = aes(x = age , y = ing_hr , group=as.factor(formal) , color=as.factor(formal))) +
-  geom_point() ## SI
+  geom_point()
 
 ggplot(data = base2 , mapping = aes(x = totalHoursWorked , y = ing_hr)) +
   geom_point(col = "indianred3" , size = 0.8) + 
-  labs(x = "Total de horas trabajadas", y = "Ingreso por hora (pesos)")
+  labs(x = "Total de horas trabajadas por semana", y = "Ingreso por hora (pesos)")
 
-
-## SÍ
-
-# totalHoursWorked - cuantas horas en total trabajo
-summary(base2$totalHoursWorked)
-
-ggplot(data = base2 , mapping = aes(x = age , y = totalHoursWorked )) +
-  geom_point(col = "steelblue" , size = 0.8)
-## NO
-ggplot(data = base2 , 
-       mapping = aes(x = totalHoursWorked , y = ing_hr , group=as.factor(formal) , color=as.factor(formal))) +
-  geom_point()
-## NO
-
-box_plot2 <- ggplot(data=base2 , mapping = aes(as.factor(occupation) , ing_hr)) + 
-  geom_boxplot() 
-box_plot2
-## Cambiar
-box_plot2 <- box_plot +
-  geom_point(aes(colour=as.factor(sex))) +
-  scale_color_manual(values = c("0"="red" , "1"="blue") , label = c("0"="Hombre" , "1"="Mujer") , name = "Sexo")
-box_plot2
-### NO
-
-# formal - =1 if formal (social security); =0 otherwise
-summary(base2$formal)
-
-ingreso_tipo_empleo <- ggplot(data=base2) + 
-  geom_histogram(mapping = aes(x=ing_hr , group=as.factor(formal) , fill=as.factor(formal)))
-ingreso_tipo_empleo
-##NO
-# Sex - =1 male, =0 female
-summary(base2$Sex)
-ingreso_sexo <- ggplot(data=base2) + 
-  geom_histogram(mapping = aes(x=ing_hr , group=as.factor(sex) , fill=as.factor(sex)))
-ingreso_sexo
-ingreso_sexo + scale_fill_manual(values = c("0"="indianred3" , "1"="steelblue") , label = c("0"="Hombre" , "1"="Mujer") , name = "Sexo")
-## SI
+# Sex - =1 male, =0 female # Crea el gráfico de barras con la media de ingresos por género
+labels1 = c('Mujer', 'Hombre')
+ggplot(base2) + 
+  geom_bar(mapping = aes(as.factor(sex) , ing_hr, fill=as.factor(sex)), 
+           position = "dodge", stat = "summary", fun = "median") + 
+  labs(x = "Género", y = "Ingreso por hora (pesos)") +
+  scale_x_discrete(labels = function(x) str_wrap(labels1, width = 6)) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(legend.title = element_blank())
 
 ## Estrato socioeconómico: estrato1 - Estrato de energía para las 13 a.M., y sextil de icv para otras cabeceras y rest 
 base2 %>%
@@ -421,17 +389,37 @@ stargazer()
 # ------------------------------------------------------------------------------------ #
 # 5. Predicting earnings
 # ------------------------------------------------------------------------------------ #
+
+base2 <- base2 %>% 
+  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxprimariaincompleta=ifelse(maxEducLevel==3, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxprimariacompleta=ifelse(maxEducLevel==4, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxsecundariaincompleta=ifelse(maxEducLevel==5, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxsecundariacompleta=ifelse(maxEducLevel==6, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
+
+base2 <- base2 %>% 
+  base <- base %>% 
+  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
+##a.
 set.seed(10101)
-
-## a. 
-
 #use 70% of the dataset as a training set and 30% as a test set. La base tiene variables que nos interesan
 
 #use 70% of the dataset as a training set and 30% as a test set. La base1 tiene variables que nos interesan
-sample <- sample(c(TRUE, FALSE), nrow(base), replace=TRUE, prob=c(0.7,0.3))
+sample <- sample(c(TRUE, FALSE), nrow(base2), replace=TRUE, prob=c(0.7,0.3))
 
-train  <- base[sample, ]
-test   <- base[!sample, ]
+train  <- base2[sample, ]
+test   <- base2[!sample, ]
 
 ##b. 
 
@@ -452,27 +440,6 @@ with(test,mean((ing_hr-model2)^2))
 
 ## Tercer modelo ##
 ###Desglosamos la variable categórica maxEducLevel, que contiene 9 categorías de niveles educativos.
-base2 <- base2 %>% 
-  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxprimariaincompleta=ifelse(maxEducLevel==3, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxprimariacompleta=ifelse(maxEducLevel==4, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxsecundariaincompleta=ifelse(maxEducLevel==5, 1, 0))
-         
-base2 <- base2 %>% 
-  mutate(maxsecundariacompleta=ifelse(maxEducLevel==6, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
-
-base2 <- base2 %>% 
-base <- base %>% 
-  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
 
 ##Ninguna observación en la muestra reportó cursar prescolar como máximo nivel educativo ni respondió "N/A" para esta pregunta, por lo que no incluimos las variables maxprescolar ni maxeducnoaplica
 
