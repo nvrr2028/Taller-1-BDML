@@ -344,14 +344,22 @@ reg4a_m <- lm(y_ingLab_m ~ female, data=base4)
 reg4a_hr <- lm(ing_hr ~ female, data=base4)
 
 # b. Equal Pay for Equal Work?
+base4$maxEducLevel <- as.factor(base4$maxEducLevel) # Educación como dummy 
+base4$relab <- as.factor(base4$relab) # Tipo de ocupación como dummy como dummy 
 
-# Bootstrap for coefficients
-eta.fn<-function(data,index){
-  coef(lm(consumption~price+income, data = base, subset = index))
+# Bootstrap para coeficientes - SALARIO MENSUAL
+eta.fn_m <-function(data,index){
+  coef(lm(wageResidF~femaleResidF, data = base, subset = index))
 }
 
-# boot(datos, estadístico deseado, repeticiones)
-boot(base4, eta.fn, R = 5000)
+boot(base4, eta.fn_m, R = 5000) # boot(datos, estadístico deseado, repeticiones)
+
+# Bootstrap para coeficientes - SALARIO POR HORA
+eta.fn_hr <-function(data,index){
+  coef(lm(wageResidF~femaleResidF, data = base, subset = index)) # Hace falta
+}
+
+boot(base4, eta.fn_hr, R = 5000) # boot(datos, estadístico deseado, repeticiones)
 
 
 # COMPARACIÓN REGRESIONES

@@ -50,8 +50,8 @@ reg4a_hr <- lm(ing_hr ~ female, data=base4)
 
 # b. Equal Pay for Equal Work?
 head(base4)
-reg4c_m <-lm(y_ingLab_m ~ female +maxEducLevel + age + age2+ formal + fulltime, data=base4)
-reg4c_hr <- lm(ing_hr  ~ female +maxEducLevel + age + age2+ formal + fulltime, data=base4)
+reg4c_m <-lm(y_ingLab_m ~ female + maxEducLevel + age + age2+ formal + fulltime, data=base4)
+reg4c_hr <- lm(ing_hr  ~ female + maxEducLevel + age + age2+ formal + fulltime, data=base4)
 
 stargazer(reg4a_hr, reg4c_hr, type="text")
 
