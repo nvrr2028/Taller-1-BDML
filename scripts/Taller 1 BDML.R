@@ -16,7 +16,7 @@ rm(list = ls(all.names = TRUE))
 
 list.of.packages = c("readr", "readxl", "lubridate", "tidyverse", "pacman", "rio", 
                      "skimr", "caret", "rvest", "stargazer", "rlist", "Hmisc", 
-                     "corrplot", "dplyr")
+                     "corrplot", "dplyr", "boot")
 
 new.packages = list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -102,8 +102,7 @@ base <- data %>%
 
 # Crear variable full-time 
 base <- base %>%
-  mutate(hoursworked=hoursWorkUsual+hoursWorkActualSecondJob) %>%  # Total de horas trabajadas en el trabajo principal y secundario
-  mutate(fulltime=ifelse(hoursworked>=40, 1, 0))                   # El tipo de contrato es tiempo completo si trabaja más de 40 horas a la semana
+  mutate(fulltime=ifelse(totalHoursWorked>=40, 1, 0))                   # El tipo de contrato es tiempo completo si trabaja más de 40 horas a la semana
 
 ### Estadística descriptiva: análisis preliminar 
 base2 <- base %>%
@@ -146,7 +145,7 @@ ggplot(data = base2 ,
        mapping = aes(x = age , y = ing_hr , group=as.factor(formal) , color=as.factor(formal))) +
   geom_point() ## SI
 
-ggplot(data = base1 , mapping = aes(x = totalHoursWorked , y = ing_hr)) +
+ggplot(data = base2 , mapping = aes(x = totalHoursWorked , y = ing_hr)) +
   geom_point(col = "indianred3" , size = 0.8)
 
 ## SÍ
@@ -162,7 +161,7 @@ ggplot(data = base2 ,
   geom_point()
 ## NO
 # oficio - occupation
-summary(base1$oficio)
+summary(base2$oficio)
 
 ggplot(data = base2 , 
        mapping = aes(x = oficio , y = ing_hr , group=as.factor(sex) , color=as.factor(sex))) +
@@ -345,7 +344,22 @@ reg4a_m <- lm(y_ingLab_m ~ female, data=base4)
 reg4a_hr <- lm(ing_hr ~ female, data=base4)
 
 # b. Equal Pay for Equal Work?
+base4$maxEducLevel <- as.factor(base4$maxEducLevel) # Educación como dummy 
+base4$relab <- as.factor(base4$relab) # Tipo de ocupación como dummy como dummy 
 
+# Bootstrap para coeficientes - SALARIO MENSUAL
+eta.fn_m <-function(data,index){
+  coef(lm(wageResidF~femaleResidF, data = base, subset = index))
+}
+
+boot(base4, eta.fn_m, R = 5000) # boot(datos, estadístico deseado, repeticiones)
+
+# Bootstrap para coeficientes - SALARIO POR HORA
+eta.fn_hr <-function(data,index){
+  coef(lm(wageResidF~femaleResidF, data = base, subset = index)) # Hace falta
+}
+
+boot(base4, eta.fn_hr, R = 5000) # boot(datos, estadístico deseado, repeticiones)
 
 
 # COMPARACIÓN REGRESIONES
@@ -361,7 +375,11 @@ set.seed(10101)
 
 ## a. 
 
+<<<<<<< Updated upstream
 #use 70% of the dataset as a training set and 30% as a test set. La base tiene variables que nos interesan
+=======
+#use 70% of the dataset as a training set and 30% as a test set. La base1 tiene variables que nos interesan
+>>>>>>> Stashed changes
 sample <- sample(c(TRUE, FALSE), nrow(base), replace=TRUE, prob=c(0.7,0.3))
 
 train  <- base[sample, ]
@@ -386,6 +404,27 @@ with(test,mean((ing_hr-model2)^2))
 
 ## Tercer modelo ##
 ###Desglosamos la variable categórica maxEducLevel, que contiene 9 categorías de niveles educativos.
+<<<<<<< Updated upstream
+base2 <- base2 %>% 
+  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxprimariaincompleta=ifelse(maxEducLevel==3, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxprimariacompleta=ifelse(maxEducLevel==4, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxsecundariaincompleta=ifelse(maxEducLevel==5, 1, 0))
+         
+base2 <- base2 %>% 
+  mutate(maxsecundariacompleta=ifelse(maxEducLevel==6, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
+
+base2 <- base2 %>% 
+=======
 base <- base %>% 
   mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
 
@@ -405,6 +444,7 @@ base <- base %>%
   mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
 
 base <- base %>% 
+>>>>>>> Stashed changes
   mutate(maxeducnoaplica=ifelse(maxEducLevel==9, 1, 0))
 
 ##Ninguna observación en la muestra reportó cursar prescolar como máximo nivel educativo ni respondió "N/A" para esta pregunta, por lo que no incluimos las variables maxprescolar ni maxeducnoaplica
@@ -413,6 +453,16 @@ model3<-lm(ing_hr~totalHoursWorked+age+sex+maxprimariaincompleta+maxprimariacomp
 test$model3<-predict(model3,newdata = test)
 with(test,mean((ing_hr-model3)^2))
 
+<<<<<<< Updated upstream
+model6<-lm(ing_hr~totalHoursWorked+maxEducLevel+age+age^2+oficio,data=train)
+test$model6<-predict(model6,newdata = test)
+stargazer(model6, type = "text")
+
+=======
+model6<-lm(ing_hr~totalHoursWorked+age+sex+maxEducLevel+formal,data=train)
+test$model6<-predict(model6,newdata = test)
+with(test,mean((ing_hr-model6)^2))
+>>>>>>> Stashed changes
 ## Cuarto modelo ##
 
 model4<-lm(ing_hr~totalHoursWorked+maxEducLevel+age+age^2+oficio+
@@ -439,7 +489,13 @@ mse2<-with(test,round(mean((ing_hr-model2)^2),2))
 mse3<-with(test,round(mean((ing_hr-model3)^2),2))
 mse4<-with(test,round(mean((ing_hr-model4)^2),2))
 mse5<-with(test,round(mean((ing_hr-model5)^2),2))
-
-tabla<-data.frame(mse1,mse2,mse3,mse4,mse5)
+<<<<<<< Updated upstream
+mse6<-with(test,round(mean((ing_hr-model6)^2),2))
+tabla<-data.frame(mse1,mse2,mse3,mse4,mse5,ms6)
+=======
+mse6<-with(test,round(mean((ing_hr-model5)^2),2))
+           
+tabla<-data.frame(mse1,mse2,mse3,mse4,mse5, mse6)
+>>>>>>> Stashed changes
 tabla
 
