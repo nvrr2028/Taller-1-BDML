@@ -409,7 +409,6 @@ base2 <- base2 %>%
   mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
 
 base2 <- base2 %>% 
-  base <- base %>% 
   mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
 ##a.
 set.seed(10101)
@@ -446,15 +445,10 @@ with(test,mean((ing_hr-model2)^2))
 model3<-lm(ing_hr~totalHoursWorked+age+sex+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+formal,data=train)
 test$model3<-predict(model3,newdata = test)
 with(test,mean((ing_hr-model3)^2))
-
-model6<-lm(ing_hr~totalHoursWorked+maxEducLevel+age+age^2+oficio,data=train)
-test$model6<-predict(model6,newdata = test)
-stargazer(model6, type = "text")
-
 ## Cuarto modelo ##
 
-model4<-lm(ing_hr~totalHoursWorked+maxEducLevel+age+age^2+oficio+
-             formal+sex+estrato1+fulltime+p6240+relab+sizeFirm,data=train)
+model4<-lm(ing_hr~totalHoursWorked+age+age^2+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+
+             formal+sex+estrato1+fulltime+relab+sizeFirm,data=train)
 test$model4<-predict(model4,newdata = test)
 
 with(test,mean((ing_hr-model4)^2))
@@ -464,8 +458,10 @@ stargazer(model4, type = "text")
 
 ## Quinto modelo ##
 
-model5<-lm(ing_hr~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:oficio:relab:sizeFirm+p6240+fulltime+maxEducLevel+
-             estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE),data=train)
+model5<-lm(ing_hr~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+fulltime:totalHoursWorked+
+             estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE)+maxprimariaincompleta:totalHoursWorked+maxprimariacompleta:totalHoursWorked+maxsecundariaincompleta:totalHoursWorked+
+           maxsecundariacompleta:totalHoursWorked+maxterciaria:totalHoursWorked
+           ,data=train)
 test$model5<-predict(model5,newdata = test)
 
 with(test,mean((ing_hr-model5)^2))
@@ -477,9 +473,8 @@ mse2<-with(test,round(mean((ing_hr-model2)^2),2))
 mse3<-with(test,round(mean((ing_hr-model3)^2),2))
 mse4<-with(test,round(mean((ing_hr-model4)^2),2))
 mse5<-with(test,round(mean((ing_hr-model5)^2),2))
-mse6<-with(test,round(mean((ing_hr-model6)^2),2))
 
-tabla<-data.frame(mse1,mse2,mse4,mse5,mse6)
+tabla<-data.frame(mse1,mse2,mse3,mse4,mse5)
 tabla
            
 
