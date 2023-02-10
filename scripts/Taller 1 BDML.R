@@ -106,7 +106,7 @@ base <- base %>%
 
 ### Estadística descriptiva: análisis preliminar 
 base2 <- base %>%
-  select(ing_hr, maxEducLevel, age, oficio,totalHoursWorked, formal, sex, estrato1, fulltime, relab, sizeFirm) %>% # Seleccionar variables de interés
+  select(ing_hr, maxEducLevel, age,totalHoursWorked, formal, sex, estrato1, fulltime, relab, sizeFirm) %>% # Seleccionar variables de interés
   drop_na()
 
 any(is.na(base2)) # No hay datos vacíos
@@ -115,7 +115,7 @@ stargazer(base2, header=FALSE, type='text',title="Variable")
 
 ### Mapa de correlaciones 
 corrm <- base2
-colnames(corrm) <- c("Ingreso por hora", "Máximo nivel de educación", "Edad", "Oficio", "Total de horas trabajadas", "Formal",
+colnames(corrm) <- c("Ingreso por hora", "Máximo nivel de educación", "Edad", "Total de horas trabajadas", "Formal",
                     "Sexo", "Estrato", "Fulltime", "Tipo de ocupación", "Tamaño de la firma")
 res2 <- rcorr(as.matrix(corrm)) # Coeficientes de correlación
 
@@ -132,66 +132,33 @@ box_plot
 
 box_plot <- box_plot +
   geom_point(aes(colour=as.factor(formal))) +
-  scale_color_manual(values = c("0"="indianred3" , "1"="steelblue") , label = c("0"="Informal" , "1"="Formal") , name = "Empleo")
-box_plot ##SI
+  scale_color_manual(values = c("0"="indianred3" , "1"="steelblue") , label = c("0"="Informal" , "1"="Formal") , name = "Empleo") +
+  labs(x = "Nivel de educación", y = "Ingreso por hora (pesos)")
+box_plot
 
-# age - edad
+# age - edad y Horas
 summary(base2$age)
 ggplot(data = base2, mapping = aes(x = age , y = ing_hr)) +
-  geom_point(col = "green" , size = 0.8)
-## NO
+  geom_point(col = "green3" , size = 0.8) +
+  labs(x = "Edad del encuestado", y = "Ingreso por hora (pesos)") 
 
-ggplot(data = base2 , 
+ggplot(data = base2 ,
        mapping = aes(x = age , y = ing_hr , group=as.factor(formal) , color=as.factor(formal))) +
-  geom_point() ## SI
+  geom_point()
 
 ggplot(data = base2 , mapping = aes(x = totalHoursWorked , y = ing_hr)) +
-  geom_point(col = "indianred3" , size = 0.8)
+  geom_point(col = "indianred3" , size = 0.8) + 
+  labs(x = "Total de horas trabajadas por semana", y = "Ingreso por hora (pesos)")
 
-## SÍ
-
-# totalHoursWorked - cuantas horas en total trabajo
-summary(base2$totalHoursWorked)
-
-ggplot(data = base2 , mapping = aes(x = age , y = totalHoursWorked )) +
-  geom_point(col = "steelblue" , size = 0.8)
-## NO
-ggplot(data = base2 , 
-       mapping = aes(x = totalHoursWorked , y = ing_hr , group=as.factor(formal) , color=as.factor(formal))) +
-  geom_point()
-## NO
-# oficio - occupation
-summary(base2$oficio)
-
-ggplot(data = base2 , 
-       mapping = aes(x = oficio , y = ing_hr , group=as.factor(sex) , color=as.factor(sex))) +
-  geom_point()
-## SI
-
-box_plot2 <- ggplot(data=base2 , mapping = aes(as.factor(occupation) , ing_hr)) + 
-  geom_boxplot() 
-box_plot2
-## Cambiar
-box_plot2 <- box_plot +
-  geom_point(aes(colour=as.factor(sex))) +
-  scale_color_manual(values = c("0"="red" , "1"="blue") , label = c("0"="Hombre" , "1"="Mujer") , name = "Sexo")
-box_plot2
-### NO
-
-# formal - =1 if formal (social security); =0 otherwise
-summary(base2$formal)
-
-ingreso_tipo_empleo <- ggplot(data=base2) + 
-  geom_histogram(mapping = aes(x=ing_hr , group=as.factor(formal) , fill=as.factor(formal)))
-ingreso_tipo_empleo
-##NO
-# Sex - =1 male, =0 female
-summary(base2$Sex)
-ingreso_sexo <- ggplot(data=base2) + 
-  geom_histogram(mapping = aes(x=ing_hr , group=as.factor(sex) , fill=as.factor(sex)))
-ingreso_sexo
-ingreso_sexo + scale_fill_manual(values = c("0"="indianred3" , "1"="steelblue") , label = c("0"="Hombre" , "1"="Mujer") , name = "Sexo")
-## SI
+# Sex - =1 male, =0 female # Crea el gráfico de barras con la media de ingresos por género
+labels1 = c('Mujer', 'Hombre')
+ggplot(base2) + 
+  geom_bar(mapping = aes(as.factor(sex) , ing_hr, fill=as.factor(sex)), 
+           position = "dodge", stat = "summary", fun = "median") + 
+  labs(x = "Género", y = "Ingreso por hora (pesos)") +
+  scale_x_discrete(labels = function(x) str_wrap(labels1, width = 6)) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(legend.title = element_blank())
 
 ## Estrato socioeconómico: estrato1 - Estrato de energía para las 13 a.M., y sextil de icv para otras cabeceras y rest 
 base2 %>%
@@ -433,19 +400,36 @@ stargazer()
 # ------------------------------------------------------------------------------------ #
 # 5. Predicting earnings
 # ------------------------------------------------------------------------------------ #
+
+base2 <- base2 %>% 
+  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxprimariaincompleta=ifelse(maxEducLevel==3, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxprimariacompleta=ifelse(maxEducLevel==4, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxsecundariaincompleta=ifelse(maxEducLevel==5, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxsecundariacompleta=ifelse(maxEducLevel==6, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
+##a.
 set.seed(10101)
-
-## a. 
-
-<<<<<<< Updated upstream
 #use 70% of the dataset as a training set and 30% as a test set. La base tiene variables que nos interesan
-=======
-#use 70% of the dataset as a training set and 30% as a test set. La base1 tiene variables que nos interesan
->>>>>>> Stashed changes
-sample <- sample(c(TRUE, FALSE), nrow(base), replace=TRUE, prob=c(0.7,0.3))
 
-train  <- base[sample, ]
-test   <- base[!sample, ]
+#use 70% of the dataset as a training set and 30% as a test set. La base1 tiene variables que nos interesan
+sample <- sample(c(TRUE, FALSE), nrow(base2), replace=TRUE, prob=c(0.7,0.3))
+
+train  <- base2[sample, ]
+test   <- base2[!sample, ]
 
 ##b. 
 
@@ -466,69 +450,16 @@ with(test,mean((ing_hr-model2)^2))
 
 ## Tercer modelo ##
 ###Desglosamos la variable categórica maxEducLevel, que contiene 9 categorías de niveles educativos.
-<<<<<<< Updated upstream
-base2 <- base2 %>% 
-  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxprimariaincompleta=ifelse(maxEducLevel==3, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxprimariacompleta=ifelse(maxEducLevel==4, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxsecundariaincompleta=ifelse(maxEducLevel==5, 1, 0))
-         
-base2 <- base2 %>% 
-  mutate(maxsecundariacompleta=ifelse(maxEducLevel==6, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
-
-base2 <- base2 %>% 
-=======
-base <- base %>% 
-  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
-
-base <- base %>% 
-  mutate(maxprimariaincompleta=ifelse(maxEducLevel==3, 1, 0))
-
-base <- base %>% 
-  mutate(maxprimariacompleta=ifelse(maxEducLevel==4, 1, 0))
-
-base <- base %>% 
-  mutate(maxsecundariaincompleta=ifelse(maxEducLevel==5, 1, 0))
-         
-base <- base %>% 
-  mutate(maxsecundariacompleta=ifelse(maxEducLevel==6, 1, 0))
-
-base <- base %>% 
-  mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
-
-base <- base %>% 
->>>>>>> Stashed changes
-  mutate(maxeducnoaplica=ifelse(maxEducLevel==9, 1, 0))
 
 ##Ninguna observación en la muestra reportó cursar prescolar como máximo nivel educativo ni respondió "N/A" para esta pregunta, por lo que no incluimos las variables maxprescolar ni maxeducnoaplica
 
 model3<-lm(ing_hr~totalHoursWorked+age+sex+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+formal,data=train)
 test$model3<-predict(model3,newdata = test)
 with(test,mean((ing_hr-model3)^2))
-
-<<<<<<< Updated upstream
-model6<-lm(ing_hr~totalHoursWorked+maxEducLevel+age+age^2+oficio,data=train)
-test$model6<-predict(model6,newdata = test)
-stargazer(model6, type = "text")
-
-=======
-model6<-lm(ing_hr~totalHoursWorked+age+sex+maxEducLevel+formal,data=train)
-test$model6<-predict(model6,newdata = test)
-with(test,mean((ing_hr-model6)^2))
->>>>>>> Stashed changes
 ## Cuarto modelo ##
 
-model4<-lm(ing_hr~totalHoursWorked+maxEducLevel+age+age^2+oficio+
-             formal+sex+estrato1+fulltime+p6240+relab+sizeFirm,data=train)
+model4<-lm(ing_hr~totalHoursWorked+age+age^2+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+
+             formal+sex+estrato1+fulltime+relab+sizeFirm,data=train)
 test$model4<-predict(model4,newdata = test)
 
 with(test,mean((ing_hr-model4)^2))
@@ -538,8 +469,10 @@ stargazer(model4, type = "text")
 
 ## Quinto modelo ##
 
-model5<-lm(ing_hr~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:oficio:relab:sizeFirm+p6240+fulltime+maxEducLevel+
-             estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE),data=train)
+model5<-lm(ing_hr~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+fulltime:totalHoursWorked+
+             estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE)+maxprimariaincompleta:totalHoursWorked+maxprimariacompleta:totalHoursWorked+maxsecundariaincompleta:totalHoursWorked+
+           maxsecundariacompleta:totalHoursWorked+maxterciaria:totalHoursWorked
+           ,data=train)
 test$model5<-predict(model5,newdata = test)
 
 with(test,mean((ing_hr-model5)^2))
@@ -551,13 +484,8 @@ mse2<-with(test,round(mean((ing_hr-model2)^2),2))
 mse3<-with(test,round(mean((ing_hr-model3)^2),2))
 mse4<-with(test,round(mean((ing_hr-model4)^2),2))
 mse5<-with(test,round(mean((ing_hr-model5)^2),2))
-<<<<<<< Updated upstream
-mse6<-with(test,round(mean((ing_hr-model6)^2),2))
-tabla<-data.frame(mse1,mse2,mse3,mse4,mse5,ms6)
-=======
-mse6<-with(test,round(mean((ing_hr-model5)^2),2))
-           
-tabla<-data.frame(mse1,mse2,mse3,mse4,mse5, mse6)
->>>>>>> Stashed changes
+
+tabla<-data.frame(mse1,mse2,mse3,mse4,mse5)
 tabla
+           
 
