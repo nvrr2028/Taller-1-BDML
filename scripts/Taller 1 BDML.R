@@ -264,12 +264,12 @@ ggplot(base2) +
 # 3a. Tabla de regresión ------------------------------------------------------------- #
 
 #Primero creamos la variable edad al cuadrado y el logaritmo del salario
-basep  <- basep %>%
+base3  <- base %>%
                     mutate(age2=age^2 , 
                           lnwage=log(ing_hr))
 
 #Procedemos a hacer la regresión
-regw_age2<- lm(lnwage~ age+ age2, data = base)
+regw_age2<- lm(lnwage~ age+ age2, data = base3)
 stargazer(regw_age2, type = "text")
 stargazer(regw_age2, type = "latex")
 
@@ -281,10 +281,10 @@ stargazer(regw_age2, type = "latex")
 
 # Perfil edad-ganancias
 ##Veamos el gráfico de la regresión en cuestión
-regw_age2<- lm(lnwage~ age+ age2, data = base)
+regw_age2<- lm(lnwage~ age+ age2, data = base3)
 stargazer(regw_age2, type = "text")
 
-age_earnings<- ggplot(base, 
+age_earnings<- ggplot(base3, 
        aes(x = age, 
            y = lnwage)) +
   geom_point(color= "steelblue") +
@@ -293,10 +293,10 @@ age_earnings<- ggplot(base,
               color = "indianred3")
 
 # Bootstrap para construir los intervalos de confianza
-mod_peakage <- function(basep,index){
+mod_peakage <- function(base3,index){
   set.seed(9876)
   #1. creamos un data frame con el summary de nuestra regresión
-  coef <- lm(lnwage~ age+ age2, data = basep, subset = index)$coefficients
+  coef <- lm(lnwage~ age+ age2, data = base3, subset = index)$coefficients
   
   #2. extraemos los betas a escalares para plantear la fórmula
   beta1 = coef[2]
@@ -308,12 +308,12 @@ mod_peakage <- function(basep,index){
   return(peak_age)
 }
 
-mod_peakage(basep, 1: nrow(basep)) #comprobando que sale igual :)
+mod_peakage(base3, 1: nrow(base3)) #comprobando que sale igual :)
 
 #Corremos el Bootstrap
 set.seed(9876)
-results_peakage <- boot(basep, mod_peakage, R=1000)
-results_peakage
+results_peakage <- boot(base3, mod_peakage, R=1000)
+results_peakage 
 
 #ahora construyamos los confidence intervals 
 
@@ -341,8 +341,10 @@ upper = wage_pa + qnorm(alpha/2) * se
 #4. Agregamos el CI al gráfico
 age_earnings + 
   geom_point(aes(x=peakage, y=wage_pa)) +
-  geom_segment(aes(y=lower, x= upper, yend= peakage, xend= peakage),
-               arrow= arrow(angle=90, ends= 'both', length(units(0.1, 'cm'))))
+  geom_segment(aes(y=upper, x= lower, yend= wage_pa , xend= wage_pa),
+               arrow= arrow(angle=90, ends= 'both', 
+                            length = unit(0.1, 'cm'))) +
+  labs(x= "Edad", y= "Ingresos", title= "Trayectoria de los ingresos a lo largo de la Edad")
 
 
 # ------------------------------------------------------------------------------------ #
