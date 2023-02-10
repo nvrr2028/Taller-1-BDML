@@ -334,20 +334,20 @@ age_earnings +
 # Base de datos punto 4
 base4 <- base %>%
   select(ing_hr, y_ingLab_m, maxEducLevel, age, formal, sex, fulltime, relab) %>% # Seleccionar variables de interés
-  mutate(female=ifelse(sex==1, 0, 1), age2=age^2) %>%
+  mutate(female=ifelse(sex==1, 0, 1), age2=age^2, ing_hr=log(ing_hr), ing_m=log(y_ingLab_m)) %>%
   drop_na()
 
 # a. Begin by estimating and discussing the unconditional wage gap:
 set.seed(1111)
 
-reg4a_m <- lm(y_ingLab_m ~ female, data=base4)
+reg4a_m <- lm(ing_m ~ female, data=base4)
 reg4a_hr <- lm(ing_hr ~ female, data=base4)
 
 # b. Equal Pay for Equal Work?
 head(base4)
 base4$maxEducLevel <- as.factor(base4$maxEducLevel) # Educación como dummy 
 base4$relab <- as.factor(base4$relab) # Tipo de ocupación como dummy como dummy 
-reg4c_m <-lm(y_ingLab_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)
+reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)
 reg4c_hr <- lm(ing_hr  ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)
 
 stargazer(reg4a_hr, reg4c_hr, type="text")
@@ -359,7 +359,7 @@ p_load("tidyverse","rio","stargazer")
 #1. Residuals of female~controles
 base4<-base4 %>% mutate(femaleResidF=lm(female~ maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)$residuals) #Residuals of female~controles 
 #2. Residuals of ingreso~controles (sin female) 
-base4<-base4 %>% mutate(wageResidF=lm(y_ingLab_m ~ maxEducLevel + age + age2+ formal + fulltime +relab , data=base4)$residuals) #<
+base4<-base4 %>% mutate(wageResidF=lm(ing_m ~ maxEducLevel + age + age2+ formal + fulltime +relab , data=base4)$residuals) #<
 #3. Residuals de female en ingresos
 reg4_m_fwl<-lm(wageResidF~femaleResidF, base4) #esta ya nos arroja el coef que queremos
 
@@ -367,7 +367,7 @@ stargazer(reg4c_m, reg4_m_fwl, type="text")
 
 # Bootstrap para coeficientes 
 eta.fn_m1 <-function(data,index){
-  coefm1 <- coef(lm(y_ingLab_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data = data, subset = index)) # Regresión original
+  coefm1 <- coef(lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data = data, subset = index)) # Regresión original
   return(coefm1[2])
 }
 
