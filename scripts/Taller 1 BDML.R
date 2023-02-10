@@ -345,6 +345,8 @@ reg4a_hr <- lm(ing_hr ~ female, data=base4)
 
 # b. Equal Pay for Equal Work?
 head(base4)
+base4$maxEducLevel <- as.factor(base4$maxEducLevel) # Educación como dummy 
+base4$relab <- as.factor(base4$relab) # Tipo de ocupación como dummy como dummy 
 reg4c_m <-lm(y_ingLab_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)
 reg4c_hr <- lm(ing_hr  ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)
 
@@ -353,7 +355,7 @@ stargazer(reg4a_hr, reg4c_hr, type="text")
 # FWL --------------
 p_load("tidyverse","rio","stargazer")
 
-#para mensual
+#### Ingreso mensual
 #1. Residuals of female~controles
 base4<-base4 %>% mutate(femaleResidF=lm(female~ maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)$residuals) #Residuals of female~controles 
 #2. Residuals of ingreso~controles (sin female) 
@@ -363,7 +365,26 @@ reg4_m_fwl<-lm(wageResidF~femaleResidF, base4) #esta ya nos arroja el coef que q
 
 stargazer(reg4c_m, reg4_m_fwl, type="text")
 
-#para horas
+# Bootstrap para coeficientes 
+eta.fn_m1 <-function(data,index){
+  coefm1 <- coef(lm(y_ingLab_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data = data, subset = index)) # Regresión original
+  return(coefm1[2])
+}
+
+reg4m1 <- boot(base4, eta.fn_m1, R = 1000) # boot(datos, estadístico deseado, repeticiones)
+
+eta.fn_m2 <-function(data,index){
+  coefm2 <- coef(lm(wageResidF~femaleResidF, data = data, subset = index)) # Regresión FWL
+  return(coefm2[2])
+}
+
+reg4m2 <- boot(base4, eta.fn_m2, R = 1000) # boot(datos, estadístico deseado, repeticiones)
+
+# Corrección de errores estándar 
+se_m1 <- sqrt(diag(vcov(reg4_m_fwl))*(9889/9877))[2]
+se_m2 <- sqrt(diag(vcov(reg4c_m)))[2]
+
+# Ingreso por horas
 #1. Residuals of female~controles
 base4<-base4 %>% mutate(femaleResidFhr=lm(female~ maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)$residuals) #Residuals of female~controles 
 #2. Residuals of ingreso~controles (sin female) 
@@ -373,28 +394,31 @@ reg4_hr_fwl<-lm(wageResidFhr~femaleResidFhr, base4) #esta ya nos arroja el coef 
 
 stargazer(reg4c_hr, reg4_hr_fwl, type="text")
 
-base4$maxEducLevel <- as.factor(base4$maxEducLevel) # Educación como dummy 
-base4$relab <- as.factor(base4$relab) # Tipo de ocupación como dummy como dummy 
-
-# Bootstrap para coeficientes - SALARIO MENSUAL
-eta.fn_m <-function(data,index){
-  coef(lm(wageResidF~femaleResidF, data = base, subset = index))
+# Bootstrap para coeficientes 
+eta.fn_hr1 <-function(data,index){
+  coefhr1 <- coef(lm(ing_hr ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data = data, subset = index)) # Regresión original
+  return(coefhr1[2])
 }
 
-boot(base4, eta.fn_m, R = 5000) # boot(datos, estadístico deseado, repeticiones)
+reg4hr1 <- boot(base4, eta.fn_hr1, R = 1000) # boot(datos, estadístico deseado, repeticiones)
 
-# Bootstrap para coeficientes - SALARIO POR HORA
-eta.fn_hr <-function(data,index){
-  coef(lm(wageResidF~femaleResidF, data = base, subset = index)) # Hace falta
+eta.fn_hr2 <-function(data,index){
+  coefhr2 <- coef(lm(wageResidFhr~femaleResidFhr, data = data, subset = index)) # Regresión FWL
+  return(coefhr2[2])
 }
 
-boot(base4, eta.fn_hr, R = 5000) # boot(datos, estadístico deseado, repeticiones)
+reg4hr2 <- boot(base4, eta.fn_hr2, R = 1000) # boot(datos, estadístico deseado, repeticiones)
 
+# Corrección de errores estándar 
+se_m1 <- sqrt(diag(vcov(reg4_hr_fwl))*(9889/9877))[2]
+se_m2 <- sqrt(diag(vcov(reg4c_hr)))[2]
 
-# COMPARACIÓN REGRESIONES
-stargazer()
+stargazer(reg4hr1, reg4hr2)
 
 # c. Predicted age-wage profile
+
+
+
 
 
 # ------------------------------------------------------------------------------------ #
