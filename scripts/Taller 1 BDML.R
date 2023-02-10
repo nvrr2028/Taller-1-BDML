@@ -264,8 +264,9 @@ ggplot(base2) +
 # 3a. Tabla de regresión ------------------------------------------------------------- #
 
 #Primero creamos la variable edad al cuadrado y el logaritmo del salario
-base$age2 <- base$age^2
-base$lnwage <- log(base$ing_hr)
+basep  <- basep %>%
+                    mutate(age2=age^2 , 
+                          lnwage=log(ing_hr))
 
 #Procedemos a hacer la regresión
 regw_age2<- lm(lnwage~ age+ age2, data = base)
@@ -283,7 +284,7 @@ stargazer(regw_age2, type = "latex")
 regw_age2<- lm(lnwage~ age+ age2, data = base)
 stargazer(regw_age2, type = "text")
 
-ggplot(base, 
+age_earnings<- ggplot(base, 
        aes(x = age, 
            y = lnwage)) +
   geom_point(color= "steelblue") +
@@ -292,27 +293,57 @@ ggplot(base,
               color = "indianred3")
 
 # Bootstrap para construir los intervalos de confianza
-lmw_summary <- summary(regw_age2)$coefficients
+mod_peakage <- function(basep,index){
+  set.seed(9876)
+  #1. creamos un data frame con el summary de nuestra regresión
+  coef <- lm(lnwage~ age+ age2, data = basep, subset = index)$coefficients
+  
+  #2. extraemos los betas a escalares para plantear la fórmula
+  beta1 = coef[2]
+  beta2 = coef[3]
+  
+  #3. calcular peak age
+  peak_age = -(beta1/(2*beta2))
+  
+  return(peak_age)
+}
 
-coefswage = data.frame(
-  Features = rownames(lmw_summary),
-  Estimate = lmw_summary[,'Estimate'],
-  std_error = lmw_summary[,'Std. Error']
-)
+mod_peakage(basep, 1: nrow(basep)) #comprobando que sale igual :)
 
+#Corremos el Bootstrap
+set.seed(9876)
+results_peakage <- boot(basep, mod_peakage, R=1000)
+results_peakage
+
+#ahora construyamos los confidence intervals 
+
+#antes necesito extraer los estadísticos a values
+peakage<- results_peakage$t0
+bias <- colMeans(results_peakage$t)-results_peakage$t0
+se <- apply(results_peakage$t,2,sd)
+
+#para agregar en punto de peak age 
+#1. creamos un data frame con el summary de nuestra regresión
+lmw_summary <- data.frame(summary(regw_age2)$coefficients)
+
+#2. extraemos los betas a escalares para plantear la fórmula
+beta0 = lmw_summary[1,1]
+beta1 = lmw_summary[2,1]
+beta2 = lmw_summary[3,1]
+
+wage_pa = beta0 + beta1*peakage + beta2*(peakage)^2
+
+#3. construimos los valores para el CI
 alpha = 0.05 # 95% Confidence Interval
-coefswage$lower = coefswage$Estimate - qnorm(alpha/2) * coefswage$std_error
-coefswage$upper = coefswage$Estimate + qnorm(alpha/2) * coefswage$std_error
-coefswage = coefswage[!(coefswage$Features == '(Intercept)'),]
+lower = wage_pa - qnorm(alpha/2) * se
+upper = wage_pa + qnorm(alpha/2) * se
 
-ggplot(coefswage) +
-  geom_vline(xintercept = 0, linetype = 4)+
-  geom_point(aes(x = Estimate, y = Features)) + #point estimate
-  geom_segment(aes(y = Features, yend = Features, x = lower, xend = upper),
-     arrow = arrow(angle = 90, ends = 'both', 
-    length = unit(0.1, 'cm'))) + #segment representing the CI
-  labs(x = 'Coeffiecient estimate') +
-  theme_bw()
+#4. Agregamos el CI al gráfico
+age_earnings + 
+  geom_point(aes(x=peakage, y=wage_pa)) +
+  geom_segment(aes(y=lower, x= upper, yend= peakage, xend= peakage),
+               arrow= arrow(angle=90, ends= 'both', length(units(0.1, 'cm'))))
+
 
 # ------------------------------------------------------------------------------------ #
 # 4. The gender earnings GAP
@@ -344,6 +375,26 @@ reg4a_m <- lm(y_ingLab_m ~ female, data=base4)
 reg4a_hr <- lm(ing_hr ~ female, data=base4)
 
 # b. Equal Pay for Equal Work?
+# b. Equal Pay for Equal Work?
+head(base4)
+reg4c_m <-lm(y_ingLab_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)
+reg4c_hr <- lm(ing_hr  ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)
+
+stargazer(reg4a_hr, reg4c_hr, type="text")
+
+# FWL --------------
+p_load("tidyverse","rio","stargazer")
+
+#1. Residuals of female~controles
+base4<-base4 %>% mutate(femaleResidF=lm(female~ maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)$residuals) #Residuals of female~controles 
+#2. Residuals of ingreso~controles (sin female) 
+base4<-base4 %>% mutate(wageResidF=lm(y_ingLab_m ~ maxEducLevel + age + age2+ formal + fulltime +relab , data=base4)$residuals) #<
+#3. Residuals de female en ingresos
+reg4_m_fwl<-lm(wageResidF~femaleResidF, base4) #esta ya nos arroja el coef que queremos
+
+stargazer(reg4c_m, reg4_m_fwl, type="text")
+
+
 base4$maxEducLevel <- as.factor(base4$maxEducLevel) # Educación como dummy 
 base4$relab <- as.factor(base4$relab) # Tipo de ocupación como dummy como dummy 
 

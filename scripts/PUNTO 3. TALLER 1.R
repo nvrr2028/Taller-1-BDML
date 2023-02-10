@@ -105,15 +105,10 @@ results_peakage
 
 #ahora construyamos los confidence intervals 
 
-#1. necesito extraer los estadísticos a values
+#antes necesito extraer los estadísticos a values
 peakage<- results_peakage$t0
 bias <- colMeans(results_peakage$t)-results_peakage$t0
 se <- apply(results_peakage$t,2,sd)
-
-#2. construimos los valores para el CI
-alpha = 0.05 # 95% Confidence Interval
-lower = peakage - qnorm(alpha/2) * se
-upper = peakage + qnorm(alpha/2) * se
 
 #para agregar en punto de peak age 
 #1. creamos un data frame con el summary de nuestra regresión
@@ -126,11 +121,13 @@ beta2 = lmw_summary[3,1]
 
 wage_pa = beta0 + beta1*peakage + beta2*(peakage)^2
 
-pa = as.character(peakage)
+#3. construimos los valores para el CI
+alpha = 0.05 # 95% Confidence Interval
+lower = wage_pa - qnorm(alpha/2) * se
+upper = wage_pa + qnorm(alpha/2) * se
 
-age_earnings
-
-ggplot(basep, 
-       aes(x = age, y = lnwage))+ 
+#4. Agregamos el CI al gráfico
+age_earnings + 
   geom_point(aes(x=peakage, y=wage_pa)) +
-  geom_errorbar(aes(ymin=lower,ymax=upper,width=0.2), position = pa)
+  geom_segment(aes(y=lower, x= upper, yend= peakage, xend= peakage),
+               arrow= arrow(angle=90, ends= 'both', length(units(0.1, 'cm'))))
