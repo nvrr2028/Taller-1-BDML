@@ -407,7 +407,6 @@ base <- base %>%
 base <- base %>% 
   mutate(maxeducnoaplica=ifelse(maxEducLevel==9, 1, 0))
 
-table(base$maxEducLevel)
 ##Ninguna observación en la muestra reportó cursar prescolar como máximo nivel educativo ni respondió "N/A" para esta pregunta, por lo que no incluimos las variables maxprescolar ni maxeducnoaplica
 
 model3<-lm(ing_hr~totalHoursWorked+age+sex+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+formal,data=train)
