@@ -120,10 +120,6 @@ res2 <- rcorr(as.matrix(corrm)) # Coeficientes de correlación
 corrplot(res2$r, type="upper", order="hclust", 
          p.mat = res2$p, sig.level = 0.05, insig = "blank", tl.col="black") # Las correlaciones no signitificativas se eliminan
 
-<<<<<<< HEAD
-
-## estrato2+estrato3+estrato4+estrato5+estrato6
-=======
 ## Transformación de variables categoricas a dummy ##
 
 base2  <- base2 %>%
@@ -140,7 +136,6 @@ base2$relab <- as.factor(base4$relab)
 base2$estrato1<- as.factor(base2$estrato1)
 base2$sizeFirm<- as.factor(base2$sizeFirm)
 
->>>>>>> 62c90a57c5fcf10333130e0da2d2a34449efe2e3
 
 ### Análisis por variable
 # maxEducLevel - max. education level attained
