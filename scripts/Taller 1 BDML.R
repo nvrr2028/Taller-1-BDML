@@ -120,6 +120,8 @@ res2 <- rcorr(as.matrix(corrm)) # Coeficientes de correlación
 corrplot(res2$r, type="upper", order="hclust", 
          p.mat = res2$P, sig.level = 0.05, insig = "blank", tl.col="black") # Las correlaciones no signitificativas se eliminan
 
+#######ERRRORRRR
+
 ## Trasnformación de variables categoricas a dummy ##
 
 base2  <- base2 %>%
@@ -524,7 +526,7 @@ stargazer(reg4hr1, reg4hr2)
 # ------------------------------------------------------------------------------------ #
 # 5. Predicting earnings
 # ------------------------------------------------------------------------------------ #
-
+base4<-base2 %>% mutate(female)
 ##a.
 set.seed(10101)
 #use 70% of the dataset as a training set and 30% as a test set.
@@ -543,7 +545,7 @@ stargazer(regw_age2train, type="text")
 
 test$regw_age2train<-predict(regw_age2train,newdata = test)
 
-with(test,mean((lnwage-reg4a_hrtrain)^2))
+with(test,mean((lnwage-regw_age2train)^2))
 
 ## Modelo ln(w) en función del género ##
 reg4a_hrtrain <- lm(lnwage ~ female, data=train)
@@ -592,17 +594,14 @@ stargazer(model4, type = "text")
 
 
 ## Quinto modelo ##
-
-
-model5<-lm(ing_hr~poly(age,2,raw=TRUE):sex:formal:relab:trabajadores2a5+trabajadores6a10
-           +trabajadores11a50+mas50trabajadores+fulltime:totalHoursWorked+
-             estrato1+poly(trabajadores2a5,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE)+
-             maxprimariaincompleta:totalHoursWorked+maxprimariacompleta:totalHoursWorked+maxsecundariaincompleta:totalHoursWorked+
-
-model5<-lm(lnwage~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+fulltime:totalHoursWorked+
-             estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE)+maxprimariaincompleta:totalHoursWorked+maxprimariacompleta:totalHoursWorked+maxsecundariaincompleta:totalHoursWorked+
-           maxsecundariacompleta:totalHoursWorked+maxterciaria:totalHoursWorked
-           ,data=train)
+model5<-lm(lnwage~poly(age,2,raw=TRUE):sex:formal:maxprimariacompleta+poly(age,2,raw=TRUE):sex:formal:maxterciaria+poly(age,2,raw=TRUE):sex:formal:maxprimariaincompleta+
+             poly(age,2,raw=TRUE):sex:formal:estrato2+poly(age,2,raw=TRUE):sex:formal:estrato3+poly(age,2,raw=TRUE):sex:formal:estrato4
+           poly(age,2,raw=TRUE):sex:formal:estrato5+poly(age,2,raw=TRUE):sex:formal:estrato6+poly(totalHoursWorked,5,raw=TRUE):sex:formal:maxterciaria+
+             poly(totalHoursWorked,5,raw=TRUE):sex:formal:maxprimariacompleta+poly(totalHoursWorked,5,raw=TRUE):sex:formal:estrato2+ 
+           poly(totalHoursWorked,5,raw=TRUE):sex:formal:estrato6+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+
+             maxsecundariacompleta+maxterciaria+formal+sex+estrato2+estrato3+estrato4+estrato5+estrato6+fulltime+
+             empleadopublico+empleadodomestico+jornalero+trabajadores2a5+trabajadores6a10+trabajadores11a50+mas50trabajadores,data=train)
+            
 test$model5<-predict(model5,newdata = test)
 
 with(test,mean((lnwage-model5)^2))
