@@ -622,3 +622,28 @@ tabla
 
 ##d.         
 
+#Make this example reproducible
+set.seed(123)
+
+# Specify the number of folds for
+# 5-fold cross-validation
+K <- 5
+
+#Split the data set into 5 folds
+index <- split(1:nrow(matchdata), 1: K)
+
+lapply(index,length)
+
+splt <- lapply(1:K, function(ind) matchdata[index[[ind]], ])
+
+p_load(data.table)
+
+m1 <- lapply(1:K, function(ii) lm(price~bedrooms, data = rbindlist(splt[-ii]))) 
+
+p1 <- lapply(1:K, function(ii) data.frame(predict(m1[[ii]], newdata = rbindlist(splt[ii]))))
+
+for (i in 1:K) {
+  colnames(p1[[i]])<-"yhat" #change the name
+  splt[[i]] <- cbind(splt[[i]], p1[[i]])
+  
+}
