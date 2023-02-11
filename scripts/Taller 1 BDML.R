@@ -662,5 +662,23 @@ for (i in 1:nrow(base2)) {
 m1MSE2_n <- lapply(1:nrow(base2), function(ii) mean((splt[[ii]]$lnwage - splt[[ii]]$yhat)^2))
 m1MSE2_n
 
+###########################
+library(data.table)
+
+m1 <- lapply(1:nrow(base2), function(ii) {
+  splt <- base2[-ii, ]
+  lm(model4, data = splt)
+})
+
+p1 <- lapply(1:nrow(base2), function(ii) {
+  splt <- base2[ii, ]
+  data.frame(yhat = predict(m1[[ii]], newdata = splt))
+})
+
+m1MSE2_n <- sapply(1:nrow(base2), function(ii) {
+  splt <- cbind(base2[ii, ], p1[[ii]])
+  mean((splt$lnwage - splt$yhat)^2)
+})
+
 
 
