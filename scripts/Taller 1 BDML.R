@@ -582,7 +582,7 @@ test$model3<-predict(model3,newdata = test)
 with(test,mean((lnwage-model3)^2))
 ## Cuarto modelo ##
 
-model4<-lm(ing_hr~totalHoursWorked+age+age^2+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+
+model4<-lm(lnwage~totalHoursWorked+age+age^2+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+
              maxsecundariacompleta+maxterciaria+formal+sex+
              estrato2+estrato3+estrato4+estrato5+estrato6+fulltime+
              empleadopublico+empleadodomestico+jornalero+
@@ -597,12 +597,12 @@ stargazer(model4, type = "text")
 
 ## Quinto modelo ##
 model5<-lm(lnwage~poly(age,2,raw=TRUE):sex:formal:maxprimariacompleta+poly(age,2,raw=TRUE):sex:formal:maxterciaria+poly(age,2,raw=TRUE):sex:formal:maxprimariaincompleta+
-             poly(age,2,raw=TRUE):sex:formal:estrato2+poly(age,2,raw=TRUE):sex:formal:estrato3+poly(age,2,raw=TRUE):sex:formal:estrato4
+             poly(age,2,raw=TRUE):sex:formal:estrato2+poly(age,2,raw=TRUE):sex:formal:estrato3+poly(age,2,raw=TRUE):sex:formal:estrato4+
            poly(age,2,raw=TRUE):sex:formal:estrato5+poly(age,2,raw=TRUE):sex:formal:estrato6+poly(totalHoursWorked,5,raw=TRUE):sex:formal:maxterciaria+
              poly(totalHoursWorked,5,raw=TRUE):sex:formal:maxprimariacompleta+poly(totalHoursWorked,5,raw=TRUE):sex:formal:estrato2+ 
            poly(totalHoursWorked,5,raw=TRUE):sex:formal:estrato6+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+
              maxsecundariacompleta+maxterciaria+formal+sex+estrato2+estrato3+estrato4+estrato5+estrato6+fulltime+
-             empleadopublico+empleadodomestico+jornalero+trabajadores2a5+trabajadores6a10+trabajadores11a50+mas50trabajadores,data=train)
+             empleadopublico+empleadodomestico+jornalero+trabajadores2a5+trabajadores6a10+trabajadores11a50+mas50trabajadores, data=train)
             
 test$model5<-predict(model5,newdata = test)
 
