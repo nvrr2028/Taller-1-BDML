@@ -122,50 +122,6 @@ corrplot(res2$r, type="upper", order="hclust",
 
 ## Trasnformación de variables categoricas a dummy ##
 
-#### Cambio de MaxEducLevel ####
-base2 %>%
-  group_by(maxEducLevel) %>%
-  summarise(n = n())
-
-
-base2 <- base2 %>% 
-  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxprimariaincompleta=ifelse(maxEducLevel==3, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxprimariacompleta=ifelse(maxEducLevel==4, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxsecundariaincompleta=ifelse(maxEducLevel==5, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxsecundariacompleta=ifelse(maxEducLevel==6, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
-
-## +maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria
-#### Cambio de sizefirm #### Base independiente
-base2 %>%
-  group_by(sizeFirm) %>%
-  summarise(n = n())
-
-base2 <- base2 %>% 
-  mutate(trabajadores2a5=ifelse(sizeFirm==2, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(trabajadores6a10=ifelse(sizeFirm==3, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(trabajadores11a50=ifelse(sizeFirm==4, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(mas50trabajadores=ifelse(sizeFirm==5, 1, 0))
-
-## trabajadores2a5+trabajadores6a10+trabajadores11a50+mas50trabajadores
-
 #### Cambio de relab ####
 base2 %>%
   group_by(relab) %>%
@@ -352,11 +308,9 @@ age_earnings<- ggplot(base3,
               formula = y ~ poly(x, 2), 
               color = "indianred3")
 
-<<<<<<< HEAD
+
 # Big data y Machine learning
 
-=======
-  >>>>>>> 04a904ad0c666553861e58e02d2f6de27ca64650
 # Bootstrap para construir los intervalos de confianza
 mod_peakage <- function(base3,index){
   set.seed(9876)
