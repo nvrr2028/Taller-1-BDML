@@ -87,13 +87,12 @@ base <- data %>%
 
 #### Variable dependiente (Y)
 #       y_ingLab_m_ha - labor income salaried - nominal hourly - all occ. (includes tips and commissions)
-#       totalHoursWorked - total hours worked previous week
-#       Ingreso total - Ingreso total
 
 #### Variables explicativas (X)
 #       maxEducLevel - max. education level attained
 #       age - edad
 #       formal - =1 if formal (social security); =0 otherwise
+#       totalHoursWorked - total hours worked previous week
 #       Sex - =1 male, =0 female
 #       estrato1 - Estrato de energía para las 13 a.M., y sextil de icv para otras cabeceras y rest
 #       full-time - Trabaja más de 40 horas a la semana, construida a partir de hoursWorkUsual (usual weekly hours worked - principal occ.)
@@ -108,15 +107,14 @@ base <- base %>%
 base2 <- base %>%
   select(ing_hr, maxEducLevel, age,totalHoursWorked, formal, sex, estrato1, fulltime, relab, sizeFirm) %>% # Seleccionar variables de interés
   drop_na()
-
 any(is.na(base2)) # No hay datos vacíos
 
-stargazer(base2, header=FALSE, type='text',title="Variable")
+stargazer(base2, header=FALSE, type='latex',title="Variable")
 
 ### Mapa de correlaciones 
 corrm <- base2
 colnames(corrm) <- c("Ingreso por hora", "Máximo nivel de educación", "Edad", "Total de horas trabajadas", "Formal",
-                    "Sexo", "Estrato", "Fulltime", "Tipo de ocupación", "Tamaño de la firma")
+                    "Sexo", "Estrato", "Tipo de contrato (fulltime)", "Tipo de ocupación", "Tamaño de la firma")
 res2 <- rcorr(as.matrix(corrm)) # Coeficientes de correlación
 
 corrplot(res2$r, type="upper", order="hclust", 
@@ -267,12 +265,7 @@ age_earnings<- ggplot(base3,
               formula = y ~ poly(x, 2), 
               color = "indianred3")
 
-# Big data y Machine learning
-
-```r
 # Bootstrap para construir los intervalos de confianza
-
-#Función para peakage
 mod_peakage <- function(base3,index){
   set.seed(9876)
   #1. creamos un data frame con el summary de nuestra regresión
@@ -295,46 +288,37 @@ set.seed(9876)
 results_peakage <- boot(base3, mod_peakage, R=1000)
 results_peakage 
 
-#Calculemos peak wage
-mod_peakwage <- function(base3,index){
-  set.seed(9876)
-  #1. creamos un data frame con el summary de nuestra regresión
-  coef <- lm(lnwage~ age+ age2, data = base3, subset = index)$coefficients
-  
-  #2. extraemos los betas a escalares para plantear la fórmula
-  beta0 = coef[1]
-  beta1 = coef[2]
-  beta2 = coef[3]
-  
-  #3. calcular peak age
-  peak_age = -(beta1/(2*beta2))
-  
-  #4. calcular peak wage
-  wage_pa = beta0 + beta1*peakage + beta2*(peakage)^2
-  
-  return(wage_pa)
-}
-
-results_peakwage <- boot(base3, mod_peakwage, R=1000)
-results_peakwage
+#ahora construyamos los confidence intervals 
 
 #antes necesito extraer los estadísticos a values
-peakwage<- results_peakwage$t0
-bias <- colMeans(results_peakwage$t)-results_peakwage$t0
-se <- apply(results_peakwage$t,2,sd)
+peakage<- results_peakage$t0
+bias <- colMeans(results_peakage$t)-results_peakage$t0
+se <- apply(results_peakage$t,2,sd)
 
-#construimos los valores para el CI
+#para agregar en punto de peak age 
+#1. creamos un data frame con el summary de nuestra regresión
+lmw_summary <- data.frame(summary(regw_age2)$coefficients)
+
+#2. extraemos los betas a escalares para plantear la fórmula
+beta0 = lmw_summary[1,1]
+beta1 = lmw_summary[2,1]
+beta2 = lmw_summary[3,1]
+
+wage_pa = beta0 + beta1*peakage + beta2*(peakage)^2
+
+#3. construimos los valores para el CI
 alpha = 0.05 # 95% Confidence Interval
-lower = peakwage - qnorm(alpha/2) * se
-upper = peakwage + qnorm(alpha/2) * se
+lower = wage_pa - qnorm(alpha/2) * se
+upper = wage_pa + qnorm(alpha/2) * se
 
 #4. Agregamos el CI al gráfico
 age_earnings + 
-  geom_point(aes(x=peakage, y=peakwage)) +
-  geom_segment(aes(y=peakwage, x= peakwage, yend= upper , xend= lower),
+  geom_point(aes(x=peakage, y=wage_pa)) +
+  geom_segment(aes(y=upper, x= lower, yend= wage_pa , xend= wage_pa),
                arrow= arrow(angle=90, ends= 'both', 
                             length = unit(0.1, 'cm'))) +
   labs(x= "Edad", y= "Ingresos", title= "Trayectoria de los ingresos a lo largo de la Edad")
+
 
 # ------------------------------------------------------------------------------------ #
 # 4. The gender earnings GAP
