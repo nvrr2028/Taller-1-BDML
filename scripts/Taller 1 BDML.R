@@ -560,14 +560,14 @@ stargazer(model1, type="text")
 
 test$model1<-predict(model1,newdata = test)
 
-with(test,mean((ing_hr-model1)^2))
+with(test,mean((lnwage-model1)^2))
 
 ## Segundo modelo ##
 
 model2<-lm(lnwage~totalHoursWorked,data=train)
 test$model2<-predict(model2,newdata = test)
 
-with(test,mean((ing_hr-model2)^2))
+with(test,mean((lnwage-model2)^2))
 
 ## Tercer modelo ##
 ###Desglosamos la variable categórica maxEducLevel, que contiene 9 categorías de niveles educativos.
@@ -576,7 +576,7 @@ with(test,mean((ing_hr-model2)^2))
 
 model3<-lm(lnwage~totalHoursWorked+age+sex+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+formal,data=train)
 test$model3<-predict(model3,newdata = test)
-with(test,mean((ing_hr-model3)^2))
+with(test,mean((lnwage-model3)^2))
 ## Cuarto modelo ##
 
 model4<-lm(lnwage~totalHoursWorked+age+age^2+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+
