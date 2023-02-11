@@ -525,11 +525,34 @@ stargazer(reg4hr1, reg4hr2)
 # 5. Predicting earnings
 # ------------------------------------------------------------------------------------ #
 
+<<<<<<< HEAD
+=======
+base2 <- base2 %>% 
+  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxprimariaincompleta=ifelse(maxEducLevel==3, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxprimariacompleta=ifelse(maxEducLevel==4, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxsecundariaincompleta=ifelse(maxEducLevel==5, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxsecundariacompleta=ifelse(maxEducLevel==6, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
+
+>>>>>>> 3911d547076b5539cc1ecd4fd0f89e9b0abdd853
 ##a.
 set.seed(10101)
-#use 70% of the dataset as a training set and 30% as a test set. La base tiene variables que nos interesan
+#use 70% of the dataset as a training set and 30% as a test set.
 
-#use 70% of the dataset as a training set and 30% as a test set. La base1 tiene variables que nos interesan
 sample <- sample(c(TRUE, FALSE), nrow(base2), replace=TRUE, prob=c(0.7,0.3))
 
 train  <- base2[sample, ]
@@ -560,63 +583,75 @@ test$reg4a_hrtrain<-predict(reg4a_hrtrain,newdata = test)
 with(test,mean((lnwage-reg4a_hrtrain)^2))
 
 ## Primer modelo ##
-model1<-lm(ing_hr~1,data=train)
+model1<-lm(lnwage~1,data=train)
 stargazer(model1, type="text")
 
 test$model1<-predict(model1,newdata = test)
 
-with(test,mean((ing_hr-model1)^2))
+with(test,mean((lnwage-model1)^2))
 
 ## Segundo modelo ##
 
-model2<-lm(ing_hr~totalHoursWorked,data=train)
+model2<-lm(lnwage~totalHoursWorked,data=train)
 test$model2<-predict(model2,newdata = test)
 
-with(test,mean((ing_hr-model2)^2))
+with(test,mean((lnwage-model2)^2))
 
 ## Tercer modelo ##
 ###Desglosamos la variable categórica maxEducLevel, que contiene 9 categorías de niveles educativos.
 
 ##Ninguna observación en la muestra reportó cursar prescolar como máximo nivel educativo ni respondió "N/A" para esta pregunta, por lo que no incluimos las variables maxprescolar ni maxeducnoaplica
 
-model3<-lm(ing_hr~totalHoursWorked+age+sex+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+formal,data=train)
+model3<-lm(lnwage~totalHoursWorked+age+sex+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+formal,data=train)
 test$model3<-predict(model3,newdata = test)
-with(test,mean((ing_hr-model3)^2))
+with(test,mean((lnwage-model3)^2))
 ## Cuarto modelo ##
 
+<<<<<<< HEAD
 model4<-lm(ing_hr~totalHoursWorked+age+age^2+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+
              maxsecundariacompleta+maxterciaria+formal+sex+
              estrato2+estrato3+estrato4+estrato5+estrato6+fulltime+
              empleadopublico+empleadodomestico+jornalero+
              trabajadores2a5+trabajadores6a10+trabajadores11a50+mas50trabajadores
            ,data=train)
+=======
+model4<-lm(lnwage~totalHoursWorked+age+age^2+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+
+             formal+sex+estrato1+fulltime+relab+sizeFirm,data=train)
+>>>>>>> 3911d547076b5539cc1ecd4fd0f89e9b0abdd853
 test$model4<-predict(model4,newdata = test)
 
-with(test,mean((ing_hr-model4)^2))
+with(test,mean((lnwage-model4)^2))
 
 stargazer(model4, type = "text")
 
 
 ## Quinto modelo ##
 
+<<<<<<< HEAD
 model5<-lm(ing_hr~poly(age,2,raw=TRUE):sex:formal:relab:trabajadores2a5+trabajadores6a10
            +trabajadores11a50+mas50trabajadores+fulltime:totalHoursWorked+
              estrato1+poly(trabajadores2a5,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE)+
              maxprimariaincompleta:totalHoursWorked+maxprimariacompleta:totalHoursWorked+maxsecundariaincompleta:totalHoursWorked+
+=======
+model5<-lm(lnwage~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+fulltime:totalHoursWorked+
+             estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE)+maxprimariaincompleta:totalHoursWorked+maxprimariacompleta:totalHoursWorked+maxsecundariaincompleta:totalHoursWorked+
+>>>>>>> 3911d547076b5539cc1ecd4fd0f89e9b0abdd853
            maxsecundariacompleta:totalHoursWorked+maxterciaria:totalHoursWorked
            ,data=train)
 test$model5<-predict(model5,newdata = test)
 
-with(test,mean((ing_hr-model5)^2))
+with(test,mean((lnwage-model5)^2))
 
 ## comparar los MSE 
-mse1<-with(test,round(mean((ing_hr-model1)^2),2))
-mse2<-with(test,round(mean((ing_hr-model2)^2),2))
-mse3<-with(test,round(mean((ing_hr-model3)^2),2))
-mse4<-with(test,round(mean((ing_hr-model4)^2),2))
-mse5<-with(test,round(mean((ing_hr-model5)^2),2))
+msew_age2 <-with(test,round(mean((lnwage-reg4a_hrtrain )^2),2))
+msew_fem <-with(test,round(mean((lnwage-reg4a_hrtrain )^2),2))
+mse1<-with(test,round(mean((lnwage-model1)^2),2))
+mse2<-with(test,round(mean((lnwage-model2)^2),2))
+mse3<-with(test,round(mean((lnwage-model3)^2),2))
+mse4<-with(test,round(mean((lnwage-model4)^2),2))
+mse5<-with(test,round(mean((lnwage-model5)^2),2))
 
-tabla<-data.frame(mse1,mse2,mse3,mse4,mse5)
+tabla<-data.frame(msew_age2, msew_fem, mse1,mse2,mse3,mse4,mse5)
 tabla
 
 ##d.         
