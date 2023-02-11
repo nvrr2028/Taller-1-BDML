@@ -120,7 +120,7 @@ res2 <- rcorr(as.matrix(corrm)) # Coeficientes de correlación
 corrplot(res2$r, type="upper", order="hclust", 
          p.mat = res2$p, sig.level = 0.05, insig = "blank", tl.col="black") # Las correlaciones no signitificativas se eliminan
 
-## Trasnformación de variables categoricas a dummy ##
+## Transformación de variables categoricas a dummy ##
 
 base2  <- base2 %>%
   mutate(age2=age^2 , 
@@ -356,10 +356,10 @@ age_earnings<- ggplot(base3,
               formula = y ~ poly(x, 2), 
               color = "indianred3")
 
+# Big data y Machine learning
+
 
 # Bootstrap para construir los intervalos de confianza
-
-#Función para peakage
 mod_peakage <- function(base3,index){
   set.seed(9876)
   #1. creamos un data frame con el summary de nuestra regresión
@@ -382,47 +382,37 @@ set.seed(9876)
 results_peakage <- boot(base3, mod_peakage, R=1000)
 results_peakage 
 
-
-#Calculemos peak wage
-mod_peakwage <- function(base3,index){
-  set.seed(9876)
-  #1. creamos un data frame con el summary de nuestra regresión
-  coef <- lm(lnwage~ age+ age2, data = base3, subset = index)$coefficients
-  
-  #2. extraemos los betas a escalares para plantear la fórmula
-  beta0 = coef[1]
-  beta1 = coef[2]
-  beta2 = coef[3]
-  
-  #3. calcular peak age
-  peak_age = -(beta1/(2*beta2))
-  
-  #4. calcular peak wage
-  wage_pa = beta0 + beta1*peakage + beta2*(peakage)^2
-  
-  return(wage_pa)
-}
-
-results_peakwage <- boot(base3, mod_peakwage, R=1000)
-results_peakwage
+#ahora construyamos los confidence intervals 
 
 #antes necesito extraer los estadísticos a values
-peakwage<- results_peakwage$t0
-bias <- colMeans(results_peakwage$t)-results_peakwage$t0
-se <- apply(results_peakwage$t,2,sd)
+peakage<- results_peakage$t0
+bias <- colMeans(results_peakage$t)-results_peakage$t0
+se <- apply(results_peakage$t,2,sd)
 
-#construimos los valores para el CI
+#para agregar en punto de peak age 
+#1. creamos un data frame con el summary de nuestra regresión
+lmw_summary <- data.frame(summary(regw_age2)$coefficients)
+
+#2. extraemos los betas a escalares para plantear la fórmula
+beta0 = lmw_summary[1,1]
+beta1 = lmw_summary[2,1]
+beta2 = lmw_summary[3,1]
+
+wage_pa = beta0 + beta1*peakage + beta2*(peakage)^2
+
+#3. construimos los valores para el CI
 alpha = 0.05 # 95% Confidence Interval
-lower = peakwage - qnorm(alpha/2) * se
-upper = peakwage + qnorm(alpha/2) * se
+lower = wage_pa - qnorm(alpha/2) * se
+upper = wage_pa + qnorm(alpha/2) * se
 
 #4. Agregamos el CI al gráfico
 age_earnings + 
-  geom_point(aes(x=peakage, y=peakwage)) +
-  geom_segment(aes(y=lower, x= peakage, yend= upper , xend= peakage),
+  geom_point(aes(x=peakage, y=wage_pa)) +
+  geom_segment(aes(y=upper, x= lower, yend= wage_pa , xend= wage_pa),
                arrow= arrow(angle=90, ends= 'both', 
-                            length = unit(0.2, 'cm'))) +
+                            length = unit(0.1, 'cm'))) +
   labs(x= "Edad", y= "Ingresos", title= "Trayectoria de los ingresos a lo largo de la Edad")
+
 
 # ------------------------------------------------------------------------------------ #
 # 4. The gender earnings GAP
@@ -450,14 +440,16 @@ base4 <- base %>%
 ### a. Begin by estimating and discussing the unconditional wage gap:
 set.seed(1111)
 
-reg4a_m <- lm(ing_m ~ female, data=base4) # Ingreso mensual ~ Female
+reg4a_m <- lm(ing_m ~ female, data=base4)   # Ingreso mensual ~ Female
 reg4a_hr <- lm(ing_hr ~ female, data=base4) # Ingreso por hora ~ Female
+
+stargazer(reg4a_m, reg4a_hr, type="latex")
 
 ### b. Equal Pay for Equal Work?
 head(base4)
 base4$maxEducLevel <- as.factor(base4$maxEducLevel) # Educación como dummy 
-base4$relab <- as.factor(base4$relab) # Tipo de ocupación como dummy
-reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
+base4$relab <- as.factor(base4$relab)               # Tipo de ocupación como dummy
+reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)     # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
 reg4c_hr <- lm(ing_hr  ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso por hora ~ Female + Other explanatory variables
 
 stargazer(reg4a_hr, reg4c_hr, type="text")
@@ -473,7 +465,7 @@ base4<-base4 %>% mutate(wageResidF=lm(ing_m ~ maxEducLevel + age + age2+ formal 
 #3. Residuals de female en ingresos
 reg4_m_fwl<-lm(wageResidF~femaleResidF, base4) #esta ya nos arroja el coef que queremos
 
-stargazer(reg4c_m, reg4_m_fwl, type="text")
+stargazer(reg4a_m, reg4c_m, reg4_m_fwl, type="text")
 
 ### Bootstrap para coeficientes -------------
 
@@ -500,9 +492,9 @@ boot_ing_m <- matrix(NA, ncol=3, nrow = 4)
 boot_ing_m[, 1] <- c("", "Coeficiente", "Sesgo", "Errores estándar")
 boot_ing_m[1, ] <- c("", "Modelo original", "Modelo FWL")
 boot_ing_m[2, 2:3] <- c(reg4m1$t0, reg4m2$t0)
-boot_ing_m[3, 2:3] <- c(0.0004555001, -0.0003207414)
+boot_ing_m[3, 2:3] <- c(0.0004555001, 8.962507e-05)
 boot_ing_m[4, 2:3] <- c(se_m1, se_m2)
-stargazer(boot_ing_m)
+stargazer(boot_ing_m, type="text")
 
 # Ingreso por horas
 #1. Residuals of female~controles
@@ -512,7 +504,7 @@ base4<-base4 %>% mutate(wageResidFhr=lm(ing_hr ~ maxEducLevel + age + age2+ form
 #3. Residuals de female en ingresos
 reg4_hr_fwl<-lm(wageResidFhr~femaleResidFhr, base4) #esta ya nos arroja el coef que queremos
 
-stargazer(reg4c_hr, reg4_hr_fwl, type="text")
+stargazer(reg4a_hr, reg4c_hr, reg4_hr_fwl, type="text")
 
 # Bootstrap para coeficientes 
 eta.fn_hr1 <-function(data,index){
@@ -537,9 +529,9 @@ boot_ing_hr <- matrix(NA, ncol=3, nrow = 4)
 boot_ing_hr[, 1] <- c("", "Coeficiente", "Sesgo", "Errores estándar")
 boot_ing_hr[1, ] <- c("", "Modelo original", "Modelo FWL")
 boot_ing_hr[2, 2:3] <- c(reg4hr1$t0, reg4hr2$t0)
-boot_ing_hr[3, 2:3] <- c(0.0005964313, -0.0004338537)
+boot_ing_hr[3, 2:3] <- c(0.0005964313, 0.0003360888)
 boot_ing_hr[4, 2:3] <- c(se_hr1, se_hr2)
-stargazer(boot_ing_hr)
+stargazer(boot_ing_hr, type="text")
 
 # c. Predicted age-wage profile
 
