@@ -16,7 +16,7 @@ rm(list = ls(all.names = TRUE))
 
 list.of.packages = c("readr", "readxl", "lubridate", "tidyverse", "pacman", "rio", 
                      "skimr", "caret", "rvest", "stargazer", "rlist", "Hmisc", 
-                     "corrplot", "dplyr", "boot")
+                     "corrplot", "dplyr", "boot", "caret","Ecdat","ggplot2")
 
 new.packages = list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -598,7 +598,7 @@ test$model3<-predict(model3,newdata = test)
 with(test,mean((lnwage-model3)^2))
 ## Cuarto modelo ##
 
-model4<-lm(ing_hr~totalHoursWorked+age+age^2+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+
+model4<-lm(lnwage~totalHoursWorked+age+age^2+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+
              maxsecundariacompleta+maxterciaria+formal+sex+
              estrato2+estrato3+estrato4+estrato5+estrato6+fulltime+
              empleadopublico+empleadodomestico+jornalero+
@@ -613,7 +613,7 @@ stargazer(model4, type = "text")
 
 ## Quinto modelo ##
 model5<-lm(lnwage~poly(age,2,raw=TRUE):sex:formal:maxprimariacompleta+poly(age,2,raw=TRUE):sex:formal:maxterciaria+poly(age,2,raw=TRUE):sex:formal:maxprimariaincompleta+
-             poly(age,2,raw=TRUE):sex:formal:estrato2+poly(age,2,raw=TRUE):sex:formal:estrato3+poly(age,2,raw=TRUE):sex:formal:estrato4
+             poly(age,2,raw=TRUE):sex:formal:estrato2+poly(age,2,raw=TRUE):sex:formal:estrato3+poly(age,2,raw=TRUE):sex:formal:estrato4+
            poly(age,2,raw=TRUE):sex:formal:estrato5+poly(age,2,raw=TRUE):sex:formal:estrato6+poly(totalHoursWorked,5,raw=TRUE):sex:formal:maxterciaria+
              poly(totalHoursWorked,5,raw=TRUE):sex:formal:maxprimariacompleta+poly(totalHoursWorked,5,raw=TRUE):sex:formal:estrato2+ 
            poly(totalHoursWorked,5,raw=TRUE):sex:formal:estrato6+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+
@@ -636,5 +636,60 @@ mse5<-with(test,round(mean((lnwage-model5)^2),2))
 tabla<-data.frame(msew_age2,msew_fem,mse1,mse2,mse3,mse4,mse5)
 tabla
 
-##d.         
+##d.
+#M
+set.seed(20183)
+n <- numeric(nrow(base2)) # obtiene el número de filas (es decir, el tamaño) de la base de datos
+index <- rep(1, n-1) # crea un vector de unos de tamaño n
 
+splt <- lapply(1:n-1, function(ind) base2[index[[ind]], ])
+
+p_load(data.table)
+
+m1 <- lapply(1:n-1, function(ii) lm(model1, data = rbindlist(splt[-ii]))) 
+
+p1 <- lapply(1:n-1, function(ii) data.frame(predict(m1[[ii]], newdata = rbindlist(splt[ii]))))
+
+for (i in 1:n-1) {
+  colnames(p1[[i]])<-"yhat" #change the name
+  splt[[i]] <- cbind(splt[[i]], p1[[i]])
+  
+}
+
+m1MSE2_n <- lapply(1:n, function(ii) mean((splt[[ii]]$lnwage - splt[[ii]]$yhat)^2))
+m1MSE2_n
+
+
+################ otro
+# Carga los datos
+data(base2)
+
+# Asigna la variable dependiente y las variables independientes
+y <- log(base2$lnwage)
+x <- base2[, c("totalHoursWorked", "age", "age2", "maxprimariaincompleta", "maxprimariacompleta","maxsecundariaincompleta", "maxsecundariacompleta", "maxterciaria", "formal", "sex","estrato2", "estrato3", "estrato4", "estrato5", "estrato6", "fulltime","empleadopublico", "empleadodomestico", "jornalero","trabajadores2a5", "trabajadores6a10", "trabajadores11a50", "mas50trabajadores")]
+
+# Inicializa un contenedor para almacenar las medidas de desempeño
+results <- numeric(nrow(base2))
+
+# Realiza la LOOCV de manera iterativa
+for (i in 1:nrow(base2)) {
+  # Asigna la observación i como el conjunto de validación
+  x_val <- x[i, ]
+  y_val <- y[i]
+  
+  # Asigna las n-1 observaciones restantes como el conjunto de entrenamiento
+  x_train <- x[-i, ]
+  y_train <- y[-i]
+  
+  # Entrena el modelo de regresión lineal en el conjunto de entrenamiento
+  fit <- lm(y_train ~ x_train)
+  
+  # Realiza la predicción para la observación en el conjunto de validación
+  y_pred <- predict(fit, newdata = x_val)
+  
+  # Calcula la medida de desempeño para esta iteración
+  results[i] <- mean((y_pred - y_val)^2)
+}
+
+# Calcula la media de las n medidas de desempeño
+mean(results)
