@@ -596,14 +596,14 @@ model5<-lm(lnwage~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:
            ,data=train)
 test$model5<-predict(model5,newdata = test)
 
-with(test,mean((ing_hr-model5)^2))
+with(test,mean((lnwage-model5)^2))
 
 ## comparar los MSE 
-mse1<-with(test,round(mean((ing_hr-model1)^2),2))
-mse2<-with(test,round(mean((ing_hr-model2)^2),2))
-mse3<-with(test,round(mean((ing_hr-model3)^2),2))
-mse4<-with(test,round(mean((ing_hr-model4)^2),2))
-mse5<-with(test,round(mean((ing_hr-model5)^2),2))
+mse1<-with(test,round(mean((lnwage-model1)^2),2))
+mse2<-with(test,round(mean((lnwage-model2)^2),2))
+mse3<-with(test,round(mean((lnwage-model3)^2),2))
+mse4<-with(test,round(mean((lnwage-model4)^2),2))
+mse5<-with(test,round(mean((lnwage-model5)^2),2))
 
 tabla<-data.frame(mse1,mse2,mse3,mse4,mse5)
 tabla
