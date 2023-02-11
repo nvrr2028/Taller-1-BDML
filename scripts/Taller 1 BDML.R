@@ -643,57 +643,24 @@ tabla
 ##d.
 #M
 set.seed(20183)
-n <- numeric(nrow(base2)) # obtiene el número de filas (es decir, el tamaño) de la base de datos
-index <- rep(1, n-1) # crea un vector de unos de tamaño n
-
-splt <- lapply(1:n-1, function(ind) base2[index[[ind]], ])
+n <- numeric(nrow(base2))
+index <- rep(1, nrow(base2)) 
+splt <- lapply(1:nrow(base2), function(ind) base2[index[[ind]], ])
 
 p_load(data.table)
 
-m1 <- lapply(1:n-1, function(ii) lm(model1, data = rbindlist(splt[-ii]))) 
+m1 <- lapply(1:nrow(base2), function(ii) lm(model4, data = rbindlist(splt[-ii]))) 
 
-p1 <- lapply(1:n-1, function(ii) data.frame(predict(m1[[ii]], newdata = rbindlist(splt[ii]))))
+p1 <- lapply(1:nrow(base2), function(ii) data.frame(predict(m1[[ii]], newdata = rbindlist(splt[ii]))))
 
-for (i in 1:n-1) {
+for (i in 1:nrow(base2)) {
   colnames(p1[[i]])<-"yhat" #change the name
   splt[[i]] <- cbind(splt[[i]], p1[[i]])
   
 }
 
-m1MSE2_n <- lapply(1:n, function(ii) mean((splt[[ii]]$lnwage - splt[[ii]]$yhat)^2))
+m1MSE2_n <- lapply(1:nrow(base2), function(ii) mean((splt[[ii]]$lnwage - splt[[ii]]$yhat)^2))
 m1MSE2_n
 
 
-################ otro
-# Carga los datos
-data(base2)
 
-# Asigna la variable dependiente y las variables independientes
-y <- log(base2$lnwage)
-x <- base2[, c("totalHoursWorked", "age", "age2", "maxprimariaincompleta", "maxprimariacompleta","maxsecundariaincompleta", "maxsecundariacompleta", "maxterciaria", "formal", "sex","estrato2", "estrato3", "estrato4", "estrato5", "estrato6", "fulltime","empleadopublico", "empleadodomestico", "jornalero","trabajadores2a5", "trabajadores6a10", "trabajadores11a50", "mas50trabajadores")]
-
-# Inicializa un contenedor para almacenar las medidas de desempeño
-results <- numeric(nrow(base2))
-
-# Realiza la LOOCV de manera iterativa
-for (i in 1:nrow(base2)) {
-  # Asigna la observación i como el conjunto de validación
-  x_val <- x[i, ]
-  y_val <- y[i]
-  
-  # Asigna las n-1 observaciones restantes como el conjunto de entrenamiento
-  x_train <- x[-i, ]
-  y_train <- y[-i]
-  
-  # Entrena el modelo de regresión lineal en el conjunto de entrenamiento
-  fit <- lm(y_train ~ x_train)
-  
-  # Realiza la predicción para la observación en el conjunto de validación
-  y_pred <- predict(fit, newdata = x_val)
-  
-  # Calcula la medida de desempeño para esta iteración
-  results[i] <- mean((y_pred - y_val)^2)
-}
-
-# Calcula la media de las n medidas de desempeño
-mean(results)
