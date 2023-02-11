@@ -622,28 +622,58 @@ tabla
 
 ##d.         
 
-#Make this example reproducible
 set.seed(123)
+N <- 9891
 
-# Specify the number of folds for
-# 5-fold cross-validation
-K <- 5
-
-#Split the data set into 5 folds
-index <- split(1:nrow(matchdata), 1: K)
+index <- split(1:nrow(base2), 1: N)
 
 lapply(index,length)
 
-splt <- lapply(1:K, function(ind) matchdata[index[[ind]], ])
+splt <- lapply(1:N, function(ind) base2[index[[ind]], ])
 
 p_load(data.table)
 
-m1 <- lapply(1:K, function(ii) lm(price~bedrooms, data = rbindlist(splt[-ii]))) 
+m1 <- lapply(1:N, function(ii) lm(model4, data = rbindlist(splt[-ii]))) 
 
-p1 <- lapply(1:K, function(ii) data.frame(predict(m1[[ii]], newdata = rbindlist(splt[ii]))))
+p1 <- lapply(1:N, function(ii) data.frame(predict(m1[[ii]], newdata = rbindlist(splt[ii]))))
 
-for (i in 1:K) {
+for (i in 1:N) {
   colnames(p1[[i]])<-"yhat" #change the name
   splt[[i]] <- cbind(splt[[i]], p1[[i]])
   
 }
+
+MSE2_Nmodel4 <- lapply(1:N, function(ii) mean((splt[[ii]]$lnwage - splt[[ii]]$yhat)^2))
+MSE2_N
+
+mean(unlist(MSE2_N))
+
+
+set.seed(123)
+N <- 9891
+
+index <- split(1:nrow(base2), 1: N)
+
+lapply(index,length)
+
+splt <- lapply(1:N, function(ind) base2[index[[ind]], ])
+
+p_load(data.table)
+
+m2 <- lapply(1:N, function(ii) lm(model5, data = rbindlist(splt[-ii]))) 
+
+p2 <- lapply(1:N, function(ii) data.frame(predict(m2[[ii]], newdata = rbindlist(splt[ii]))))
+
+for (i in 1:N) {
+  colnames(p2[[i]])<-"yhat" #change the name
+  splt[[i]] <- cbind(splt[[i]], p2[[i]])
+  
+}
+
+MSE2_Nmodel5 <- lapply(1:N, function(ii) mean((splt[[ii]]$lnwage - splt[[ii]]$yhat)^2))
+MSE2_Nmodel5
+
+mean(unlist(MSE2_Nmodel5))
+
+
+db$MSE[db$model=="model5"]
