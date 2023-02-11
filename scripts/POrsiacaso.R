@@ -114,7 +114,7 @@ stargazer(base2, header=FALSE, type='latex',title="Variable")
 ### Mapa de correlaciones 
 corrm <- base2
 colnames(corrm) <- c("Ingreso por hora", "Máximo nivel de educación", "Edad", "Total de horas trabajadas", "Formal",
-                    "Sexo", "Estrato", "Tipo de contrato (fulltime)", "Tipo de ocupación", "Tamaño de la firma")
+                     "Sexo", "Estrato", "Tipo de contrato (fulltime)", "Tipo de ocupación", "Tamaño de la firma")
 res2 <- rcorr(as.matrix(corrm)) # Coeficientes de correlación
 
 corrplot(res2$r, type="upper", order="hclust", 
@@ -273,7 +273,7 @@ base2 %>%
 # Gráfico
 ggplot(base2) + 
   geom_bar(mapping = aes(as.factor(fulltime), ing_hr, group=as.factor(formal), fill=as.factor(formal)), 
-               position = "dodge", stat = "summary", fun = "median") + 
+           position = "dodge", stat = "summary", fun = "median") + 
   labs(x = "Tipo de contrato (tiempo completo)", y = "Ingreso por hora (pesos)") +
   scale_x_discrete(labels=c("0"='No', "1"='Si')) +
   scale_fill_manual(values = c("0"="#ffc425" , "1"="#00aedb") , label = c("0"="Informal" , "1"="Formal")) +
@@ -325,8 +325,8 @@ ggplot(base2) +
 
 #Primero creamos la variable edad al cuadrado y el logaritmo del salario
 base3  <- base %>%
-                    mutate(age2=age^2 , 
-                          lnwage=log(ing_hr))
+  mutate(age2=age^2 , 
+         lnwage=log(ing_hr))
 
 #Procedemos a hacer la regresión
 regw_age2<- lm(lnwage~ age+ age2, data = base3)
@@ -345,16 +345,18 @@ regw_age2<- lm(lnwage~ age+ age2, data = base3)
 stargazer(regw_age2, type = "text")
 
 age_earnings<- ggplot(base3, 
-       aes(x = age, 
-           y = lnwage)) +
+                      aes(x = age, 
+                          y = lnwage)) +
   geom_point(color= "steelblue") +
   geom_smooth(method = "lm", 
               formula = y ~ poly(x, 2), 
               color = "indianred3")
 
+<<<<<<< HEAD
 # Big data y Machine learning
 
-
+=======
+  >>>>>>> 04a904ad0c666553861e58e02d2f6de27ca64650
 # Bootstrap para construir los intervalos de confianza
 mod_peakage <- function(base3,index){
   set.seed(9876)
@@ -591,7 +593,7 @@ stargazer(model4, type = "text")
 
 model5<-lm(ing_hr~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+fulltime:totalHoursWorked+
              estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE)+maxprimariaincompleta:totalHoursWorked+maxprimariacompleta:totalHoursWorked+maxsecundariaincompleta:totalHoursWorked+
-           maxsecundariacompleta:totalHoursWorked+maxterciaria:totalHoursWorked
+             maxsecundariacompleta:totalHoursWorked+maxterciaria:totalHoursWorked
            ,data=train)
 test$model5<-predict(model5,newdata = test)
 
