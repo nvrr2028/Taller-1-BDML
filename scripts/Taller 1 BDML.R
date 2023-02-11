@@ -526,7 +526,10 @@ stargazer(reg4hr1, reg4hr2)
 # ------------------------------------------------------------------------------------ #
 # 5. Predicting earnings
 # ------------------------------------------------------------------------------------ #
-base4<-base2 %>% mutate(female)
+base2 <- base2 %>%
+  mutate(female=ifelse(sex==1, 0, 1))
+head(base2)
+
 ##a.
 set.seed(10101)
 #use 70% of the dataset as a training set and 30% as a test set.
@@ -537,7 +540,6 @@ train  <- base2[sample, ]
 test   <- base2[!sample, ]
 
 ##b. 
-##b.
 
 ## Modelo ln(w) en función de la edad y edad cuadrática ##
 regw_age2train <- lm(lnwage ~ age+ age2, data=train)
