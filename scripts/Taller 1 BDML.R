@@ -518,20 +518,14 @@ test$model2<-predict(model2,newdata = test)
 with(test,mean((lnwage-model2)^2))
 
 ## Tercer modelo ##
-###Desglosamos la variable categórica maxEducLevel, que contiene 9 categorías de niveles educativos.
 
-##Ninguna observación en la muestra reportó cursar prescolar como máximo nivel educativo ni respondió "N/A" para esta pregunta, por lo que no incluimos las variables maxprescolar ni maxeducnoaplica
-
-model3<-lm(lnwage~totalHoursWorked+age+sex+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+formal,data=train)
+model3<-lm(lnwage~totalHoursWorked+age+sex+maxEducLevel+formal,data=train)
 test$model3<-predict(model3,newdata = test)
 with(test,mean((lnwage-model3)^2))
 ## Cuarto modelo ##
 
-model4<-lm(lnwage~totalHoursWorked+age+age^2+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+
-             maxsecundariacompleta+maxterciaria+formal+sex+
-             estrato2+estrato3+estrato4+estrato5+estrato6+fulltime+
-             empleadopublico+empleadodomestico+jornalero+
-             trabajadores2a5+trabajadores6a10+trabajadores11a50+mas50trabajadores,data=train)
+model4<-lm(lnwage~totalHoursWorked+age+age^2+maxEducLevel+formal+sex+
+             estrato1+relab+sizeFirm,data=train)
 
 test$model4<-predict(model4,newdata = test)
 
@@ -541,14 +535,10 @@ stargazer(model4, type = "text")
 
 
 ## Quinto modelo ##
-model5<-lm(lnwage~poly(age,2,raw=TRUE):sex:formal:maxprimariacompleta+poly(age,2,raw=TRUE):sex:formal:maxterciaria+poly(age,2,raw=TRUE):sex:formal:maxprimariaincompleta+
-             poly(age,2,raw=TRUE):sex:formal:estrato2+poly(age,2,raw=TRUE):sex:formal:estrato3+poly(age,2,raw=TRUE):sex:formal:estrato4+
-           poly(age,2,raw=TRUE):sex:formal:estrato5+poly(age,2,raw=TRUE):sex:formal:estrato6+poly(totalHoursWorked,5,raw=TRUE):sex:formal:maxterciaria+
-             poly(totalHoursWorked,5,raw=TRUE):sex:formal:maxprimariacompleta+poly(totalHoursWorked,5,raw=TRUE):sex:formal:estrato2+ 
-           poly(totalHoursWorked,5,raw=TRUE):sex:formal:estrato6+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+
-             maxsecundariacompleta+maxterciaria+formal+sex+estrato2+estrato3+estrato4+estrato5+estrato6+fulltime+
-             empleadopublico+empleadodomestico+jornalero+trabajadores2a5+trabajadores6a10+trabajadores11a50+mas50trabajadores,data=train)
-            
+model5<-lm(lnwage~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+fulltime:totalHoursWorked+
+             estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE)+maxprimariaincompleta:totalHoursWorked+maxprimariacompleta:totalHoursWorked+maxsecundariaincompleta:totalHoursWorked+
+             maxsecundariacompleta:totalHoursWorked+maxterciaria:totalHoursWorked
+           ,data=train)
 test$model5<-predict(model5,newdata = test)
 
 with(test,mean((lnwage-model5)^2))
