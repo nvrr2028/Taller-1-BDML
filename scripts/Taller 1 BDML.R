@@ -120,6 +120,10 @@ res2 <- rcorr(as.matrix(corrm)) # Coeficientes de correlación
 corrplot(res2$r, type="upper", order="hclust", 
          p.mat = res2$p, sig.level = 0.05, insig = "blank", tl.col="black") # Las correlaciones no signitificativas se eliminan
 
+<<<<<<< HEAD
+
+## estrato2+estrato3+estrato4+estrato5+estrato6
+=======
 ## Transformación de variables categoricas a dummy ##
 
 base2  <- base2 %>%
@@ -131,86 +135,12 @@ base2 %>%
   group_by(maxEducLevel) %>%
   summarise(n = n())
 
+base2$maxEducLevel <- as.factor(base2$maxEducLevel)
+base2$relab <- as.factor(base4$relab) 
+base2$estrato1<- as.factor(base2$estrato1)
+base2$sizeFirm<- as.factor(base2$sizeFirm)
 
-base2 <- base2 %>% 
-  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxprimariaincompleta=ifelse(maxEducLevel==3, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxprimariacompleta=ifelse(maxEducLevel==4, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxsecundariaincompleta=ifelse(maxEducLevel==5, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxsecundariacompleta=ifelse(maxEducLevel==6, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
-
-## +maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria
-#### Cambio de sizefirm #### Base independiente
-base2 %>%
-  group_by(sizeFirm) %>%
-  summarise(n = n())
-
-base2 <- base2 %>% 
-  mutate(trabajadores2a5=ifelse(sizeFirm==2, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(trabajadores6a10=ifelse(sizeFirm==3, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(trabajadores11a50=ifelse(sizeFirm==4, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(mas50trabajadores=ifelse(sizeFirm==5, 1, 0))
-
-## trabajadores2a5+trabajadores6a10+trabajadores11a50+mas50trabajadores
-
-#### Cambio de relab ####
-base2 %>%
-  group_by(relab) %>%
-  summarise(n = n())
-
-base2 <- base2 %>%
-  mutate(empleadopublico=ifelse(relab==2,1,0))
-base2 <- base2 %>% 
-  mutate(empleadodomestico=ifelse(relab==3,1,0))
-base2 <- base2 %>%
-  mutate(cuentapropia=ifelse(relab==4,1,0))
-base2 <- base2 %>%
-  mutate(empleador=ifelse(relab==5,1,0))
-base2 <- base2 %>% 
-  mutate(trabajadorfamiliarsinremuneracion=ifelse(relab==6,1,0))
-base2 <- base2 %>% 
-  mutate(trabajadorempresasinremuneracion=ifelse(relab==7,1,0))
-base2 <- base2 %>% 
-  mutate(jornalero=ifelse(relab==8,1,0))
-
-## empleadopublico+empleadodomestico+jornalero
-
-#### cambio de estrato1 #### Base estrato1
-
-base2 <- base2 %>% 
-  mutate(estrato2=ifelse(estrato1==2, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(estrato3=ifelse(estrato1==3, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(estrato4=ifelse(estrato1==4, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(estrato5=ifelse(estrato1==5, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(estrato6=ifelse(estrato1==6, 1, 0))
-
-
-## estrato2+estrato3+estrato4+estrato5+estrato6
+>>>>>>> 62c90a57c5fcf10333130e0da2d2a34449efe2e3
 
 ### Análisis por variable
 # maxEducLevel - max. education level attained
@@ -641,44 +571,15 @@ tabla<-data.frame(msew_age2,msew_fem,mse1,mse2,mse3,mse4,mse5)
 tabla
 
 ##d.
-#M
-set.seed(20183)
-n <- numeric(nrow(base2))
-index <- rep(1, nrow(base2)) 
-splt <- lapply(1:nrow(base2), function(ind) base2[index[[ind]], ])
+library (boot)
+glm.fit=glm(model4 ,data=base2)
+cv.err =cv.glm(base2 ,glm.fit)
+cv.err$delta
 
-p_load(data.table)
+glm.fit=glm(model5 ,data=base2)
+cv.err =cv.glm(base2 ,glm.fit)
+cv.err$delta
 
-m1 <- lapply(1:nrow(base2), function(ii) lm(model4, data = rbindlist(splt[-ii]))) 
-
-p1 <- lapply(1:nrow(base2), function(ii) data.frame(predict(m1[[ii]], newdata = rbindlist(splt[ii]))))
-
-for (i in 1:nrow(base2)) {
-  colnames(p1[[i]])<-"yhat" #change the name
-  splt[[i]] <- cbind(splt[[i]], p1[[i]])
-  
-}
-
-m1MSE2_n <- lapply(1:nrow(base2), function(ii) mean((splt[[ii]]$lnwage - splt[[ii]]$yhat)^2))
-m1MSE2_n
-
-###########################
-library(data.table)
-
-m1 <- lapply(1:nrow(base2), function(ii) {
-  splt <- base2[-ii, ]
-  lm(model4, data = splt)
-})
-
-p1 <- lapply(1:nrow(base2), function(ii) {
-  splt <- base2[ii, ]
-  data.frame(yhat = predict(m1[[ii]], newdata = splt))
-})
-
-m1MSE2_n <- sapply(1:nrow(base2), function(ii) {
-  splt <- cbind(base2[ii, ], p1[[ii]])
-  mean((splt$lnwage - splt$yhat)^2)
-})
 
 
 
