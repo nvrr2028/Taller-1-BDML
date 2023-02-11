@@ -26,6 +26,8 @@ sapply(list.of.packages, require, character.only = TRUE)
 # 1. Descripción del problema
 # ------------------------------------------------------------------------------------ #
 
+# An income predicting model could potentially assist in  agging cases of fraud that 
+# could lead to thereduction of the gap.
 # An income prediction model can help identify vulnerable individuals and families
 # that may need further assistance.
 
@@ -91,9 +93,7 @@ base <- data %>%
 #### Variables explicativas (X)
 #       maxEducLevel - max. education level attained
 #       age - edad
-#       oficio - occupation
 #       formal - =1 if formal (social security); =0 otherwise
-#       Informal - =1 if informal (social security); =0 otherwiseinformal
 #       Sex - =1 male, =0 female
 #       estrato1 - Estrato de energía para las 13 a.M., y sextil de icv para otras cabeceras y rest
 #       full-time - Trabaja más de 40 horas a la semana, construida a partir de hoursWorkUsual (usual weekly hours worked - principal occ.)
@@ -157,6 +157,14 @@ ggplot(base2) +
            position = "dodge", stat = "summary", fun = "median") + 
   labs(x = "Género", y = "Ingreso por hora (pesos)") +
   scale_x_discrete(labels = function(x) str_wrap(labels1, width = 6)) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(legend.title = element_blank())
+
+## totalHoursWorked: total hours worked previous week
+# Gráfico
+ggplot(base2) + 
+  geom_point(mapping = aes(totalHoursWorked , ing_hr, color=totalHoursWorked)) + 
+  labs(x = "Horas totales trabajadas", y = "Ingreso por hora (pesos)") +
   theme(plot.title = element_text(hjust = 0.5)) +
   theme(legend.title = element_blank())
 
