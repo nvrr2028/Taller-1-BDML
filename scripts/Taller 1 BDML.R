@@ -544,9 +544,8 @@ base2 <- base2 %>%
 
 ##a.
 set.seed(10101)
-#use 70% of the dataset as a training set and 30% as a test set. La base tiene variables que nos interesan
+#use 70% of the dataset as a training set and 30% as a test set.
 
-#use 70% of the dataset as a training set and 30% as a test set. La base1 tiene variables que nos interesan
 sample <- sample(c(TRUE, FALSE), nrow(base2), replace=TRUE, prob=c(0.7,0.3))
 
 train  <- base2[sample, ]
@@ -599,13 +598,15 @@ test$model5<-predict(model5,newdata = test)
 with(test,mean((lnwage-model5)^2))
 
 ## comparar los MSE 
+msew_age2 <-with(test,round(mean((lnwage-reg4a_hrtrain )^2),2))
+msew_fem <-with(test,round(mean((lnwage-reg4a_hrtrain )^2),2))
 mse1<-with(test,round(mean((lnwage-model1)^2),2))
 mse2<-with(test,round(mean((lnwage-model2)^2),2))
 mse3<-with(test,round(mean((lnwage-model3)^2),2))
 mse4<-with(test,round(mean((lnwage-model4)^2),2))
 mse5<-with(test,round(mean((lnwage-model5)^2),2))
 
-tabla<-data.frame(mse1,mse2,mse3,mse4,mse5)
+tabla<-data.frame(msew_age2, msew_fem, mse1,mse2,mse3,mse4,mse5)
 tabla
 
 ##d.         
