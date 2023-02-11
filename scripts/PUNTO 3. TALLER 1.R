@@ -140,10 +140,13 @@ lower = peakwage - qnorm(alpha/2) * se
 upper = peakwage + qnorm(alpha/2) * se
 
 #4. Agregamos el CI al gráfico
+
 age_earnings + 
   geom_point(aes(x=peakage, y=peakwage)) +
-  geom_segment(aes(y=peakwage, x= peakwage, yend= upper , xend= lower),
+  geom_segment(aes(y=lower, x= peakage, yend= upper , xend= peakage, colour="#F23DB3"),
                arrow= arrow(angle=90, ends= 'both', 
-                            length = unit(0.1, 'cm'))) +
+                            length = unit(0.3, 'cm'))) +
   labs(x= "Edad", y= "Ingresos", title= "Trayectoria de los ingresos a lo largo de la Edad")
+
+
 

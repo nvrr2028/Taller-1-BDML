@@ -419,11 +419,10 @@ upper = peakwage + qnorm(alpha/2) * se
 #4. Agregamos el CI al gráfico
 age_earnings + 
   geom_point(aes(x=peakage, y=peakwage)) +
-  geom_segment(aes(y=peakwage, x= peakwage, yend= upper , xend= lower),
+  geom_segment(aes(y=lower, x= peakage, yend= upper , xend= peakage),
                arrow= arrow(angle=90, ends= 'both', 
-                            length = unit(0.1, 'cm'))) +
+                            length = unit(0.2, 'cm'))) +
   labs(x= "Edad", y= "Ingresos", title= "Trayectoria de los ingresos a lo largo de la Edad")
-
 
 # ------------------------------------------------------------------------------------ #
 # 4. The gender earnings GAP
