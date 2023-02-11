@@ -685,11 +685,14 @@ tabla
 library (boot)
 glm.fit=glm(model4 ,data=base2)
 cv.err =cv.glm(base2 ,glm.fit)
-cv.err$delta
+LOOCVm4<-cv.err$delta
 
 glm.fit=glm(model5 ,data=base2)
 cv.err =cv.glm(base2 ,glm.fit)
 cv.err$delta
+LOOCVm5<-cv.err$delta
+
+
 
 
 
