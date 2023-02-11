@@ -558,7 +558,6 @@ sample <- sample(c(TRUE, FALSE), nrow(base2), replace=TRUE, prob=c(0.7,0.3))
 train  <- base2[sample, ]
 test   <- base2[!sample, ]
 
-##b. 
 ##b.
 
 estrato2+estrato3+estrato4+estrato5+estrato6
