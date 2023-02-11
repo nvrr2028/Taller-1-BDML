@@ -436,28 +436,28 @@ age_earnings +
 # Base de datos punto 4
 base4 <- base %>%
   select(ing_hr, y_ingLab_m, maxEducLevel, age, formal, sex, fulltime, relab) %>% # Seleccionar variables de interés
-  mutate(female=ifelse(sex==1, 0, 1), age2=age^2, ing_hr=log(ing_hr), ing_m=log(y_ingLab_m)) %>%
-  drop_na()
+  mutate(female=ifelse(sex==1, 0, 1), age2=age^2, ing_hr=log(ing_hr), ing_m=log(y_ingLab_m)) %>% # Transformaciones adicionales a las variables
+  drop_na() #Eliminando NAs
 
-# a. Begin by estimating and discussing the unconditional wage gap:
+### a. Begin by estimating and discussing the unconditional wage gap:
 set.seed(1111)
 
-reg4a_m <- lm(ing_m ~ female, data=base4)
-reg4a_hr <- lm(ing_hr ~ female, data=base4)
+reg4a_m <- lm(ing_m ~ female, data=base4) # Ingreso mensual ~ Female
+reg4a_hr <- lm(ing_hr ~ female, data=base4) # Ingreso por hora ~ Female
 
-# b. Equal Pay for Equal Work?
+### b. Equal Pay for Equal Work?
 head(base4)
 base4$maxEducLevel <- as.factor(base4$maxEducLevel) # Educación como dummy 
-base4$relab <- as.factor(base4$relab) # Tipo de ocupación como dummy como dummy 
-reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)
-reg4c_hr <- lm(ing_hr  ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)
+base4$relab <- as.factor(base4$relab) # Tipo de ocupación como dummy
+reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
+reg4c_hr <- lm(ing_hr  ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso por hora ~ Female + Other explanatory variables
 
 stargazer(reg4a_hr, reg4c_hr, type="text")
 
-# FWL --------------
+## FWL --------------
 p_load("tidyverse","rio","stargazer")
 
-#### Ingreso mensual
+# Ingreso mensual
 #1. Residuals of female~controles
 base4<-base4 %>% mutate(femaleResidF=lm(female~ maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)$residuals) #Residuals of female~controles 
 #2. Residuals of ingreso~controles (sin female) 
@@ -467,24 +467,34 @@ reg4_m_fwl<-lm(wageResidF~femaleResidF, base4) #esta ya nos arroja el coef que q
 
 stargazer(reg4c_m, reg4_m_fwl, type="text")
 
-# Bootstrap para coeficientes 
+### Bootstrap para coeficientes -------------
+
+# Regresión original
 eta.fn_m1 <-function(data,index){
   coefm1 <- coef(lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data = data, subset = index)) # Regresión original
   return(coefm1[2])
 }
-
 reg4m1 <- boot(base4, eta.fn_m1, R = 1000) # boot(datos, estadístico deseado, repeticiones)
 
+# Regresión FWL
 eta.fn_m2 <-function(data,index){
   coefm2 <- coef(lm(wageResidF~femaleResidF, data = data, subset = index)) # Regresión FWL
   return(coefm2[2])
 }
-
 reg4m2 <- boot(base4, eta.fn_m2, R = 1000) # boot(datos, estadístico deseado, repeticiones)
 
 # Corrección de errores estándar 
-se_m1 <- sqrt(diag(vcov(reg4_m_fwl))*(9889/9877))[2]
-se_m2 <- sqrt(diag(vcov(reg4c_m)))[2]
+se_m1 <- sqrt(diag(vcov(reg4c_m)))[2]
+se_m2 <- sqrt(diag(vcov(reg4_m_fwl))*(9889/9877))[2]
+
+## Resumen del bootstrap
+boot_ing_m <- matrix(NA, ncol=3, nrow = 4)
+boot_ing_m[, 1] <- c("", "Coeficiente", "Sesgo", "Errores estándar")
+boot_ing_m[1, ] <- c("", "Modelo original", "Modelo FWL")
+boot_ing_m[2, 2:3] <- c(reg4m1$t0, reg4m2$t0)
+boot_ing_m[3, 2:3] <- c(0.0004555001, -0.0003207414)
+boot_ing_m[4, 2:3] <- c(se_m1, se_m2)
+stargazer(boot_ing_m)
 
 # Ingreso por horas
 #1. Residuals of female~controles
@@ -501,7 +511,6 @@ eta.fn_hr1 <-function(data,index){
   coefhr1 <- coef(lm(ing_hr ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data = data, subset = index)) # Regresión original
   return(coefhr1[2])
 }
-
 reg4hr1 <- boot(base4, eta.fn_hr1, R = 1000) # boot(datos, estadístico deseado, repeticiones)
 
 eta.fn_hr2 <-function(data,index){
@@ -512,10 +521,17 @@ eta.fn_hr2 <-function(data,index){
 reg4hr2 <- boot(base4, eta.fn_hr2, R = 1000) # boot(datos, estadístico deseado, repeticiones)
 
 # Corrección de errores estándar 
-se_m1 <- sqrt(diag(vcov(reg4_hr_fwl))*(9889/9877))[2]
-se_m2 <- sqrt(diag(vcov(reg4c_hr)))[2]
+se_hr1 <- sqrt(diag(vcov(reg4c_hr)))[2]                 # Error estándar ajustado para la regresión FWL
+se_hr2 <- sqrt(diag(vcov(reg4_hr_fwl))*(9889/9877))[2]  # Error estándar regresión original
 
-stargazer(reg4hr1, reg4hr2)
+## Resumen del bootstrap
+boot_ing_hr <- matrix(NA, ncol=3, nrow = 4)
+boot_ing_hr[, 1] <- c("", "Coeficiente", "Sesgo", "Errores estándar")
+boot_ing_hr[1, ] <- c("", "Modelo original", "Modelo FWL")
+boot_ing_hr[2, 2:3] <- c(reg4hr1$t0, reg4hr2$t0)
+boot_ing_hr[3, 2:3] <- c(0.0005964313, -0.0004338537)
+boot_ing_hr[4, 2:3] <- c(se_hr1, se_hr2)
+stargazer(boot_ing_hr)
 
 # c. Predicted age-wage profile
 
@@ -582,7 +598,7 @@ test$model3<-predict(model3,newdata = test)
 with(test,mean((lnwage-model3)^2))
 ## Cuarto modelo ##
 
-model4<-lm(lnwage~totalHoursWorked+age+age^2+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+
+model4<-lm(ing_hr~totalHoursWorked+age+age^2+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+
              maxsecundariacompleta+maxterciaria+formal+sex+
              estrato2+estrato3+estrato4+estrato5+estrato6+fulltime+
              empleadopublico+empleadodomestico+jornalero+
@@ -597,12 +613,12 @@ stargazer(model4, type = "text")
 
 ## Quinto modelo ##
 model5<-lm(lnwage~poly(age,2,raw=TRUE):sex:formal:maxprimariacompleta+poly(age,2,raw=TRUE):sex:formal:maxterciaria+poly(age,2,raw=TRUE):sex:formal:maxprimariaincompleta+
-             poly(age,2,raw=TRUE):sex:formal:estrato2+poly(age,2,raw=TRUE):sex:formal:estrato3+poly(age,2,raw=TRUE):sex:formal:estrato4+
+             poly(age,2,raw=TRUE):sex:formal:estrato2+poly(age,2,raw=TRUE):sex:formal:estrato3+poly(age,2,raw=TRUE):sex:formal:estrato4
            poly(age,2,raw=TRUE):sex:formal:estrato5+poly(age,2,raw=TRUE):sex:formal:estrato6+poly(totalHoursWorked,5,raw=TRUE):sex:formal:maxterciaria+
              poly(totalHoursWorked,5,raw=TRUE):sex:formal:maxprimariacompleta+poly(totalHoursWorked,5,raw=TRUE):sex:formal:estrato2+ 
            poly(totalHoursWorked,5,raw=TRUE):sex:formal:estrato6+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+
              maxsecundariacompleta+maxterciaria+formal+sex+estrato2+estrato3+estrato4+estrato5+estrato6+fulltime+
-             empleadopublico+empleadodomestico+jornalero+trabajadores2a5+trabajadores6a10+trabajadores11a50+mas50trabajadores, data=train)
+             empleadopublico+empleadodomestico+jornalero+trabajadores2a5+trabajadores6a10+trabajadores11a50+mas50trabajadores,data=train)
             
 test$model5<-predict(model5,newdata = test)
 
@@ -622,58 +638,3 @@ tabla
 
 ##d.         
 
-set.seed(123)
-N <- 9891
-
-index <- split(1:nrow(base2), 1: N)
-
-lapply(index,length)
-
-splt <- lapply(1:N, function(ind) base2[index[[ind]], ])
-
-p_load(data.table)
-
-m1 <- lapply(1:N, function(ii) lm(model4, data = rbindlist(splt[-ii]))) 
-
-p1 <- lapply(1:N, function(ii) data.frame(predict(m1[[ii]], newdata = rbindlist(splt[ii]))))
-
-for (i in 1:N) {
-  colnames(p1[[i]])<-"yhat" #change the name
-  splt[[i]] <- cbind(splt[[i]], p1[[i]])
-  
-}
-
-MSE2_Nmodel4 <- lapply(1:N, function(ii) mean((splt[[ii]]$lnwage - splt[[ii]]$yhat)^2))
-MSE2_N
-
-mean(unlist(MSE2_N))
-
-
-set.seed(123)
-N <- 9891
-
-index <- split(1:nrow(base2), 1: N)
-
-lapply(index,length)
-
-splt <- lapply(1:N, function(ind) base2[index[[ind]], ])
-
-p_load(data.table)
-
-m2 <- lapply(1:N, function(ii) lm(model5, data = rbindlist(splt[-ii]))) 
-
-p2 <- lapply(1:N, function(ii) data.frame(predict(m2[[ii]], newdata = rbindlist(splt[ii]))))
-
-for (i in 1:N) {
-  colnames(p2[[i]])<-"yhat" #change the name
-  splt[[i]] <- cbind(splt[[i]], p2[[i]])
-  
-}
-
-MSE2_Nmodel5 <- lapply(1:N, function(ii) mean((splt[[ii]]$lnwage - splt[[ii]]$yhat)^2))
-MSE2_Nmodel5
-
-mean(unlist(MSE2_Nmodel5))
-
-
-db$MSE[db$model=="model5"]
