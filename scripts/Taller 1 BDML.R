@@ -359,8 +359,12 @@ age_earnings +
 # Base de datos punto 4
 base4 <- base %>%
   select(ing_hr, y_ingLab_m, maxEducLevel, age, formal, sex, fulltime, relab) %>% # Seleccionar variables de interés
-  mutate(female=ifelse(sex==1, 0, 1), age2=age^2, ing_hr=log(ing_hr), ing_m=log(y_ingLab_m)) %>% # Transformaciones adicionales a las variables
+  mutate(female=ifelse(sex==1, 0, 1),sex=ifelse(sex==1, 0, 1), age2=age^2, ing_hr=log(ing_hr), ing_m=log(y_ingLab_m)) %>% # Transformaciones adicionales a las variables
   drop_na() #Eliminando NAs
+
+base4$maxEducLevel <- as.factor(base4$maxEducLevel) # Educación como dummy 
+base4$relab <- as.factor(base4$relab) # Tipo de ocupación como dummy
+base4$sex <- as.factor(base4$sex)
 
 ### a. Begin by estimating and discussing the unconditional wage gap:
 set.seed(1111)
@@ -375,6 +379,8 @@ head(base4)
 base4$maxEducLevel <- as.factor(base4$maxEducLevel) # Educación como dummy 
 base4$relab <- as.factor(base4$relab)               # Tipo de ocupación como dummy
 reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)     # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
+reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
+
 reg4c_hr <- lm(ing_hr  ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso por hora ~ Female + Other explanatory variables
 
 stargazer(reg4a_hr, reg4c_hr, type="text")
@@ -407,6 +413,8 @@ eta.fn_m2 <-function(data,index){
   return(coefm2[2])
 }
 reg4m2 <- boot(base4, eta.fn_m2, R = 1000) # boot(datos, estadístico deseado, repeticiones)
+
+femalecoef<- reg4m2$t0
 
 # Corrección de errores estándar 
 se_m1 <- sqrt(diag(vcov(reg4c_m)))[2]
@@ -460,8 +468,123 @@ stargazer(boot_ing_hr, type="text")
 
 # c. Predicted age-wage profile
 
+age_wage_sex<- ggplot(base4, 
+            aes(x = age, 
+                y = ing_m, color= sex)) +
+  geom_point(size=2, color="#69b3a2AA") +
+  geom_smooth(method = "lm", 
+              formula = y ~ poly(x, 2), aes(group=sex))+
+  scale_color_manual(labels = c("Masculino", "Femenino"), values = c("steelblue", "indianred3")) +
+  labs(x= "Edad", y= "Ingresos", title= "Trayectoria de los ingresos a lo largo de la edad por sexo", color= "Sexo")
+
+# Bootstrap para construir los intervalos de confianza
+
+#Función para peakage
+mod_peakage_sex <- function(base4,index){
+  set.seed(9876)
+  #1. creamos un data frame con el summary de nuestra regresión
+  coef <- lm(ing_m ~ female + age + age2, data=base4, subset = index)$coefficients
+  
+  #2. extraemos los betas a escalares para plantear la fórmula
+  beta0 = coef[1]
+  beta1 = coef[2]
+  beta2 = coef[3]
+  beta3 = coef[4]
+  
+  #3. calcular peak age
+  peak_age = -(beta2/(2*beta3))
+  
+  return(peak_age)
+}
+
+mod_peakage(base4, 1: nrow(base4)) #comprobando que sale igual :)
+
+#Corremos el Bootstrap
+set.seed(9876)
+results_peakage_sex <- boot(base4, mod_peakage_sex, R=1000)
+results_peakage_sex 
+
+#peak wage
+mod_peakwage_fem <- function(base4,index){
+  set.seed(9876)
+  #1. creamos un data frame con el summary de nuestra regresión
+  coef <- lm(ing_m ~ female + age + age2, data=base4, subset = index)$coefficients
+  
+  #2. extraemos los betas a escalares para plantear la fórmula
+  beta0 = coef[1]
+  beta1 = coef[2]
+  beta2 = coef[3]
+  beta3 = coef[4]
+  
+  #3. calcular peak age
+  peak_age = -(beta2/(2*beta3))
+  
+  #4. calcular peak wage
+  wage_pa_fem = beta0 + beta1*femalecoef+ beta2*peakage + beta3*(peakage)^2
+  #wage_pa_men = beta0 + beta2*peakage + beta3*(peakage)^2
+  
+  return(wage_pa_fem)
+}
+
+results_peakwage_fem <- boot(base4, mod_peakwage_fem, R=1000)
+results_peakwage_fem
+
+#antes necesito extraer los estadísticos a values
+peakwage_fem<- results_peakwage_fem$t0
+bias_fem <- colMeans(results_peakwage_fem$t)-results_peakwage_fem$t0
+se_fem <- apply(results_peakwage_fem$t,2,sd)
+
+#construimos los valores para el CI
+alpha = 0.05 # 95% Confidence Interval
+lower = peakwage_fem - qnorm(alpha/2) * se_fem
+upper = peakwage_fem + qnorm(alpha/2) * se_fem
+
+#peak wage- men
+mod_peakwage_m <- function(base4,index){
+  set.seed(9876)
+  #1. creamos un data frame con el summary de nuestra regresión
+  coef <- lm(ing_m ~ female + age + age2, data=base4, subset = index)$coefficients
+  
+  #2. extraemos los betas a escalares para plantear la fórmula
+  beta0 = coef[1]
+  beta1 = coef[2]
+  beta2 = coef[3]
+  beta3 = coef[4]
+  
+  #3. calcular peak age
+  peak_age = -(beta2/(2*beta3))
+  
+  #4. calcular peak wage
+  wage_pa_men = beta0 + beta2*peakage + beta3*(peakage)^2
+  
+  return(wage_pa_men)
+}
+
+results_peakwage_m <- boot(base4, mod_peakwage_m, R=1000)
+results_peakwage_m
+
+#antes necesito extraer los estadísticos a values
+peakwage_m<- results_peakwage_m$t0
+bias_m <- colMeans(results_peakwage_m$t)-results_peakwage_m$t0
+se_m <- apply(results_peakwage_m$t,2,sd)
+
+#construimos los valores para el CI
+alpha = 0.05 # 95% Confidence Interval
+lower_m = peakwage_m - qnorm(alpha/2) * se_m
+upper_m = peakwage_m + qnorm(alpha/2) * se_m
 
 
+#4. Agregamos el CI al gráfico
+age_wage_sex + 
+  geom_point(aes(x=peakage, y=peakwage_fem)) +
+  geom_point(aes(x=peakage, y=peakwage_m)) +
+  geom_segment(aes(y=lower, x= peakage, yend= upper , xend= peakage),
+               arrow= arrow(angle=90, ends= 'both', 
+                            length = unit(0.2, 'cm'))) +
+  geom_segment(aes(y=lower_m, x= peakage, yend= upper_m , xend= peakage),
+               arrow= arrow(angle=90, ends= 'both', 
+                            length = unit(0.2, 'cm'))) +
+  labs(x= "Edad", y= "Ingresos", title= "Trayectoria de los ingresos a lo largo de la Edad")
 
 
 # ------------------------------------------------------------------------------------ #
