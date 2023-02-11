@@ -262,6 +262,10 @@ base2 %>%
   group_by(estrato1) %>%
   summarise(n = n())
 
+base2 %>% 
+  group_by(estrato1) %>% 
+  summarise('median_ing' = round(median(ing_hr), digits = 0)) 
+
 # Gráfico
 ggplot(base2) + 
   geom_boxplot(mapping = aes(as.factor(estrato1) , ing_hr, fill=as.factor(estrato1))) + 
