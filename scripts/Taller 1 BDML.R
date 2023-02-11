@@ -525,29 +525,6 @@ stargazer(reg4hr1, reg4hr2)
 # 5. Predicting earnings
 # ------------------------------------------------------------------------------------ #
 
-<<<<<<< HEAD
-=======
-base2 <- base2 %>% 
-  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxprimariaincompleta=ifelse(maxEducLevel==3, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxprimariacompleta=ifelse(maxEducLevel==4, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxsecundariaincompleta=ifelse(maxEducLevel==5, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxsecundariacompleta=ifelse(maxEducLevel==6, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
-
-base2 <- base2 %>% 
-  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
-
 ##a.
 set.seed(10101)
 #use 70% of the dataset as a training set and 30% as a test set.
@@ -557,12 +534,8 @@ sample <- sample(c(TRUE, FALSE), nrow(base2), replace=TRUE, prob=c(0.7,0.3))
 train  <- base2[sample, ]
 test   <- base2[!sample, ]
 
+##b. 
 ##b.
-
-estrato2+estrato3+estrato4+estrato5+estrato6
-empleadopublico+empleadodomestico+jornalero
-trabajadores2a5+trabajadores6a10+trabajadores11a50+mas50trabajadores
-+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria
 
 ## Modelo ln(w) en función de la edad y edad cuadrática ##
 regw_age2train <- lm(lnwage ~ age+ age2, data=train)
@@ -609,11 +582,7 @@ model4<-lm(ing_hr~totalHoursWorked+age+age^2+maxprimariaincompleta+maxprimariaco
              maxsecundariacompleta+maxterciaria+formal+sex+
              estrato2+estrato3+estrato4+estrato5+estrato6+fulltime+
              empleadopublico+empleadodomestico+jornalero+
-             trabajadores2a5+trabajadores6a10+trabajadores11a50+mas50trabajadores
-           ,data=train)
-
-model4<-lm(lnwage~totalHoursWorked+age+age^2+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+
-             formal+sex+estrato1+fulltime+relab+sizeFirm,data=train)
+             trabajadores2a5+trabajadores6a10+trabajadores11a50+mas50trabajadores,data=train)
 
 test$model4<-predict(model4,newdata = test)
 
@@ -639,15 +608,15 @@ test$model5<-predict(model5,newdata = test)
 with(test,mean((lnwage-model5)^2))
 
 ## comparar los MSE 
-msew_age2 <-with(test,round(mean((lnwage-reg4a_hrtrain )^2),2))
-msew_fem <-with(test,round(mean((lnwage-reg4a_hrtrain )^2),2))
+msew_age2<-with(test,round(mean((lnwage-reg4a_hrtrain )^2),2))
+msew_fem<-with(test,round(mean((lnwage-reg4a_hrtrain )^2),2))
 mse1<-with(test,round(mean((lnwage-model1)^2),2))
 mse2<-with(test,round(mean((lnwage-model2)^2),2))
 mse3<-with(test,round(mean((lnwage-model3)^2),2))
 mse4<-with(test,round(mean((lnwage-model4)^2),2))
 mse5<-with(test,round(mean((lnwage-model5)^2),2))
 
-tabla<-data.frame(msew_age2, msew_fem, mse1,mse2,mse3,mse4,mse5)
+tabla<-data.frame(msew_age2,msew_fem,mse1,mse2,mse3,mse4,mse5)
 tabla
 
 ##d.         
