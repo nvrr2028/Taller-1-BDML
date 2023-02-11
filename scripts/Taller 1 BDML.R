@@ -534,6 +534,15 @@ with(test,mean((lnwage-model4)^2))
 stargazer(model4, type = "text")
 
 
+##c.
+
+##
+ggplot(df, aes(x=predict(model4), y=lnwage)) + 
+  geom_point() +
+  geom_abline()
+  labs(x='Predicted Values', y='Actual Values', title='Predicted vs. Actual Values')
+
+
 ## Quinto modelo ##
 model5<-lm(lnwage~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+fulltime:totalHoursWorked+
              estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE)+maxprimariaincompleta:totalHoursWorked+maxprimariacompleta:totalHoursWorked+maxsecundariaincompleta:totalHoursWorked+
