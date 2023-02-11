@@ -541,6 +541,7 @@ base2 <- base2 %>%
 
 base2 <- base2 %>% 
   mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
+
 ##a.
 set.seed(10101)
 #use 70% of the dataset as a training set and 30% as a test set. La base tiene variables que nos interesan
@@ -554,7 +555,7 @@ test   <- base2[!sample, ]
 ##b. 
 
 ## Primer modelo ##
-model1<-lm(ing_hr~1,data=train)
+model1<-lm(lnwage~1,data=train)
 stargazer(model1, type="text")
 
 test$model1<-predict(model1,newdata = test)
@@ -563,7 +564,7 @@ with(test,mean((ing_hr-model1)^2))
 
 ## Segundo modelo ##
 
-model2<-lm(ing_hr~totalHoursWorked,data=train)
+model2<-lm(lnwage~totalHoursWorked,data=train)
 test$model2<-predict(model2,newdata = test)
 
 with(test,mean((ing_hr-model2)^2))
@@ -573,23 +574,23 @@ with(test,mean((ing_hr-model2)^2))
 
 ##Ninguna observación en la muestra reportó cursar prescolar como máximo nivel educativo ni respondió "N/A" para esta pregunta, por lo que no incluimos las variables maxprescolar ni maxeducnoaplica
 
-model3<-lm(ing_hr~totalHoursWorked+age+sex+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+formal,data=train)
+model3<-lm(lnwage~totalHoursWorked+age+sex+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+formal,data=train)
 test$model3<-predict(model3,newdata = test)
 with(test,mean((ing_hr-model3)^2))
 ## Cuarto modelo ##
 
-model4<-lm(ing_hr~totalHoursWorked+age+age^2+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+
+model4<-lm(lnwage~totalHoursWorked+age+age^2+maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria+
              formal+sex+estrato1+fulltime+relab+sizeFirm,data=train)
 test$model4<-predict(model4,newdata = test)
 
-with(test,mean((ing_hr-model4)^2))
+with(test,mean((lnwage-model4)^2))
 
 stargazer(model4, type = "text")
 
 
 ## Quinto modelo ##
 
-model5<-lm(ing_hr~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+fulltime:totalHoursWorked+
+model5<-lm(lnwage~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+fulltime:totalHoursWorked+
              estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE)+maxprimariaincompleta:totalHoursWorked+maxprimariacompleta:totalHoursWorked+maxsecundariaincompleta:totalHoursWorked+
            maxsecundariacompleta:totalHoursWorked+maxterciaria:totalHoursWorked
            ,data=train)
