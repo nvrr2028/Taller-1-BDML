@@ -109,7 +109,7 @@ base2 <- base %>%
   drop_na()
 any(is.na(base2)) # No hay datos vacíos
 
-stargazer(base2, header=FALSE, type='latex',title="Variable")
+stargazer(base2, header=FALSE, type='text',title="Variable")
 
 ### Mapa de correlaciones 
 corrm <- base2
@@ -118,9 +118,7 @@ colnames(corrm) <- c("Ingreso por hora", "Máximo nivel de educación", "Edad", 
 res2 <- rcorr(as.matrix(corrm)) # Coeficientes de correlación
 
 corrplot(res2$r, type="upper", order="hclust", 
-         p.mat = res2$P, sig.level = 0.05, insig = "blank", tl.col="black") # Las correlaciones no signitificativas se eliminan
-
-#######ERRRORRRR
+         p.mat = res2$p, sig.level = 0.05, insig = "blank", tl.col="black") # Las correlaciones no signitificativas se eliminan
 
 ## Trasnformación de variables categoricas a dummy ##
 
