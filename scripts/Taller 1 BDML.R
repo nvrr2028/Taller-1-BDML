@@ -156,10 +156,6 @@ ggplot(data = base2, mapping = aes(x = age , y = ing_hr)) +
   geom_point(col = "green3" , size = 0.8) +
   labs(x = "Edad del encuestado", y = "Ingreso por hora (pesos)") 
 
-ggplot(data = base2 ,
-       mapping = aes(x = age , y = ing_hr , group=as.factor(formal) , color=as.factor(formal))) +
-  geom_point()
-
 ggplot(data = base2 , mapping = aes(x = totalHoursWorked , y = ing_hr)) +
   geom_point(col = "indianred3" , size = 0.8) + 
   labs(x = "Total de horas trabajadas por semana", y = "Ingreso por hora (pesos)")
@@ -525,7 +521,7 @@ with(test,mean((lnwage-model3)^2))
 ## Cuarto modelo ##
 
 model4<-lm(lnwage~totalHoursWorked+age+age^2+maxEducLevel+formal+sex+
-             estrato1+relab+sizeFirm,data=train)
+             estrato1+relab+sizeFirm+totalHoursWorked+sex:totalHoursWorked+age:totalHoursWorked,data=train)
 
 test$model4<-predict(model4,newdata = test)
 
@@ -544,22 +540,20 @@ ggplot(df, aes(x=predict(model4), y=lnwage)) +
 
 
 ## Quinto modelo ##
-model5<-lm(lnwage~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+fulltime:totalHoursWorked+
-             estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE)+maxprimariaincompleta:totalHoursWorked+maxprimariacompleta:totalHoursWorked+maxsecundariaincompleta:totalHoursWorked+
-             maxsecundariacompleta:totalHoursWorked+maxterciaria:totalHoursWorked
-           ,data=train)
+  model5<-lm(lnwage~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+poly(fulltime,6,raw=TRUE):maxEducLevel:sex:age+
+             poly(estrato1,5,raw=TRUE):maxEducLevel:sex:age+maxEducLevel+estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE),data=train)
 test$model5<-predict(model5,newdata = test)
 
 with(test,mean((lnwage-model5)^2))
 
 ## comparar los MSE 
-msew_age2<-with(test,round(mean((lnwage-reg4a_hrtrain )^2),2))
-msew_fem<-with(test,round(mean((lnwage-reg4a_hrtrain )^2),2))
-mse1<-with(test,round(mean((lnwage-model1)^2),2))
-mse2<-with(test,round(mean((lnwage-model2)^2),2))
-mse3<-with(test,round(mean((lnwage-model3)^2),2))
-mse4<-with(test,round(mean((lnwage-model4)^2),2))
-mse5<-with(test,round(mean((lnwage-model5)^2),2))
+msew_age2<-with(test,round(mean((lnwage-reg4a_hrtrain )^2),4))
+msew_fem<-with(test,round(mean((lnwage-reg4a_hrtrain )^2),4))
+mse1<-with(test,round(mean((lnwage-model1)^2),4))
+mse2<-with(test,round(mean((lnwage-model2)^2),4))
+mse3<-with(test,round(mean((lnwage-model3)^2),4))
+mse4<-with(test,round(mean((lnwage-model4)^2),4))
+mse5<-with(test,round(mean((lnwage-model5)^2),4))
 
 tabla<-data.frame(msew_age2,msew_fem,mse1,mse2,mse3,mse4,mse5)
 tabla
