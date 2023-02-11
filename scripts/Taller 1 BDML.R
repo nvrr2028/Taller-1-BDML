@@ -641,44 +641,11 @@ tabla<-data.frame(msew_age2,msew_fem,mse1,mse2,mse3,mse4,mse5)
 tabla
 
 ##d.
-#M
-set.seed(20183)
-n <- numeric(nrow(base2))
-index <- rep(1, nrow(base2)) 
-splt <- lapply(1:nrow(base2), function(ind) base2[index[[ind]], ])
+library (boot)
+glm.fit=glm(model4 ,data=base2)
+cv.err =cv.glm(base2 ,glm.fit)
+cv.err$delta
 
-p_load(data.table)
-
-m1 <- lapply(1:nrow(base2), function(ii) lm(model4, data = rbindlist(splt[-ii]))) 
-
-p1 <- lapply(1:nrow(base2), function(ii) data.frame(predict(m1[[ii]], newdata = rbindlist(splt[ii]))))
-
-for (i in 1:nrow(base2)) {
-  colnames(p1[[i]])<-"yhat" #change the name
-  splt[[i]] <- cbind(splt[[i]], p1[[i]])
-  
-}
-
-m1MSE2_n <- lapply(1:nrow(base2), function(ii) mean((splt[[ii]]$lnwage - splt[[ii]]$yhat)^2))
-m1MSE2_n
-
-###########################
-library(data.table)
-
-m1 <- lapply(1:nrow(base2), function(ii) {
-  splt <- base2[-ii, ]
-  lm(model4, data = splt)
-})
-
-p1 <- lapply(1:nrow(base2), function(ii) {
-  splt <- base2[ii, ]
-  data.frame(yhat = predict(m1[[ii]], newdata = splt))
-})
-
-m1MSE2_n <- sapply(1:nrow(base2), function(ii) {
-  splt <- cbind(base2[ii, ], p1[[ii]])
-  mean((splt$lnwage - splt$yhat)^2)
-})
-
-
-
+glm.fit=glm(model5 ,data=base2)
+cv.err =cv.glm(base2 ,glm.fit)
+cv.err$delta
