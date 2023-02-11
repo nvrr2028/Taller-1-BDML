@@ -375,6 +375,10 @@ reg4a_hr <- lm(ing_hr ~ female, data=base4) # Ingreso por hora ~ Female
 stargazer(reg4a_m, reg4a_hr, type="latex")
 
 ### b. Equal Pay for Equal Work?
+
+
+reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
+
 head(base4)
 base4$maxEducLevel <- as.factor(base4$maxEducLevel) # Educación como dummy 
 base4$relab <- as.factor(base4$relab)               # Tipo de ocupación como dummy
@@ -483,21 +487,23 @@ age_wage_sex<- ggplot(base4,
 mod_peakage_sex <- function(base4,index){
   set.seed(9876)
   #1. creamos un data frame con el summary de nuestra regresión
-  coef <- lm(ing_m ~ female + age + age2, data=base4, subset = index)$coefficients
+  coef <- lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, subset = index)$coefficients
   
   #2. extraemos los betas a escalares para plantear la fórmula
-  beta0 = coef[1]
-  beta1 = coef[2]
-  beta2 = coef[3]
-  beta3 = coef[4]
+  beta0 = coef[1] #intercepto
+  beta1 = coef[2] #female
+  beta2 = coef[3] #maxeduc
+  beta3 = coef[8] #age
+  beta4 = coef[9] #age2
+  beta5 = coef[10] #formal
+  beta6 = coef[11] #fulltime
+  beta7 = coef[11] #relab
   
   #3. calcular peak age
-  peak_age = -(beta2/(2*beta3))
+  peak_age = -(beta3/(2*beta4))
   
   return(peak_age)
 }
-
-mod_peakage(base4, 1: nrow(base4)) #comprobando que sale igual :)
 
 #Corremos el Bootstrap
 set.seed(9876)
@@ -508,20 +514,24 @@ results_peakage_sex
 mod_peakwage_fem <- function(base4,index){
   set.seed(9876)
   #1. creamos un data frame con el summary de nuestra regresión
-  coef <- lm(ing_m ~ female + age + age2, data=base4, subset = index)$coefficients
+  coef <- lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, subset = index)$coefficients
   
   #2. extraemos los betas a escalares para plantear la fórmula
-  beta0 = coef[1]
-  beta1 = coef[2]
-  beta2 = coef[3]
-  beta3 = coef[4]
+  beta0 = coef[1] #intercepto
+  beta1 = coef[2] #female
+  beta2 = coef[3] #maxeduc
+  beta3 = coef[8] #age
+  beta4 = coef[9] #age2
+  beta5 = coef[10] #formal
+  beta6 = coef[11] #fulltime
+  beta7 = coef[11] #relab
+  
   
   #3. calcular peak age
-  peak_age = -(beta2/(2*beta3))
+  peak_age = -(beta3/(2*beta4))
   
   #4. calcular peak wage
-  wage_pa_fem = beta0 + beta1*femalecoef+ beta2*peakage + beta3*(peakage)^2
-  #wage_pa_men = beta0 + beta2*peakage + beta3*(peakage)^2
+  wage_pa_fem = beta0 + beta1*femalecoef+ beta2*1 + beta3*(peakage)+ beta4*(peakage)^2+ beta5*1+ beta6 +beta7
   
   return(wage_pa_fem)
 }
@@ -543,19 +553,23 @@ upper = peakwage_fem + qnorm(alpha/2) * se_fem
 mod_peakwage_m <- function(base4,index){
   set.seed(9876)
   #1. creamos un data frame con el summary de nuestra regresión
-  coef <- lm(ing_m ~ female + age + age2, data=base4, subset = index)$coefficients
+  coef <- lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4, subset = index)$coefficients
   
   #2. extraemos los betas a escalares para plantear la fórmula
-  beta0 = coef[1]
-  beta1 = coef[2]
-  beta2 = coef[3]
-  beta3 = coef[4]
+  beta0 = coef[1] #intercepto
+  beta1 = coef[2] #female
+  beta2 = coef[3] #maxeduc
+  beta3 = coef[8] #age
+  beta4 = coef[9] #age2
+  beta5 = coef[10] #formal
+  beta6 = coef[11] #fulltime
+  beta7 = coef[11] #relab
   
   #3. calcular peak age
-  peak_age = -(beta2/(2*beta3))
+  peak_age = -(beta3/(2*beta4))
   
   #4. calcular peak wage
-  wage_pa_men = beta0 + beta2*peakage + beta3*(peakage)^2
+  wage_pa_men = beta0 + beta2*1 + beta3*(peakage)+ beta4*(peakage)^2+ beta5*1+ beta6 +beta7
   
   return(wage_pa_men)
 }
