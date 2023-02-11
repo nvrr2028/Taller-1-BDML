@@ -122,8 +122,95 @@ res2 <- rcorr(as.matrix(corrm)) # Coeficientes de correlación
 corrplot(res2$r, type="upper", order="hclust", 
          p.mat = res2$P, sig.level = 0.05, insig = "blank", tl.col="black") # Las correlaciones no signitificativas se eliminan
 
-### Análisis por variable
+## Trasnformación de variables categoricas a dummy ##
 
+#### Cambio de MaxEducLevel ####
+base2 %>%
+  group_by(maxEducLevel) %>%
+  summarise(n = n())
+
+
+base2 <- base2 %>% 
+  mutate(maxprescolar=ifelse(maxEducLevel == 2, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxprimariaincompleta=ifelse(maxEducLevel==3, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxprimariacompleta=ifelse(maxEducLevel==4, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxsecundariaincompleta=ifelse(maxEducLevel==5, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxsecundariacompleta=ifelse(maxEducLevel==6, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(maxterciaria=ifelse(maxEducLevel==7, 1, 0))
+
+## +maxprimariaincompleta+maxprimariacompleta+maxsecundariaincompleta+maxsecundariacompleta+maxterciaria
+#### Cambio de sizefirm #### Base independiente
+base2 %>%
+  group_by(sizeFirm) %>%
+  summarise(n = n())
+
+base2 <- base2 %>% 
+  mutate(trabajadores2a5=ifelse(sizeFirm==2, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(trabajadores6a10=ifelse(sizeFirm==3, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(trabajadores11a50=ifelse(sizeFirm==4, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(mas50trabajadores=ifelse(sizeFirm==5, 1, 0))
+
+## trabajadores2a5+trabajadores6a10+trabajadores11a50+mas50trabajadores
+
+#### Cambio de relab ####
+base2 %>%
+  group_by(relab) %>%
+  summarise(n = n())
+
+base2 <- base2 %>%
+  mutate(empleadopublico=ifelse(relab==2,1,0))
+base2 <- base2 %>% 
+  mutate(empleadodomestico=ifelse(relab==3,1,0))
+base2 <- base2 %>%
+  mutate(cuentapropia=ifelse(relab==4,1,0))
+base2 <- base2 %>%
+  mutate(empleador=ifelse(relab==5,1,0))
+base2 <- base2 %>% 
+  mutate(trabajadorfamiliarsinremuneracion=ifelse(relab==6,1,0))
+base2 <- base2 %>% 
+  mutate(trabajadorempresasinremuneracion=ifelse(relab==7,1,0))
+base2 <- base2 %>% 
+  mutate(jornalero=ifelse(relab==8,1,0))
+
+## empleadopublico+empleadodomestico+jornalero
+
+#### cambio de estrato1 #### Base estrato1
+
+base2 <- base2 %>% 
+  mutate(estrato2=ifelse(estrato1==2, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(estrato3=ifelse(estrato1==3, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(estrato4=ifelse(estrato1==4, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(estrato5=ifelse(estrato1==5, 1, 0))
+
+base2 <- base2 %>% 
+  mutate(estrato6=ifelse(estrato1==6, 1, 0))
+
+
+## estrato2+estrato3+estrato4+estrato5+estrato6
+
+### Análisis por variable
 # maxEducLevel - max. education level attained
 summary(base2$maxEducLevel)
 box_plot <- ggplot(data=base2 , mapping = aes(as.factor(maxEducLevel) , ing_hr)) + 
@@ -269,7 +356,6 @@ age_earnings<- ggplot(base3,
 
 # Big data y Machine learning
 
-```r
 # Bootstrap para construir los intervalos de confianza
 
 #Función para peakage
@@ -523,7 +609,6 @@ test$model5<-predict(model5,newdata = test)
 
 with(test,mean((ing_hr-model5)^2))
 
-##c.
 ## comparar los MSE 
 mse1<-with(test,round(mean((ing_hr-model1)^2),2))
 mse2<-with(test,round(mean((ing_hr-model2)^2),2))
@@ -533,5 +618,6 @@ mse5<-with(test,round(mean((ing_hr-model5)^2),2))
 
 tabla<-data.frame(mse1,mse2,mse3,mse4,mse5)
 tabla
-           
+
+##d.         
 
