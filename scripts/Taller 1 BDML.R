@@ -305,9 +305,37 @@ mod_peakage(base3, 1: nrow(base3)) #comprobando que sale igual :)
 #Corremos el Bootstrap
 set.seed(9876)
 results_peakage <- boot(base3, mod_peakage, R=1000)
+<<<<<<< HEAD
 results_peakage 
 
 #ahora construyamos los confidence intervals 
+=======
+results_peakage
+peakage<- results_peakage$t0
+
+#Calculemos peak wage
+mod_peakwage <- function(base3,index){
+  set.seed(9876)
+  #1. creamos un data frame con el summary de nuestra regresión
+  coef <- lm(lnwage~ age+ age2, data = base3, subset = index)$coefficients
+  
+  #2. extraemos los betas a escalares para plantear la fórmula
+  beta0 = coef[1]
+  beta1 = coef[2]
+  beta2 = coef[3]
+  
+  #3. calcular peak age
+  peak_age = -(beta1/(2*beta2))
+  
+  #4. calcular peak wage
+  wage_pa = beta0 + beta1*peakage + beta2*(peakage)^2
+  
+  return(wage_pa)
+}
+
+results_peakwage <- boot(base3, mod_peakwage, R=1000)
+results_peakwage
+>>>>>>> 4bc4d0666e1b719a1ce9b9827c9e95326e8a51b1
 
 #antes necesito extraer los estadísticos a values
 peakage<- results_peakage$t0
@@ -379,9 +407,6 @@ stargazer(reg4a_m, reg4a_hr, type="latex")
 
 reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
 
-head(base4)
-base4$maxEducLevel <- as.factor(base4$maxEducLevel) # Educación como dummy 
-base4$relab <- as.factor(base4$relab)               # Tipo de ocupación como dummy
 reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)     # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
 reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
 
@@ -390,7 +415,7 @@ reg4c_hr <- lm(ing_hr  ~ female + maxEducLevel + age + age2+ formal + fulltime +
 stargazer(reg4a_hr, reg4c_hr, type="text")
 
 ## FWL --------------
-p_load("tidyverse","rio","stargazer")
+#p_load("tidyverse","rio","stargazer")
 
 # Ingreso mensual
 #1. Residuals of female~controles
@@ -487,7 +512,7 @@ age_wage_sex<- ggplot(base4,
 mod_peakage_sex <- function(base4,index){
   set.seed(9876)
   #1. creamos un data frame con el summary de nuestra regresión
-  coef <- lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, subset = index)$coefficients
+  coef <- lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, base4, subset = index)$coefficients
   
   #2. extraemos los betas a escalares para plantear la fórmula
   beta0 = coef[1] #intercepto
@@ -514,7 +539,7 @@ results_peakage_sex
 mod_peakwage_fem <- function(base4,index){
   set.seed(9876)
   #1. creamos un data frame con el summary de nuestra regresión
-  coef <- lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, subset = index)$coefficients
+  coef <- lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, base4, subset = index)$coefficients
   
   #2. extraemos los betas a escalares para plantear la fórmula
   beta0 = coef[1] #intercepto
@@ -703,7 +728,7 @@ ggplot(test$base2, aes(x=msemod4, fill=sex)) +
   geom_histogram(fill="white", color="black")+
   geom_vline(aes(xintercept=mean(msemod4)), color="blue",
              linetype="dashed")+
-  labs(title="Histograma del error de predicción del modelo con menor MSE",x="Error de predicción", y = "Frecuencia")+
+  labs(title="Histograma del RMSE",x="Error de predicción", y = "Frecuencia")+
   theme_classic()
 
 
