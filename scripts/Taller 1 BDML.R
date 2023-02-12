@@ -682,8 +682,8 @@ with(test,mean((lnwage-model4)^2))
 stargazer(model4, type = "text")
 
 ## Quinto modelo ##
-model5<-lm(lnwage~poly(age,2,raw=TRUE)+log(poly(maxEducLevel,7,raw=TRUE)):sex:formal:relab:sizeFirm+
-             poly(fulltime,8,raw=TRUE):maxEducLevel+poly(totalHoursWorked,6,raw=TRUE):sex:age+poly(relab,4,raw=TRUE):sex:age+estrato1,data=train)
+model5<-lm(lnwage~poly(age,2,raw=TRUE)+maxEducLevel:sex:formal+sizeFirm+relab+
+             poly(fulltime,2,raw=TRUE):maxEducLevel+poly(totalHoursWorked,2,raw=TRUE):sex:age+poly(relab,4,raw=TRUE):sex:age+estrato1,data=train)
 test$model5<-predict(model5,newdata = test)
 
 with(test,mean((lnwage-model5)^2))
