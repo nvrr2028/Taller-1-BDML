@@ -522,6 +522,7 @@ with(test,mean((lnwage-model2)^2))
 model3<-lm(lnwage~totalHoursWorked+age+sex+maxEducLevel+formal,data=train)
 test$model3<-predict(model3,newdata = test)
 with(test,mean((lnwage-model3)^2))
+
 ## Cuarto modelo ##
 
 model4<-lm(lnwage~totalHoursWorked+age+age^2+maxEducLevel+formal+sex+
@@ -532,16 +533,6 @@ test$model4<-predict(model4,newdata = test)
 with(test,mean((lnwage-model4)^2))
 
 stargazer(model4, type = "text")
-
-
-##c.
-
-##
-ggplot(df, aes(x=predict(model4), y=lnwage)) + 
-  geom_point() +
-  geom_abline()
-  labs(x='Predicted Values', y='Actual Values', title='Predicted vs. Actual Values')
-
 
 ## Quinto modelo ##
 model5<-lm(lnwage~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+fulltime:totalHoursWorked+
@@ -561,8 +552,55 @@ mse3<-with(test,round(mean((lnwage-model3)^2),2))
 mse4<-with(test,round(mean((lnwage-model4)^2),2))
 mse5<-with(test,round(mean((lnwage-model5)^2),2))
 
-tabla<-data.frame(msew_age2,msew_fem,mse1,mse2,mse3,mse4,mse5)
-tabla
+comparacionmse<-data.frame(msew_age2,msew_fem,mse1,mse2,mse3,mse4, mse5)
+
+##c.
+
+test$mod4predic <- predict(model4, newdata=test) #
+testmod4predic <- test$mod4predic
+
+testlnwage <- test$lnwage
+
+ggplot(test$base2, aes(x = testmod4predic, y = testlnwage)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1, color = "green") +
+  labs(x = "Valores predichos de log(ingreso)", y = "Valores observados de log(ingreso)")
+
+test$regw_age2train<-predict(regw_age2train,newdata = test)
+
+msemod4 = (testlnwage-testmod4predic)^2
+hist(msemod4)
+
+ggplot(test$base2, aes(x=msemod4)) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white")+
+  geom_density(alpha=.2, fill="#FF6666")
+
+
+
+msemod44<-with(test,round(mean((testlnwage-testmod4predic)^2),2))
+msemod44
+
+
+
+
+base5 <- base2 >%> mutate(model4predichos=predict(model4, newdata = base2))
+<- predict(model4)
+
+base2 >%> mutate(model4pred=predict(model4, newdata = base2))
+
+mod4predic=predict(model4, newdata=test)
+length(mod4predic) <- length(base2$lnwage)
+plot()
+
+print(mod4predic)
+
+
+
+head(base2)
+
+
+
+length(mod4predic)
 
 ##d.
 library (boot)
