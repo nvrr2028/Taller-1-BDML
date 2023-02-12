@@ -250,7 +250,7 @@ results_peakage_sex <- boot(base4, mod_peakage_sex, R=1000)
 results_peakage_sex 
 
 #EDAD MÁXIMO
-peakage<- results_peakwage_m$t0
+peakage<- results_peakage_sex$t0
 
 #2. peak wage
 mod_peakwage_fem <- function(base4,index){
