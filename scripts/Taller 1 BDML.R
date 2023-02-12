@@ -685,51 +685,27 @@ comparacionmse<-data.frame(msew_age2,msew_fem,mse1,mse2,mse3,mse4, mse5)
 
 ##c.
 
-test$mod4predic <- predict(model4, newdata=test) #
-testmod4predic <- test$mod4predic
+test$mod4predic <- predict(model4, newdata=test) 
+testmod4predic <- test$mod4predic #guardamos las predicciones del modelo 4, que tiene menor MSE, sobre las observaciones de prueba
 
-testlnwage <- test$lnwage
+testlnwage <- test$lnwage #guardamos las observaciones de prueba
 
+#Gráfica para comparar valores observados y predichos. Si no hubiese error de predicción, todos los puntos estarían sobre la recta
 ggplot(test$base2, aes(x = testmod4predic, y = testlnwage)) +
   geom_point() +
   geom_abline(intercept = 0, slope = 1, color = "green") +
   labs(x = "Valores predichos de log(ingreso)", y = "Valores observados de log(ingreso)")
 
-test$regw_age2train<-predict(regw_age2train,newdata = test)
+# Calculamos los errores de predicción cuadráticos para realizar un histograma
+msemod4 = (testlnwage-testmod4predic)
 
-msemod4 = (testlnwage-testmod4predic)^2
-hist(msemod4)
+ggplot(test$base2, aes(x=msemod4, fill=sex)) +
+  geom_histogram(fill="white", color="black")+
+  geom_vline(aes(xintercept=mean(msemod4)), color="blue",
+             linetype="dashed")+
+  labs(title="Histograma del error de predicción del modelo con menor MSE",x="Error de predicción", y = "Frecuencia")+
+  theme_classic()
 
-ggplot(test$base2, aes(x=msemod4)) + 
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  geom_density(alpha=.2, fill="#FF6666")
-
-
-
-msemod44<-with(test,round(mean((testlnwage-testmod4predic)^2),2))
-msemod44
-
-
-
-
-base5 <- base2 >%> mutate(model4predichos=predict(model4, newdata = base2))
-<- predict(model4)
-
-base2 >%> mutate(model4pred=predict(model4, newdata = base2))
-
-mod4predic=predict(model4, newdata=test)
-length(mod4predic) <- length(base2$lnwage)
-plot()
-
-print(mod4predic)
-
-
-
-head(base2)
-
-
-
-length(mod4predic)
 
 ##d.
 library (boot)
