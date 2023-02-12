@@ -682,11 +682,13 @@ with(test,mean((lnwage-model4)^2))
 stargazer(model4, type = "text")
 
 ## Quinto modelo ##
-  model5<-lm(lnwage~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+poly(fulltime,6,raw=TRUE):maxEducLevel:sex:age+
-             poly(estrato1,5,raw=TRUE):maxEducLevel:sex:age+maxEducLevel+estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE),data=train)
+model5<-lm(lnwage~poly(age,2,raw=TRUE)+log(poly(maxEducLevel,7,raw=TRUE)):sex:formal:relab:sizeFirm+
+             poly(fulltime,8,raw=TRUE):maxEducLevel+poly(totalHoursWorked,6,raw=TRUE):sex:age+poly(relab,4,raw=TRUE):sex:age+estrato1,data=train)
 test$model5<-predict(model5,newdata = test)
 
 with(test,mean((lnwage-model5)^2))
+
+stargazer(model5, type = "latex")
 
 ## comparar los MSE 
 msew_age2<-with(test,round(mean((lnwage-reg4a_hrtrain )^2),4))
@@ -698,6 +700,8 @@ mse4<-with(test,round(mean((lnwage-model4)^2),4))
 mse5<-with(test,round(mean((lnwage-model5)^2),4))
 
 comparacionmse<-data.frame(msew_age2,msew_fem,mse1,mse2,mse3,mse4, mse5)
+comparacionmse
+stargazer(model1,model2,model3,model4, type="latex")
 
 ##c.
 
@@ -736,6 +740,7 @@ LOOCVm5<-cv.err$delta
 
 tabla2<-data.frame(LOOCVm4,LOOCVm5)
 tabla2
+stargazer(tabla2, type="latex")
 
 
 
