@@ -696,7 +696,7 @@ ggplot(test$base2, aes(x = testmod4predic, y = testlnwage)) +
   geom_abline(intercept = 0, slope = 1, color = "green") +
   labs(x = "Valores predichos de log(ingreso)", y = "Valores observados de log(ingreso)")
 
-# Calculamos los errores de predicción cuadráticos para realizar un histograma
+# Calculamos los errores de predicción para realizar un histograma
 msemod4 = (testlnwage-testmod4predic)
 
 ggplot(test$base2, aes(x=msemod4, fill=sex)) +
