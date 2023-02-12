@@ -306,8 +306,8 @@ mod_peakage(base3, 1: nrow(base3)) #comprobando que sale igual :)
 #Corremos el Bootstrap
 set.seed(9876)
 results_peakage <- boot(base3, mod_peakage, R=1000)
-results_peakage 
-
+results_peakage
+peakage<- results_peakage$t0
 
 #Calculemos peak wage
 mod_peakwage <- function(base3,index){
@@ -391,16 +391,13 @@ stargazer(reg4a_m, reg4a_hr, type="latex")
 
 reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
 
-head(base4)
-base4$maxEducLevel <- as.factor(base4$maxEducLevel) # Educación como dummy 
-base4$relab <- as.factor(base4$relab)               # Tipo de ocupación como dummy
 reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)     # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
 reg4c_hr <- lm(ing_hr  ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso por hora ~ Female + Other explanatory variables
 
 stargazer(reg4a_hr, reg4c_hr, type="text")
 
 ## FWL --------------
-p_load("tidyverse","rio","stargazer")
+#p_load("tidyverse","rio","stargazer")
 
 # Ingreso mensual
 #1. Residuals of female~controles
@@ -497,7 +494,7 @@ age_wage_sex<- ggplot(base4,
 mod_peakage_sex <- function(base4,index){
   set.seed(9876)
   #1. creamos un data frame con el summary de nuestra regresión
-  coef <- lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, subset = index)$coefficients
+  coef <- lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, base4, subset = index)$coefficients
   
   #2. extraemos los betas a escalares para plantear la fórmula
   beta0 = coef[1] #intercepto
@@ -524,7 +521,7 @@ results_peakage_sex
 mod_peakwage_fem <- function(base4,index){
   set.seed(9876)
   #1. creamos un data frame con el summary de nuestra regresión
-  coef <- lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, subset = index)$coefficients
+  coef <- lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, base4, subset = index)$coefficients
   
   #2. extraemos los betas a escalares para plantear la fórmula
   beta0 = coef[1] #intercepto
