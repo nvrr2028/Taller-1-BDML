@@ -16,7 +16,7 @@ rm(list = ls(all.names = TRUE))
 
 list.of.packages = c("readr", "readxl", "lubridate", "tidyverse", "pacman", "rio", 
                      "skimr", "caret", "rvest", "stargazer", "rlist", "Hmisc", 
-                     "corrplot", "dplyr", "boot", "caret","Ecdat","ggplot2")
+                     "corrplot", "dplyr", "boot", "caret","Ecdat","ggplot2", "car")
 
 new.packages = list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -673,7 +673,7 @@ with(test,mean((lnwage-model3)^2))
 ## Cuarto modelo ##
 
 model4<-lm(lnwage~totalHoursWorked+age+age^2+maxEducLevel+formal+sex+
-             estrato1+relab+sizeFirm+totalHoursWorked+sex:totalHoursWorked+age:totalHoursWorked,data=train)
+             estrato1+sex:totalHoursWorked+age:totalHoursWorked,data=train)
 
 test$model4<-predict(model4,newdata = test)
 
