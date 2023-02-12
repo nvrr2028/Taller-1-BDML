@@ -305,11 +305,9 @@ mod_peakage(base3, 1: nrow(base3)) #comprobando que sale igual :)
 #Corremos el Bootstrap
 set.seed(9876)
 results_peakage <- boot(base3, mod_peakage, R=1000)
-<<<<<<< HEAD
 results_peakage 
 
 #ahora construyamos los confidence intervals 
-=======
 results_peakage
 peakage<- results_peakage$t0
 
@@ -335,7 +333,6 @@ mod_peakwage <- function(base3,index){
 
 results_peakwage <- boot(base3, mod_peakwage, R=1000)
 results_peakwage
->>>>>>> 4bc4d0666e1b719a1ce9b9827c9e95326e8a51b1
 
 #antes necesito extraer los estadísticos a values
 peakage<- results_peakage$t0
@@ -403,13 +400,7 @@ reg4a_hr <- lm(ing_hr ~ female, data=base4) # Ingreso por hora ~ Female
 stargazer(reg4a_m, reg4a_hr, type="latex")
 
 ### b. Equal Pay for Equal Work?
-
-
 reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
-
-reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)     # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
-reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
-
 reg4c_hr <- lm(ing_hr  ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso por hora ~ Female + Other explanatory variables
 
 stargazer(reg4a_hr, reg4c_hr, type="text")
