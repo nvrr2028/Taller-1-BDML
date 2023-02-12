@@ -671,22 +671,28 @@ with(test,mean((lnwage-model3)^2))
 ## Cuarto modelo ##
 
 model4<-lm(lnwage~totalHoursWorked+age+age^2+maxEducLevel+formal+sex+
-             estrato1+relab+sizeFirm+totalHoursWorked+sex:totalHoursWorked+age:totalHoursWorked,data=train)
+             estrato1+sex:totalHoursWorked+age:totalHoursWorked,data=train)
 
-test$model4<-predict(model4,newdata = test)
+model41<-lm(lnwage~totalHoursWorked+age+age^2+maxEducLevel+formal+sex+
+             estrato1+relab+sizeFirm,data=train)
 
-with(test,mean((lnwage-model4)^2))
+install.packages('car')
+library("car")
+vif(model41)
 
-stargazer(model4, type = "text")
+test$model41<-predict(model41,newdata = test)
+
+with(test,mean((lnwage-model41)^2))
+class(test$model41)
+stargazer(model41, type = "text")
+class(model2)
 
 ## Quinto modelo ##
-model5<-lm(lnwage~poly(age,2,raw=TRUE)+log(poly(maxEducLevel,7,raw=TRUE)):sex:formal:relab:sizeFirm+
-             poly(fulltime,8,raw=TRUE):maxEducLevel+poly(totalHoursWorked,6,raw=TRUE):sex:age+poly(relab,4,raw=TRUE):sex:age+estrato1,data=train)
+  model5<-lm(lnwage~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+poly(fulltime,6,raw=TRUE):maxEducLevel:sex:age+
+             poly(estrato1,5,raw=TRUE):maxEducLevel:sex:age+maxEducLevel+estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE),data=train)
 test$model5<-predict(model5,newdata = test)
 
 with(test,mean((lnwage-model5)^2))
-
-stargazer(model5, type = "latex")
 
 ## comparar los MSE 
 msew_age2<-with(test,round(mean((lnwage-reg4a_hrtrain )^2),4))
@@ -696,10 +702,9 @@ mse2<-with(test,round(mean((lnwage-model2)^2),4))
 mse3<-with(test,round(mean((lnwage-model3)^2),4))
 mse4<-with(test,round(mean((lnwage-model4)^2),4))
 mse5<-with(test,round(mean((lnwage-model5)^2),4))
-
+mse4
 comparacionmse<-data.frame(msew_age2,msew_fem,mse1,mse2,mse3,mse4, mse5)
 comparacionmse
-stargazer(model1,model2,model3,model4,model5, type="latex")
 
 ##c.
 
@@ -727,7 +732,7 @@ ggplot(test$base2, aes(x=msemod4, fill=sex)) +
 
 ##d.
 library (boot)
-glm.fit=glm(model4 ,data=base2)
+glm.fit=glm(model3 ,data=base2)
 cv.err =cv.glm(base2 ,glm.fit)
 LOOCVm4<-cv.err$delta
 
@@ -738,7 +743,6 @@ LOOCVm5<-cv.err$delta
 
 tabla2<-data.frame(LOOCVm4,LOOCVm5)
 tabla2
-stargazer(tabla2, type="latex")
 
 
 
