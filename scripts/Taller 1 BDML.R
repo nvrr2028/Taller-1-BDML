@@ -281,8 +281,6 @@ age_earnings<- ggplot(base3,
               formula = y ~ poly(x, 2), 
               color = "indianred3")
 
-# Big data y Machine learning
-
 
 # Bootstrap para construir los intervalos de confianza
 mod_peakage <- function(base3,index){
