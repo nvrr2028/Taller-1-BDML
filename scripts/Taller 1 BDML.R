@@ -285,10 +285,7 @@ age_earnings<- ggplot(base3,
               formula = y ~ poly(x, 2), 
               color = "indianred3")
 
-# Big data y Machine learning
-
-
-# Bootstrap para construir los intervalos de confianza
+#Función para peakage
 mod_peakage <- function(base3,index){
   set.seed(9876)
   #1. creamos un data frame con el summary de nuestra regresión
@@ -311,35 +308,47 @@ set.seed(9876)
 results_peakage <- boot(base3, mod_peakage, R=1000)
 results_peakage 
 
-#ahora construyamos los confidence intervals 
+
+#Calculemos peak wage
+mod_peakwage <- function(base3,index){
+  set.seed(9876)
+  #1. creamos un data frame con el summary de nuestra regresión
+  coef <- lm(lnwage~ age+ age2, data = base3, subset = index)$coefficients
+  
+  #2. extraemos los betas a escalares para plantear la fórmula
+  beta0 = coef[1]
+  beta1 = coef[2]
+  beta2 = coef[3]
+  
+  #3. calcular peak age
+  peak_age = -(beta1/(2*beta2))
+  
+  #4. calcular peak wage
+  wage_pa = beta0 + beta1*peakage + beta2*(peakage)^2
+  
+  return(wage_pa)
+}
+
+results_peakwage <- boot(base3, mod_peakwage, R=1000)
+results_peakwage
 
 #antes necesito extraer los estadísticos a values
-peakage<- results_peakage$t0
-bias <- colMeans(results_peakage$t)-results_peakage$t0
-se <- apply(results_peakage$t,2,sd)
+peakwage<- results_peakwage$t0
+bias <- colMeans(results_peakwage$t)-results_peakwage$t0
+se <- apply(results_peakwage$t,2,sd)
 
-#para agregar en punto de peak age 
-#1. creamos un data frame con el summary de nuestra regresión
-lmw_summary <- data.frame(summary(regw_age2)$coefficients)
-
-#2. extraemos los betas a escalares para plantear la fórmula
-beta0 = lmw_summary[1,1]
-beta1 = lmw_summary[2,1]
-beta2 = lmw_summary[3,1]
-
-wage_pa = beta0 + beta1*peakage + beta2*(peakage)^2
-
-#3. construimos los valores para el CI
+#construimos los valores para el CI
 alpha = 0.05 # 95% Confidence Interval
-lower = wage_pa - qnorm(alpha/2) * se
-upper = wage_pa + qnorm(alpha/2) * se
+lower = peakwage - qnorm(alpha/2) * se
+upper = peakwage + qnorm(alpha/2) * se
 
 #4. Agregamos el CI al gráfico
+
 age_earnings + 
-  geom_point(aes(x=peakage, y=wage_pa)) +
-  geom_segment(aes(y=upper, x= lower, yend= wage_pa , xend= wage_pa),
+  geom_point(aes(x=peakage, y=peakwage)) +
+  geom_segment(aes(y=lower, x= peakage, yend= upper , xend= peakage, colour="#F23DB3"),
                arrow= arrow(angle=90, ends= 'both', 
-                            length = unit(0.1, 'cm'))) +
+                            length = unit(0.3, 'cm'))) +
   labs(x= "Edad", y= "Ingresos", title= "Trayectoria de los ingresos a lo largo de la Edad")
 
 
