@@ -268,7 +268,7 @@ mod_peakwage_fem <- function(base4,index){
   peak_age = -(beta2/(2*beta3))
  
   #4. calcular peak wage
-  wage_pa_fem = beta0 + beta1*femalecoef+ beta2*(peakage)+ beta3*(peakage)^2
+  wage_pa_fem = beta0 + beta1*1+ beta2*(peakage)+ beta3*(peakage)^2
   return(wage_pa_fem)
 }
 
@@ -290,7 +290,7 @@ mod_peakwage_m <- function(base4,index){
   set.seed(9876)
   #1. creamos un data frame con el summary de nuestra regresión
   coef <- lm(ing_m ~ female +age + age2, base4, subset = index)$coefficients
-  
+ 
   #2. extraemos los betas a escalares para plantear la fórmula
   beta0 = coef[1] #intercepto
   beta1 = coef[2] #female
@@ -322,12 +322,10 @@ upper_m = peakwage_m + qnorm(alpha/2) * se_m
 
 #3. Agregamos el CI al gráfico
 age_wage_sex + 
-  geom_point(aes(x=peakage, y=peakwage_fem)) +
-  geom_point(aes(x=peakage, y=peakwage_m)) +
-  geom_segment(aes(y=lower, x= peakage, yend= upper , xend= peakage),
+  geom_segment(aes(y=upper, x= peakage, yend= lower , xend= peakage),
                arrow= arrow(angle=90, ends= 'both', 
                             length = unit(0.2, 'cm'))) +
-  geom_segment(aes(y=lower_m, x= peakage, yend= upper_m , xend= peakage),
+  geom_segment(aes(y=upper_m, x= peakage, yend= lower_m , xend= peakage),
                arrow= arrow(angle=90, ends= 'both', 
                             length = unit(0.2, 'cm'))) +
   labs(x= "Edad", y= "Ingresos", title= "Trayectoria de los ingresos a lo largo de la Edad")
