@@ -132,7 +132,7 @@ base2 %>%
   summarise(n = n())
 
 base2$maxEducLevel <- as.factor(base2$maxEducLevel)
-base2$relab <- as.factor(base4$relab) 
+base2$relab <- as.factor(base2$relab) 
 base2$estrato1<- as.factor(base2$estrato1)
 base2$sizeFirm<- as.factor(base2$sizeFirm)
 
