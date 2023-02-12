@@ -132,7 +132,7 @@ base2 %>%
   summarise(n = n())
 
 base2$maxEducLevel <- as.factor(base2$maxEducLevel)
-base2$relab <- as.factor(base2$relab) 
+base2$relab <- as.factor(base4$relab) 
 base2$estrato1<- as.factor(base2$estrato1)
 base2$sizeFirm<- as.factor(base2$sizeFirm)
 
@@ -155,6 +155,10 @@ summary(base2$age)
 ggplot(data = base2, mapping = aes(x = age , y = ing_hr)) +
   geom_point(col = "green3" , size = 0.8) +
   labs(x = "Edad del encuestado", y = "Ingreso por hora (pesos)") 
+
+ggplot(data = base2 ,
+       mapping = aes(x = age , y = ing_hr , group=as.factor(formal) , color=as.factor(formal))) +
+  geom_point()
 
 ggplot(data = base2 , mapping = aes(x = totalHoursWorked , y = ing_hr)) +
   geom_point(col = "indianred3" , size = 0.8) + 
@@ -281,10 +285,7 @@ age_earnings<- ggplot(base3,
               formula = y ~ poly(x, 2), 
               color = "indianred3")
 
-# Big data y Machine learning
-
-
-# Bootstrap para construir los intervalos de confianza
+#Función para peakage
 mod_peakage <- function(base3,index){
   set.seed(9876)
   #1. creamos un data frame con el summary de nuestra regresión
@@ -307,35 +308,47 @@ set.seed(9876)
 results_peakage <- boot(base3, mod_peakage, R=1000)
 results_peakage 
 
-#ahora construyamos los confidence intervals 
+
+#Calculemos peak wage
+mod_peakwage <- function(base3,index){
+  set.seed(9876)
+  #1. creamos un data frame con el summary de nuestra regresión
+  coef <- lm(lnwage~ age+ age2, data = base3, subset = index)$coefficients
+  
+  #2. extraemos los betas a escalares para plantear la fórmula
+  beta0 = coef[1]
+  beta1 = coef[2]
+  beta2 = coef[3]
+  
+  #3. calcular peak age
+  peak_age = -(beta1/(2*beta2))
+  
+  #4. calcular peak wage
+  wage_pa = beta0 + beta1*peakage + beta2*(peakage)^2
+  
+  return(wage_pa)
+}
+
+results_peakwage <- boot(base3, mod_peakwage, R=1000)
+results_peakwage
 
 #antes necesito extraer los estadísticos a values
-peakage<- results_peakage$t0
-bias <- colMeans(results_peakage$t)-results_peakage$t0
-se <- apply(results_peakage$t,2,sd)
+peakwage<- results_peakwage$t0
+bias <- colMeans(results_peakwage$t)-results_peakwage$t0
+se <- apply(results_peakwage$t,2,sd)
 
-#para agregar en punto de peak age 
-#1. creamos un data frame con el summary de nuestra regresión
-lmw_summary <- data.frame(summary(regw_age2)$coefficients)
-
-#2. extraemos los betas a escalares para plantear la fórmula
-beta0 = lmw_summary[1,1]
-beta1 = lmw_summary[2,1]
-beta2 = lmw_summary[3,1]
-
-wage_pa = beta0 + beta1*peakage + beta2*(peakage)^2
-
-#3. construimos los valores para el CI
+#construimos los valores para el CI
 alpha = 0.05 # 95% Confidence Interval
-lower = wage_pa - qnorm(alpha/2) * se
-upper = wage_pa + qnorm(alpha/2) * se
+lower = peakwage - qnorm(alpha/2) * se
+upper = peakwage + qnorm(alpha/2) * se
 
 #4. Agregamos el CI al gráfico
+
 age_earnings + 
-  geom_point(aes(x=peakage, y=wage_pa)) +
-  geom_segment(aes(y=upper, x= lower, yend= wage_pa , xend= wage_pa),
+  geom_point(aes(x=peakage, y=peakwage)) +
+  geom_segment(aes(y=lower, x= peakage, yend= upper , xend= peakage, colour="#F23DB3"),
                arrow= arrow(angle=90, ends= 'both', 
-                            length = unit(0.1, 'cm'))) +
+                            length = unit(0.3, 'cm'))) +
   labs(x= "Edad", y= "Ingresos", title= "Trayectoria de los ingresos a lo largo de la Edad")
 
 
@@ -376,15 +389,12 @@ stargazer(reg4a_m, reg4a_hr, type="latex")
 
 ### b. Equal Pay for Equal Work?
 
-
 reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
 
 head(base4)
 base4$maxEducLevel <- as.factor(base4$maxEducLevel) # Educación como dummy 
 base4$relab <- as.factor(base4$relab)               # Tipo de ocupación como dummy
 reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)     # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
-reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
-
 reg4c_hr <- lm(ing_hr  ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso por hora ~ Female + Other explanatory variables
 
 stargazer(reg4a_hr, reg4c_hr, type="text")
@@ -611,7 +621,9 @@ head(base2)
 ##a.
 set.seed(10101)
 #use 70% of the dataset as a training set and 30% as a test set.
+
 sample <- sample(c(TRUE, FALSE), nrow(base2), replace=TRUE, prob=c(0.7,0.3))
+
 train  <- base2[sample, ]
 test   <- base2[!sample, ]
 
@@ -634,7 +646,7 @@ test$reg4a_hrtrain<-predict(reg4a_hrtrain,newdata = test)
 with(test,mean((lnwage-reg4a_hrtrain)^2))
 
 ## Primer modelo ##
-model1<-lm(lnwage~totalHoursWorked:sex:age,data=train)
+model1<-lm(lnwage~1,data=train)
 stargazer(model1, type="text")
 
 test$model1<-predict(model1,newdata = test)
@@ -643,21 +655,20 @@ with(test,mean((lnwage-model1)^2))
 
 ## Segundo modelo ##
 
-model2<-lm(lnwage~totalHoursWorked:sex+maxEducLevel:sex,data=train)
+model2<-lm(lnwage~totalHoursWorked,data=train)
 test$model2<-predict(model2,newdata = test)
 
 with(test,mean((lnwage-model2)^2))
 
 ## Tercer modelo ##
 
-model3<-lm(lnwage~totalHoursWorked^2+age^2+sex+maxEducLevel+formal,data=train)
+model3<-lm(lnwage~totalHoursWorked+age+sex+maxEducLevel+formal,data=train)
 test$model3<-predict(model3,newdata = test)
 with(test,mean((lnwage-model3)^2))
-
 ## Cuarto modelo ##
 
 model4<-lm(lnwage~totalHoursWorked+age+age^2+maxEducLevel+formal+sex+
-             estrato1+relab+sizeFirm+totalHoursWorked+sex:totalHoursWorked+age:totalHoursWorked,data=train)
+             estrato1+relab+sizeFirm,data=train)
 
 test$model4<-predict(model4,newdata = test)
 
@@ -665,61 +676,47 @@ with(test,mean((lnwage-model4)^2))
 
 stargazer(model4, type = "text")
 
+
+##c.
+
+##
+ggplot(df, aes(x=predict(model4), y=lnwage)) + 
+  geom_point() +
+  geom_abline()
+  labs(x='Predicted Values', y='Actual Values', title='Predicted vs. Actual Values')
+
+
 ## Quinto modelo ##
-  model5<-lm(lnwage~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+poly(fulltime,6,raw=TRUE):maxEducLevel:sex:age+
-             poly(estrato1,5,raw=TRUE):maxEducLevel:sex:age+maxEducLevel+estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE),data=train)
+model5<-lm(lnwage~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+fulltime:totalHoursWorked+
+             estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE)+maxprimariaincompleta:totalHoursWorked+maxprimariacompleta:totalHoursWorked+maxsecundariaincompleta:totalHoursWorked+
+             maxsecundariacompleta:totalHoursWorked+maxterciaria:totalHoursWorked
+           ,data=train)
 test$model5<-predict(model5,newdata = test)
 
 with(test,mean((lnwage-model5)^2))
 
 ## comparar los MSE 
-msew_age2<-with(test,round(mean((lnwage-reg4a_hrtrain )^2),4))
-msew_fem<-with(test,round(mean((lnwage-reg4a_hrtrain )^2),4))
-mse1<-with(test,round(mean((lnwage-model1)^2),4))
-mse2<-with(test,round(mean((lnwage-model2)^2),4))
-mse3<-with(test,round(mean((lnwage-model3)^2),4))
-mse4<-with(test,round(mean((lnwage-model4)^2),4))
-mse5<-with(test,round(mean((lnwage-model5)^2),4))
+msew_age2<-with(test,round(mean((lnwage-reg4a_hrtrain )^2),2))
+msew_fem<-with(test,round(mean((lnwage-reg4a_hrtrain )^2),2))
+mse1<-with(test,round(mean((lnwage-model1)^2),2))
+mse2<-with(test,round(mean((lnwage-model2)^2),2))
+mse3<-with(test,round(mean((lnwage-model3)^2),2))
+mse4<-with(test,round(mean((lnwage-model4)^2),2))
+mse5<-with(test,round(mean((lnwage-model5)^2),2))
 
-comparacionmse<-data.frame(msew_age2,msew_fem,mse1,mse2,mse3,mse4, mse5)
-
-##c.
-
-test$mod4predic <- predict(model4, newdata=test) 
-testmod4predic <- test$mod4predic #guardamos las predicciones del modelo 4, que tiene menor MSE, sobre las observaciones de prueba
-
-testlnwage <- test$lnwage #guardamos las observaciones de prueba
-
-#Gráfica para comparar valores observados y predichos. Si no hubiese error de predicción, todos los puntos estarían sobre la recta
-ggplot(test$base2, aes(x = testmod4predic, y = testlnwage)) +
-  geom_point() +
-  geom_abline(intercept = 0, slope = 1, color = "green") +
-  labs(x = "Valores predichos de log(ingreso)", y = "Valores observados de log(ingreso)")
-
-# Calculamos los errores de predicción cuadráticos para realizar un histograma
-msemod4 = (testlnwage-testmod4predic)
-
-ggplot(test$base2, aes(x=msemod4, fill=sex)) +
-  geom_histogram(fill="white", color="black")+
-  geom_vline(aes(xintercept=mean(msemod4)), color="blue",
-             linetype="dashed")+
-  labs(title="Histograma del error de predicción del modelo con menor MSE",x="Error de predicción", y = "Frecuencia")+
-  theme_classic()
-
+tabla<-data.frame(msew_age2,msew_fem,mse1,mse2,mse3,mse4,mse5)
+tabla
 
 ##d.
 library (boot)
 glm.fit=glm(model4 ,data=base2)
 cv.err =cv.glm(base2 ,glm.fit)
-LOOCVm4<-cv.err$delta
+cv.err$delta
 
 glm.fit=glm(model5 ,data=base2)
 cv.err =cv.glm(base2 ,glm.fit)
 cv.err$delta
-LOOCVm5<-cv.err$delta
 
-tabla2<-data.frame(LOOCVm4,LOOCVm5)
-tabla2
 
 
 
