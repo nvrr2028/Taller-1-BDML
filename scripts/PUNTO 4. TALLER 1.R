@@ -91,4 +91,116 @@ reg4_hr_fwl<-lm(wageResidFhr~femaleResidFhr, base4) #esta ya nos arroja el coef 
 
 stargazer(reg4c_hr, reg4_hr_fwl, type="text")
 
+# grafico--------------------
+
+# Bootstrap para construir los intervalos de confianza
+
+#Función para peakage
+mod_peakage_sex <- function(base4,index){
+  set.seed(9876)
+  #1. creamos un data frame con el summary de nuestra regresión
+  coef <- lm(ing_m ~ female + age + age2, data=base4, subset = index)$coefficients
+  
+  #2. extraemos los betas a escalares para plantear la fórmula
+  beta0 = coef[1]
+  beta1 = coef[2]
+  beta2 = coef[3]
+  beta3 = coef[4]
+  
+  #3. calcular peak age
+  peak_age = -(beta2/(2*beta3))
+  
+  return(peak_age)
+}
+
+mod_peakage(base4, 1: nrow(base4)) #comprobando que sale igual :)
+
+#Corremos el Bootstrap
+set.seed(9876)
+results_peakage_sex <- boot(base4, mod_peakage_sex, R=1000)
+results_peakage_sex 
+
+#peak wage
+mod_peakwage_fem <- function(base4,index){
+  set.seed(9876)
+  #1. creamos un data frame con el summary de nuestra regresión
+  coef <- lm(ing_m ~ female + age + age2, data=base4, subset = index)$coefficients
+  
+  #2. extraemos los betas a escalares para plantear la fórmula
+  beta0 = coef[1]
+  beta1 = coef[2]
+  beta2 = coef[3]
+  beta3 = coef[4]
+ 
+  #3. calcular peak age
+  peak_age = -(beta2/(2*beta3))
+  
+  #4. calcular peak wage
+  wage_pa_fem = beta0 + beta1*femalecoef+ beta2*peakage + beta3*(peakage)^2
+  #wage_pa_men = beta0 + beta2*peakage + beta3*(peakage)^2
+  
+  return(wage_pa_fem)
+}
+
+results_peakwage_fem <- boot(base4, mod_peakwage_fem, R=1000)
+results_peakwage_fem
+
+#antes necesito extraer los estadísticos a values
+peakwage_fem<- results_peakwage_fem$t0
+bias_fem <- colMeans(results_peakwage_fem$t)-results_peakwage_fem$t0
+se_fem <- apply(results_peakwage_fem$t,2,sd)
+
+#construimos los valores para el CI
+alpha = 0.05 # 95% Confidence Interval
+lower = peakwage_fem - qnorm(alpha/2) * se_fem
+upper = peakwage_fem + qnorm(alpha/2) * se_fem
+
+#peak wage- men
+mod_peakwage_m <- function(base4,index){
+  set.seed(9876)
+  #1. creamos un data frame con el summary de nuestra regresión
+  coef <- lm(ing_m ~ female + age + age2, data=base4, subset = index)$coefficients
+  
+  #2. extraemos los betas a escalares para plantear la fórmula
+  beta0 = coef[1]
+  beta1 = coef[2]
+  beta2 = coef[3]
+  beta3 = coef[4]
+  
+  #3. calcular peak age
+  peak_age = -(beta2/(2*beta3))
+  
+  #4. calcular peak wage
+  wage_pa_men = beta0 + beta2*peakage + beta3*(peakage)^2
+  
+  return(wage_pa_men)
+}
+
+results_peakwage_m <- boot(base4, mod_peakwage_m, R=1000)
+results_peakwage_m
+
+#antes necesito extraer los estadísticos a values
+peakwage_m<- results_peakwage_m$t0
+bias_m <- colMeans(results_peakwage_m$t)-results_peakwage_m$t0
+se_m <- apply(results_peakwage_m$t,2,sd)
+
+#construimos los valores para el CI
+alpha = 0.05 # 95% Confidence Interval
+lower_m = peakwage_m - qnorm(alpha/2) * se_m
+upper_m = peakwage_m + qnorm(alpha/2) * se_m
+
+
+#4. Agregamos el CI al gráfico
+age_wage_sex + 
+  geom_point(aes(x=peakage, y=peakwage_fem)) +
+  geom_point(aes(x=peakage, y=peakwage_m)) +
+  geom_segment(aes(y=lower, x= peakage, yend= upper , xend= peakage),
+               arrow= arrow(angle=90, ends= 'both', 
+                            length = unit(0.2, 'cm'))) +
+  geom_segment(aes(y=lower_m, x= peakage, yend= upper_m , xend= peakage),
+               arrow= arrow(angle=90, ends= 'both', 
+                            length = unit(0.2, 'cm'))) +
+  labs(x= "Edad", y= "Ingresos", title= "Trayectoria de los ingresos a lo largo de la Edad")
+
+
 

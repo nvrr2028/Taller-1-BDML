@@ -132,7 +132,7 @@ base2 %>%
   summarise(n = n())
 
 base2$maxEducLevel <- as.factor(base2$maxEducLevel)
-base2$relab <- as.factor(base4$relab) 
+base2$relab <- as.factor(base2$relab) 
 base2$estrato1<- as.factor(base2$estrato1)
 base2$sizeFirm<- as.factor(base2$sizeFirm)
 
@@ -155,10 +155,6 @@ summary(base2$age)
 ggplot(data = base2, mapping = aes(x = age , y = ing_hr)) +
   geom_point(col = "green3" , size = 0.8) +
   labs(x = "Edad del encuestado", y = "Ingreso por hora (pesos)") 
-
-ggplot(data = base2 ,
-       mapping = aes(x = age , y = ing_hr , group=as.factor(formal) , color=as.factor(formal))) +
-  geom_point()
 
 ggplot(data = base2 , mapping = aes(x = totalHoursWorked , y = ing_hr)) +
   geom_point(col = "indianred3" , size = 0.8) + 
@@ -363,8 +359,12 @@ age_earnings +
 # Base de datos punto 4
 base4 <- base %>%
   select(ing_hr, y_ingLab_m, maxEducLevel, age, formal, sex, fulltime, relab) %>% # Seleccionar variables de interés
-  mutate(female=ifelse(sex==1, 0, 1), age2=age^2, ing_hr=log(ing_hr), ing_m=log(y_ingLab_m)) %>% # Transformaciones adicionales a las variables
+  mutate(female=ifelse(sex==1, 0, 1),sex=ifelse(sex==1, 0, 1), age2=age^2, ing_hr=log(ing_hr), ing_m=log(y_ingLab_m)) %>% # Transformaciones adicionales a las variables
   drop_na() #Eliminando NAs
+
+base4$maxEducLevel <- as.factor(base4$maxEducLevel) # Educación como dummy 
+base4$relab <- as.factor(base4$relab) # Tipo de ocupación como dummy
+base4$sex <- as.factor(base4$sex)
 
 ### a. Begin by estimating and discussing the unconditional wage gap:
 set.seed(1111)
@@ -375,10 +375,16 @@ reg4a_hr <- lm(ing_hr ~ female, data=base4) # Ingreso por hora ~ Female
 stargazer(reg4a_m, reg4a_hr, type="latex")
 
 ### b. Equal Pay for Equal Work?
+
+
+reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
+
 head(base4)
 base4$maxEducLevel <- as.factor(base4$maxEducLevel) # Educación como dummy 
 base4$relab <- as.factor(base4$relab)               # Tipo de ocupación como dummy
 reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4)     # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
+reg4c_m <-lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso mensual ~ Female + Other explanatory variables
+
 reg4c_hr <- lm(ing_hr  ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4) # (Conditional wage gap) Ingreso por hora ~ Female + Other explanatory variables
 
 stargazer(reg4a_hr, reg4c_hr, type="text")
@@ -411,6 +417,8 @@ eta.fn_m2 <-function(data,index){
   return(coefm2[2])
 }
 reg4m2 <- boot(base4, eta.fn_m2, R = 1000) # boot(datos, estadístico deseado, repeticiones)
+
+femalecoef<- reg4m2$t0
 
 # Corrección de errores estándar 
 se_m1 <- sqrt(diag(vcov(reg4c_m)))[2]
@@ -464,8 +472,133 @@ stargazer(boot_ing_hr, type="text")
 
 # c. Predicted age-wage profile
 
+age_wage_sex<- ggplot(base4, 
+            aes(x = age, 
+                y = ing_m, color= sex)) +
+  geom_point(size=2, color="#69b3a2AA") +
+  geom_smooth(method = "lm", 
+              formula = y ~ poly(x, 2), aes(group=sex))+
+  scale_color_manual(labels = c("Masculino", "Femenino"), values = c("steelblue", "indianred3")) +
+  labs(x= "Edad", y= "Ingresos", title= "Trayectoria de los ingresos a lo largo de la edad por sexo", color= "Sexo")
+
+# Bootstrap para construir los intervalos de confianza
+
+#Función para peakage
+mod_peakage_sex <- function(base4,index){
+  set.seed(9876)
+  #1. creamos un data frame con el summary de nuestra regresión
+  coef <- lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, subset = index)$coefficients
+  
+  #2. extraemos los betas a escalares para plantear la fórmula
+  beta0 = coef[1] #intercepto
+  beta1 = coef[2] #female
+  beta2 = coef[3] #maxeduc
+  beta3 = coef[8] #age
+  beta4 = coef[9] #age2
+  beta5 = coef[10] #formal
+  beta6 = coef[11] #fulltime
+  beta7 = coef[11] #relab
+  
+  #3. calcular peak age
+  peak_age = -(beta3/(2*beta4))
+  
+  return(peak_age)
+}
+
+#Corremos el Bootstrap
+set.seed(9876)
+results_peakage_sex <- boot(base4, mod_peakage_sex, R=1000)
+results_peakage_sex 
+
+#peak wage
+mod_peakwage_fem <- function(base4,index){
+  set.seed(9876)
+  #1. creamos un data frame con el summary de nuestra regresión
+  coef <- lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, subset = index)$coefficients
+  
+  #2. extraemos los betas a escalares para plantear la fórmula
+  beta0 = coef[1] #intercepto
+  beta1 = coef[2] #female
+  beta2 = coef[3] #maxeduc
+  beta3 = coef[8] #age
+  beta4 = coef[9] #age2
+  beta5 = coef[10] #formal
+  beta6 = coef[11] #fulltime
+  beta7 = coef[11] #relab
+  
+  
+  #3. calcular peak age
+  peak_age = -(beta3/(2*beta4))
+  
+  #4. calcular peak wage
+  wage_pa_fem = beta0 + beta1*femalecoef+ beta2*1 + beta3*(peakage)+ beta4*(peakage)^2+ beta5*1+ beta6 +beta7
+  
+  return(wage_pa_fem)
+}
+
+results_peakwage_fem <- boot(base4, mod_peakwage_fem, R=1000)
+results_peakwage_fem
+
+#antes necesito extraer los estadísticos a values
+peakwage_fem<- results_peakwage_fem$t0
+bias_fem <- colMeans(results_peakwage_fem$t)-results_peakwage_fem$t0
+se_fem <- apply(results_peakwage_fem$t,2,sd)
+
+#construimos los valores para el CI
+alpha = 0.05 # 95% Confidence Interval
+lower = peakwage_fem - qnorm(alpha/2) * se_fem
+upper = peakwage_fem + qnorm(alpha/2) * se_fem
+
+#peak wage- men
+mod_peakwage_m <- function(base4,index){
+  set.seed(9876)
+  #1. creamos un data frame con el summary de nuestra regresión
+  coef <- lm(ing_m ~ female + maxEducLevel + age + age2+ formal + fulltime + relab, data=base4, subset = index)$coefficients
+  
+  #2. extraemos los betas a escalares para plantear la fórmula
+  beta0 = coef[1] #intercepto
+  beta1 = coef[2] #female
+  beta2 = coef[3] #maxeduc
+  beta3 = coef[8] #age
+  beta4 = coef[9] #age2
+  beta5 = coef[10] #formal
+  beta6 = coef[11] #fulltime
+  beta7 = coef[11] #relab
+  
+  #3. calcular peak age
+  peak_age = -(beta3/(2*beta4))
+  
+  #4. calcular peak wage
+  wage_pa_men = beta0 + beta2*1 + beta3*(peakage)+ beta4*(peakage)^2+ beta5*1+ beta6 +beta7
+  
+  return(wage_pa_men)
+}
+
+results_peakwage_m <- boot(base4, mod_peakwage_m, R=1000)
+results_peakwage_m
+
+#antes necesito extraer los estadísticos a values
+peakwage_m<- results_peakwage_m$t0
+bias_m <- colMeans(results_peakwage_m$t)-results_peakwage_m$t0
+se_m <- apply(results_peakwage_m$t,2,sd)
+
+#construimos los valores para el CI
+alpha = 0.05 # 95% Confidence Interval
+lower_m = peakwage_m - qnorm(alpha/2) * se_m
+upper_m = peakwage_m + qnorm(alpha/2) * se_m
 
 
+#4. Agregamos el CI al gráfico
+age_wage_sex + 
+  geom_point(aes(x=peakage, y=peakwage_fem)) +
+  geom_point(aes(x=peakage, y=peakwage_m)) +
+  geom_segment(aes(y=lower, x= peakage, yend= upper , xend= peakage),
+               arrow= arrow(angle=90, ends= 'both', 
+                            length = unit(0.2, 'cm'))) +
+  geom_segment(aes(y=lower_m, x= peakage, yend= upper_m , xend= peakage),
+               arrow= arrow(angle=90, ends= 'both', 
+                            length = unit(0.2, 'cm'))) +
+  labs(x= "Edad", y= "Ingresos", title= "Trayectoria de los ingresos a lo largo de la Edad")
 
 
 # ------------------------------------------------------------------------------------ #
@@ -478,9 +611,7 @@ head(base2)
 ##a.
 set.seed(10101)
 #use 70% of the dataset as a training set and 30% as a test set.
-
 sample <- sample(c(TRUE, FALSE), nrow(base2), replace=TRUE, prob=c(0.7,0.3))
-
 train  <- base2[sample, ]
 test   <- base2[!sample, ]
 
@@ -503,7 +634,7 @@ test$reg4a_hrtrain<-predict(reg4a_hrtrain,newdata = test)
 with(test,mean((lnwage-reg4a_hrtrain)^2))
 
 ## Primer modelo ##
-model1<-lm(lnwage~1,data=train)
+model1<-lm(lnwage~totalHoursWorked:sex:age,data=train)
 stargazer(model1, type="text")
 
 test$model1<-predict(model1,newdata = test)
@@ -512,21 +643,21 @@ with(test,mean((lnwage-model1)^2))
 
 ## Segundo modelo ##
 
-model2<-lm(lnwage~totalHoursWorked,data=train)
+model2<-lm(lnwage~totalHoursWorked:sex+maxEducLevel:sex,data=train)
 test$model2<-predict(model2,newdata = test)
 
 with(test,mean((lnwage-model2)^2))
 
 ## Tercer modelo ##
 
-model3<-lm(lnwage~totalHoursWorked+age+sex+maxEducLevel+formal,data=train)
+model3<-lm(lnwage~totalHoursWorked^2+age^2+sex+maxEducLevel+formal,data=train)
 test$model3<-predict(model3,newdata = test)
 with(test,mean((lnwage-model3)^2))
 
 ## Cuarto modelo ##
 
 model4<-lm(lnwage~totalHoursWorked+age+age^2+maxEducLevel+formal+sex+
-             estrato1+relab+sizeFirm,data=train)
+             estrato1+relab+sizeFirm+totalHoursWorked+sex:totalHoursWorked+age:totalHoursWorked,data=train)
 
 test$model4<-predict(model4,newdata = test)
 
@@ -535,22 +666,20 @@ with(test,mean((lnwage-model4)^2))
 stargazer(model4, type = "text")
 
 ## Quinto modelo ##
-model5<-lm(lnwage~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+fulltime:totalHoursWorked+
-             estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE)+maxprimariaincompleta:totalHoursWorked+maxprimariacompleta:totalHoursWorked+maxsecundariaincompleta:totalHoursWorked+
-             maxsecundariacompleta:totalHoursWorked+maxterciaria:totalHoursWorked
-           ,data=train)
+  model5<-lm(lnwage~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+poly(fulltime,6,raw=TRUE):maxEducLevel:sex:age+
+             poly(estrato1,5,raw=TRUE):maxEducLevel:sex:age+maxEducLevel+estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE),data=train)
 test$model5<-predict(model5,newdata = test)
 
 with(test,mean((lnwage-model5)^2))
 
 ## comparar los MSE 
-msew_age2<-with(test,round(mean((lnwage-reg4a_hrtrain )^2),2))
-msew_fem<-with(test,round(mean((lnwage-reg4a_hrtrain )^2),2))
-mse1<-with(test,round(mean((lnwage-model1)^2),2))
-mse2<-with(test,round(mean((lnwage-model2)^2),2))
-mse3<-with(test,round(mean((lnwage-model3)^2),2))
-mse4<-with(test,round(mean((lnwage-model4)^2),2))
-mse5<-with(test,round(mean((lnwage-model5)^2),2))
+msew_age2<-with(test,round(mean((lnwage-reg4a_hrtrain )^2),4))
+msew_fem<-with(test,round(mean((lnwage-reg4a_hrtrain )^2),4))
+mse1<-with(test,round(mean((lnwage-model1)^2),4))
+mse2<-with(test,round(mean((lnwage-model2)^2),4))
+mse3<-with(test,round(mean((lnwage-model3)^2),4))
+mse4<-with(test,round(mean((lnwage-model4)^2),4))
+mse5<-with(test,round(mean((lnwage-model5)^2),4))
 
 comparacionmse<-data.frame(msew_age2,msew_fem,mse1,mse2,mse3,mse4, mse5)
 
@@ -606,12 +735,15 @@ length(mod4predic)
 library (boot)
 glm.fit=glm(model4 ,data=base2)
 cv.err =cv.glm(base2 ,glm.fit)
-cv.err$delta
+LOOCVm4<-cv.err$delta
 
 glm.fit=glm(model5 ,data=base2)
 cv.err =cv.glm(base2 ,glm.fit)
 cv.err$delta
+LOOCVm5<-cv.err$delta
 
+tabla2<-data.frame(LOOCVm4,LOOCVm5)
+tabla2
 
 
 
