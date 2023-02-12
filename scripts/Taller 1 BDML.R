@@ -701,7 +701,7 @@ mse5<-with(test,round(mean((lnwage-model5)^2),4))
 
 comparacionmse<-data.frame(msew_age2,msew_fem,mse1,mse2,mse3,mse4, mse5)
 comparacionmse
-stargazer(model1,model2,model3,model4, type="latex")
+stargazer(model1,model2,model3,model4,model5, type="latex")
 
 ##c.
 
