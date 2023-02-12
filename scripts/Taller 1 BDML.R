@@ -611,9 +611,7 @@ head(base2)
 ##a.
 set.seed(10101)
 #use 70% of the dataset as a training set and 30% as a test set.
-
 sample <- sample(c(TRUE, FALSE), nrow(base2), replace=TRUE, prob=c(0.7,0.3))
-
 train  <- base2[sample, ]
 test   <- base2[!sample, ]
 
@@ -636,7 +634,7 @@ test$reg4a_hrtrain<-predict(reg4a_hrtrain,newdata = test)
 with(test,mean((lnwage-reg4a_hrtrain)^2))
 
 ## Primer modelo ##
-model1<-lm(lnwage~1,data=train)
+model1<-lm(lnwage~totalHoursWorked:sex:age,data=train)
 stargazer(model1, type="text")
 
 test$model1<-predict(model1,newdata = test)
@@ -645,14 +643,14 @@ with(test,mean((lnwage-model1)^2))
 
 ## Segundo modelo ##
 
-model2<-lm(lnwage~totalHoursWorked,data=train)
+model2<-lm(lnwage~totalHoursWorked:sex+maxEducLevel:sex,data=train)
 test$model2<-predict(model2,newdata = test)
 
 with(test,mean((lnwage-model2)^2))
 
 ## Tercer modelo ##
 
-model3<-lm(lnwage~totalHoursWorked+age+sex+maxEducLevel+formal,data=train)
+model3<-lm(lnwage~totalHoursWorked^2+age^2+sex+maxEducLevel+formal,data=train)
 test$model3<-predict(model3,newdata = test)
 with(test,mean((lnwage-model3)^2))
 ## Cuarto modelo ##
@@ -706,8 +704,8 @@ cv.err =cv.glm(base2 ,glm.fit)
 cv.err$delta
 LOOCVm5<-cv.err$delta
 
-
-
+tabla2<-data.frame(LOOCVm4,LOOCVm5)
+tabla2
 
 
 
