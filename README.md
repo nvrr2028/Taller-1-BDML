@@ -14,13 +14,18 @@
 
 La brecha fiscal es un de los principales problemas del mundo, esta, es la diferencia entre la cantidad de impuestos que el gobierno puede recaudar contra la cantidad de impuestos que realmente recauda. En Colombia, según Bonet (2016), la brecha fiscal en el 2014 fue de aproximadamente 46 billones de pesos, lo que demuestra un gran desperdicio de eficiencia tributaria. Es importante reducir esta brecha debido a que se debe mantener un sistema tributario justo, eficiente y efectivo, para garantizar el mayor recaudo posible para el estado y poder brindar servicios esenciales a la población. Para esto, se realizará un estudio de predicción de ingresos, el cual podría potencialmente ayudar a acumular casos de fraude que lograría la reducción de esta brecha. En términos generales el estudio concluye que en Colombia hay brechas salariales por discriminación por género, y además, el modelo propuesto puede ser un buen predictor del salario, ya que es efectivo prediciendo muestra dentro del grueso de la población pero no tanto en observaciones atípicas. 
 
+# Document
+
+La carpeta de "document" contiene el documento final con el desarrollo del ejercicio.
+
 # Data files
 
 Todos los datos se encuentran fueron scrappeados del repositorio que se encuentra en la página "https://ignaciomsarmiento.github.io/GEIH2018_sample/labels.html". De allí, se tomaron 10 piezas de datos que se unieron en una sola base, cuyo código se puede encontrar en el script "Taller-1-BDML" de la carpeta "scripts".
 
 # Code files
 
-El código principal para correr el ejercicio es "Taller 1 BDML", el cual contiene cada no de los puntos solicitados. No obstante, también exite un código particular para cada uno de los puntos, en el caso de que sea necesaro utilizarlos.
+En análisis del ingreso se desarrolla en R version 4.2.2 (2022-10-31 ucrt).
+El código principal para correr el ejercicio es "Taller 1 BDML", el cual contiene cada uno de los puntos solicitados. No obstante, también exite un código particular para cada uno de los puntos, en el caso de que sea necesaro utilizarlos.
 Por lo tanto, la carpeta de "scripts" contiene: 
 - Taller 1 BDML
 - PUNTO 2. TALLER 1
