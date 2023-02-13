@@ -1,4 +1,5 @@
 #PUNTO 3. 
+#PUNTO 4. 
 #cosas de otros puntos ------------
 # Limpiar el espacio
 rm(list = ls(all.names = TRUE))
@@ -8,13 +9,14 @@ rm(list = ls(all.names = TRUE))
 # ------------------------------------------------------------------------------------ #
 
 list.of.packages = c("readr", "readxl", "lubridate", "tidyverse", "pacman", "rio", 
-                     "skimr", "caret", "rvest", "stargazer", "rlist")
+                     "skimr", "caret", "rvest", "stargazer", "rlist", "Hmisc", 
+                     "corrplot", "dplyr", "boot", "caret","Ecdat","ggplot2", "car")
 
 new.packages = list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 sapply(list.of.packages, require, character.only = TRUE)
 
-set.seed(0000) 
+set.seed(9876) 
 # Base provisional para obtener los nombres de las columnas
 prov <- import("https://github.com/ignaciomsarmiento/datasets/blob/main/GEIH_sample1.Rds?raw=true") 
 
@@ -22,7 +24,7 @@ ini <- prov %>%
   group_by(y_ingLab_m_ha) %>%
   summarise(n = n())
 
-basep <- prov %>%
+base <- prov %>%
   # 1. Renombrando variable de interés
   rename(ing_hr=y_ingLab_m_ha) %>%                             # y_ingLab_m_ha pasaría a ser ing_hr
   # 2. Filtrando por edad y empleado
@@ -32,23 +34,24 @@ basep <- prov %>%
   mutate_at(c('ing_hr'), ~na_if(., 0)) %>%                     # Reemplazar valores nulos de ing_hr por NA
   filter(!is.na(ing_hr))                                       # Filtrando por vacios en ing_hr
 
-basep <- basep %>%
+base <- base %>%
   mutate(fulltime=ifelse(hoursWorkUsual>=40, 1, 0)) # El tipo de contrato es tiempo completo si trabaja más de 40 horas a la semana
+
 
 # 3a. Tabla de regresión ------------------------------------------------------------- #
 
 #Primero creamos la variable edad al cuadrado y el logaritmo del salario
-basep  <- basep %>%
+base3  <- base %>%
   mutate(age2=age^2 , 
          lnwage=log(ing_hr))
 
 #Procedemos a hacer la regresión
-regw_age2<- lm(lnwage~ age+ age2, data = basep)
+regw_age2<- lm(lnwage~ age+ age2, data = base3)
 stargazer(regw_age2, type = "text")
 stargazer(regw_age2, type = "latex")
 
 ##Veamos el gráfico de la regresión en cuestión
-age_earnings<- ggplot(basep, 
+age_earnings<- ggplot(base3, 
        aes(x = age, 
            y = lnwage)) +
   geom_point(color= "steelblue") +
@@ -58,27 +61,6 @@ age_earnings<- ggplot(basep,
 
 # Bootstrap para construir los intervalos de confianza
 p_load("boot")
-
-# ---------
-#Primero tenemos que calcular el peak age. 
-
-#1. creamos un data frame con el summary de nuestra regresión
-#lmw_summary <- data.frame(summary(regw_age2)$coefficients)
-
-#2. extraemos los betas a escalares para plantear la fórmula
-#beta1 = lmw_summary[2,1]
-#beta2 = lmw_summary[3,1]
-
-#peak_age = -(beta1/(2*beta2))
-#peak_age
-
-#1. creamos un data frame con el summary de nuestra regresión
-#coef <- lm(lnwage~ age+ age2, data = basep)$coefficients
-
-#2. extraemos los betas a escalares para plantear la fórmula
-#beta1 = coef[2]
-#beta2 = coef[3]
-
 
 # Bootstrap para construir los intervalos de confianza
 
