@@ -23,7 +23,9 @@ Todos los datos se encuentran fueron scrappeados del repositorio que se encuentr
 Todas las gráficas se pueden encontrar en la carpeta "views". Así mismo, los códigos con los que fueron generados se encuentran en el script "Taller-1-BDML" de la carpeta "scripts".
 
 # Data dictionary
-- lnwage = logaritmo natural del salario 
+- lnwage: logaritmo natural del salario 
+- age: la edad de la persona
+- totalHoursWorked: 
 - maxEducLevel3                          =1 si el nivel máximo de educación es primaria incompleta
 - maxEducLevel4                          =1 si el nivel máximo de educación es primaria completa
 - maxEducLevel5                          =1 si el nivel máximo de educación es secundaria incompleta
