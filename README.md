@@ -13,13 +13,30 @@
 # Abstract
 
 # Data files
+Todos los datos se encuentran fueron scrappeados de la 
+
 
 # Code files
 
+# Graphs
+
+Todas las gráficas se pueden encontrar en la carpeta "views". Así mismo, los códigos con los que fueron generados se encuentran en el script "Taller-1-BDML" de la carpeta "scripts".
+
 # Data dictionary
-- maxEducLevel3                          =1 si el nivel máximo de educación es  Minority x 0-25 Within Zip Toxic Concentration
-	- Minority_dec3                         =1 if Minority x 25-75 Within Zip Toxic Concentration
-	- Minority_dec4                        =1 if Minority x 75-100 Within Zip Toxic Concentration
+- maxEducLevel3                          =1 si el nivel máximo de educación es primaria incompleta
+- maxEducLevel4                          =1 si el nivel máximo de educación es primaria completa
+- maxEducLevel5                          =1 si el nivel máximo de educación es secundaria incompleta
+- maxEducLevel6                          =1 si el nivel máximo de educación es secundaria completa
+- maxEducLevel7                          =1 si el nivel máximo de educación es terciaria
+- estrato12                              =1 si la persona es de estrato 2
+- estrato13                              =1 si la persona es de estrato 3
+- estrato14                              =1 si la persona es de estrato 4
+- estrato15                              =1 si la persona es de estrato 5
+- estrato16                              =1 si la persona es de estrato 6
+- sizeFirm2                              =1 si la empresa en que trabaja la persona tiene de 2 a 5 trabajadores
+- sizeFirm3                              =1 si la empresa en que trabaja la persona tiene de 6 a 10 trabajadores
+- sizeFirm4                              =1 si la empresa en que trabaja la persona tiene de 11 a 50 trabajadores
+- sizeFirm5                              =1 si la empresa en que trabaja la persona tiene más de 50 trabajadores
 
 
 
