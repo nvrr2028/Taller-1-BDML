@@ -694,17 +694,18 @@ ggplot(test$base2, aes(x=msemod4, fill=sex)) +
   theme_classic()
 
 
-##d.
+##d. LOOCV modelo 4
 library (boot)
 glm.fit=glm(model4 ,data=base2)
 cv.err =cv.glm(base2 ,glm.fit)
 LOOCVm4<-cv.err$delta
 
+## LOOCV modelo 5
 glm.fit=glm(model5 ,data=base2)
 cv.err =cv.glm(base2 ,glm.fit)
 cv.err$delta
 LOOCVm5<-cv.err$delta
-
+##comparo los dos modelos
 tabla2<-data.frame(LOOCVm4,LOOCVm5)
 tabla2
 stargazer(tabla2, type="latex")
