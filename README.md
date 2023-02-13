@@ -25,6 +25,12 @@
 - estrato12                              =1 si la persona es de estrato 2
 - estrato13                              =1 si la persona es de estrato 3
 - estrato14                              =1 si la persona es de estrato 4
+- estrato15                              =1 si la persona es de estrato 5
+- estrato16                              =1 si la persona es de estrato 6
+- sizeFirm2                              =1 si la empresa en que trabaja la persona tiene de 2 a 5 trabajadores
+- sizeFirm3                              =1 si la empresa en que trabaja la persona tiene de 6 a 10 trabajadores
+- sizeFirm4                              =1 si la empresa en que trabaja la persona tiene de 11 a 50 trabajadores
+- sizeFirm5                              =1 si la empresa en que trabaja la persona tiene más de 50 trabajadores
 
 
 
