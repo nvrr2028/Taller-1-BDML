@@ -1,4 +1,11 @@
-# Problem Set Template Repository for Big Data and Machine Learning for Applied Economics
+#**************************************************************************************#
+#                                    TALLER 1 BDML                                     #
+#                        Uniandes: Sofia Charry Tobar                                  #
+#                                  Laura Manuela Rodríguez Morales                     #
+#                                  Nicol Valeria Rodríguez Rodríguez                   #
+#                                  Brayan Alexander Vargas Rojas                       #
+#                          Fuente: GEIH DANE                                           #
+#**************************************************************************************#
 
 This is the template repository for the problem sets.
 
