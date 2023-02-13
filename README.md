@@ -7,6 +7,24 @@
 #                          Fuente: GEIH DANE                                           #
 #**************************************************************************************#
 
+
+# Predicting income
+
+# Abstract
+
+# Data files
+
+# Code files
+
+# Data dictionary
+- maxEducLevel3                          =1 si el nivel máximo de educación es  Minority x 0-25 Within Zip Toxic Concentration
+	- Minority_dec3                         =1 if Minority x 25-75 Within Zip Toxic Concentration
+	- Minority_dec4                        =1 if Minority x 75-100 Within Zip Toxic Concentration
+
+
+
+
+
 This is the template repository for the problem sets.
 
 The repo should contain at least four folders:
