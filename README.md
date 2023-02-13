@@ -8,11 +8,15 @@
 #**************************************************************************************#
 
 
-# Predicting income
+# Predicting income - GEIH
 
 # Abstract
 
 La brecha fiscal es un de los principales problemas del mundo, esta, es la diferencia entre la cantidad de impuestos que el gobierno puede recaudar contra la cantidad de impuestos que realmente recauda. En Colombia, según Bonet (2016), la brecha fiscal en el 2014 fue de aproximadamente 46 billones de pesos, lo que demuestra un gran desperdicio de eficiencia tributaria. Es importante reducir esta brecha debido a que se debe mantener un sistema tributario justo, eficiente y efectivo, para garantizar el mayor recaudo posible para el estado y poder brindar servicios esenciales a la población. Para esto, se realizará un estudio de predicción de ingresos, el cual podría potencialmente ayudar a acumular casos de fraude que lograría la reducción de esta brecha. En términos generales el estudio concluye que en Colombia hay brechas salariales por discriminación por género, y además, el modelo propuesto puede ser un buen predictor del salario, ya que es efectivo prediciendo muestra dentro del grueso de la población pero no tanto en observaciones atípicas. 
+
+# Document
+
+La carpeta de "document" contiene el documento final con el desarrollo del ejercicio.
 
 # Data files
 
@@ -20,7 +24,14 @@ Todos los datos se encuentran fueron scrappeados del repositorio que se encuentr
 
 # Code files
 
-El código principal para correr el ejercicio es "Taller 1 BDML", el cual contiene cada no de los puntos solicitados. No obstante, también exite un código particular para cada uno de los puntos, en el caso de que sea necesaro utilizarlos.
+En análisis del ingreso se desarrolla en R version 4.2.2 (2022-10-31 ucrt).
+El código principal para correr el ejercicio es "Taller 1 BDML", el cual contiene cada uno de los puntos solicitados. No obstante, también exite un código particular para cada uno de los puntos, en el caso de que sea necesaro utilizarlos.
+Por lo tanto, la carpeta de "scripts" contiene: 
+- Taller 1 BDML
+- PUNTO 2. TALLER 1
+- PUNTO 3. TALLER 1
+- PUNTO 4. TALLER 1
+- PUNTO 5. TALLER 1
 
 # Graphs
 
@@ -60,20 +71,4 @@ Todas las gráficas se pueden encontrar en la carpeta "views". Así mismo, los c
         3: 6-10 empleados.
         4: 11-50 empleados.
         5: >50 empleados.
-
-This is the template repository for the problem sets.
-
-The repo should contain at least four folders:
-
-- `document`: contains your final document in `pdf` format. Ideally, the document should pull figures and tables directly from the `views` folder. I've included a latex template I created for the Thesis Seminar. 
-- `scripts`: contains all your scripts
-- `stores`: contains all the data sets used. If files are "too big" for GitHub, include a document describing where people can access the data.
-- `views`: contains all figures and tables
-
-
-
-## Some general reminders: 
-
-- It is essential how you write up the document. Be sure to be organized and consistent in explaining your equations and findings. Make sure that there are no compilation errors.
-- Write understandable code, separating and commenting on each section. Coding, like in writing, style is critical for readability. If the code is well written, it should be self-contained. There is no need to write everything you did. I encourage you to follow the [tidyverse style guide](https://style.tidyverse.org/)
 
