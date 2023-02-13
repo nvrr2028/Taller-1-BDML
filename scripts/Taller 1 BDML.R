@@ -262,9 +262,6 @@ regw_age2<- lm(lnwage~ age+ age2, data = base3)
 stargazer(regw_age2, type = "text")
 stargazer(regw_age2, type = "latex")
 
-# 3b. Interpretación de los coeficientes --------------------------------------------- #
-
-# 3c. Discusión of the model's in sample fit ----------------------------------------- #
 
 # 3d. Gráfico de la estimación del perfil edad-ganancias ----------------------------- #
 
@@ -281,7 +278,7 @@ age_earnings<- ggplot(base3,
               formula = y ~ poly(x, 2), 
               color = "indianred3")
 
-# Bootstrap para construir los intervalos de confianza
+# Bootstrap para construir los intervalos de confianza------------------
 
 #Función para peakage
 mod_peakage <- function(base3,index){
@@ -340,7 +337,7 @@ alpha = 0.05 # 95% Confidence Interval
 lower = peakwage - qnorm(alpha/2) * se
 upper = peakwage + qnorm(alpha/2) * se
 
-#4. Agregamos el CI al gráfico
+#4. Agregamos el CI al gráfico -------------
 
 age_earnings + 
   geom_point(aes(x=peakage, y=peakwage)) +
