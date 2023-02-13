@@ -23,20 +23,37 @@ Todos los datos se encuentran fueron scrappeados de la
 Todas las gráficas se pueden encontrar en la carpeta "views". Así mismo, los códigos con los que fueron generados se encuentran en el script "Taller-1-BDML" de la carpeta "scripts".
 
 # Data dictionary
-- maxEducLevel3                          =1 si el nivel máximo de educación es primaria incompleta
-- maxEducLevel4                          =1 si el nivel máximo de educación es primaria completa
-- maxEducLevel5                          =1 si el nivel máximo de educación es secundaria incompleta
-- maxEducLevel6                          =1 si el nivel máximo de educación es secundaria completa
-- maxEducLevel7                          =1 si el nivel máximo de educación es terciaria
-- estrato12                              =1 si la persona es de estrato 2
-- estrato13                              =1 si la persona es de estrato 3
-- estrato14                              =1 si la persona es de estrato 4
-- estrato15                              =1 si la persona es de estrato 5
-- estrato16                              =1 si la persona es de estrato 6
-- sizeFirm2                              =1 si la empresa en que trabaja la persona tiene de 2 a 5 trabajadores
-- sizeFirm3                              =1 si la empresa en que trabaja la persona tiene de 6 a 10 trabajadores
-- sizeFirm4                              =1 si la empresa en que trabaja la persona tiene de 11 a 50 trabajadores
-- sizeFirm5                              =1 si la empresa en que trabaja la persona tiene más de 50 trabajadores
+ing_hr: variable continua que representa el ingreso laboral nominal por hora, incluyendo todas las ocupaciones, propinas y comisiones.
+    maxEducLevel: variable categórica sobre el máximo nivel de educación alcanzado. 
+        1: Ninguno.
+        2: Preescolar.
+        3: Primaria incompleta.
+        4: Primaria completa.
+        5: Secundaria incompleta.
+        6: Secundaria completa.
+        7: Terciaria
+        9: N/A.
+    age: variable continua que representa la edad.
+    totalHoursWorked: variable continua que representa el número total de horas trabajadas la semana anterior.
+    formal: variable binaria que toma el valor de 1 si el trabajador si cotiza a seguridad social. Es una proxy de formalidad.
+    estrato1: variable categórica para el estrato socieconómico. Toma valores entre 1 a 6.
+    fulltime: variable binaria que toma el valor de 1 si el trabajador trabajó más de 40 horas la semana pasada. Es una proxy del tipo de contrato.
+    relab: variable categórica para el tipo de ocupación.
+        1: Obrero o empleado de empresa particular.
+        2: Obrero o empleado del gobierno.
+        3: Empleado doméstico.
+        4: Trabajador por cuenta propia.
+        5: Patrón o empleador.
+        6: Trabajador familiar sin remuneración.
+        7: Trabajador sin remuneracin en empresas o negocios de otros hogares.
+        8: Jornalero o peón.
+        9: Otro.
+    sizeFirm: variable categórica para el tamaño de la empresa.
+        1: Independiente.
+        2: 2-5 empleados.
+        3: 6-10 empleados.
+        4: 11-50 empleados.
+        5: >50 empleados.
 
 
 
