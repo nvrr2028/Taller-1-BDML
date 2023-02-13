@@ -14,15 +14,49 @@
 
 # Data files
 
+
 # Code files
 
+
 # Data dictionary
+Las variables utilizadas en el ejercicio corresponden a:
 - maxEducLevel3                          =1 si el nivel máximo de educación es  Minority x 0-25 Within Zip Toxic Concentration
 	- Minority_dec3                         =1 if Minority x 25-75 Within Zip Toxic Concentration
 	- Minority_dec4                        =1 if Minority x 75-100 Within Zip Toxic Concentration
 
 
-
+    ing_hr: variable continua que representa el ingreso laboral nominal por hora, incluyendo todas las ocupaciones, propinas y comisiones.
+    maxEducLevel variable categórica sobre el máximo nivel de educación alcanzado. 
+        Ninguno.
+        Preescolar.
+        Primaria incompleta.
+        Primaria completa.
+        Secundaria incompleta.
+        Secundaria completa.
+        Terciaria
+        N/A.
+    age: variable continua que representa la edad.
+    totalHoursWorked: variable continua que representa el número total de horas trabajadas la semana anterior.
+    formal: variable binaria que toma el valor de 1 si el trabajador si cotiza a seguridad social. Es una proxy de formalidad.
+    estrato1: variable categórica para el estrato socieconómico. Toma valores entre 1 a 6.
+    fulltime: variable binaria que toma el valor de 1 si el trabajador trabajó más de 40 horas la semana pasada. Es una proxy del tipo de contrato.
+    relab: variable categórica para el tipo de ocupación.
+    itemize
+        1: Obrero o empleado de empresa particular.
+        2: Obrero o empleado del gobierno.
+        3: Empleado doméstico.
+        4: Trabajador por cuenta propia.
+        5: Patrón o empleador.
+        6: Trabajador familiar sin remuneración.
+        7: Trabajador sin remuneracin en empresas o negocios de otros hogares.
+        8: Jornalero o peón.
+        9: Otro.
+    sizeFirm: variable categórica para el tamaño de la empresa.
+        1: Independiente.
+        2: 2-5 empleados.
+        3: 6-10 empleados.
+        4: 11-50 empleados.
+        5: >50 empleados.
 
 
 This is the template repository for the problem sets.
