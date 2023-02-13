@@ -8,7 +8,7 @@
 #**************************************************************************************#
 
 
-# Predicting income
+# Predicting income - GEIH
 
 # Abstract
 
@@ -21,6 +21,12 @@ Todos los datos se encuentran fueron scrappeados del repositorio que se encuentr
 # Code files
 
 El código principal para correr el ejercicio es "Taller 1 BDML", el cual contiene cada no de los puntos solicitados. No obstante, también exite un código particular para cada uno de los puntos, en el caso de que sea necesaro utilizarlos.
+Por lo tanto, la carpeta de "scripts" contiene: 
+- Taller 1 BDML
+- PUNTO 2. TALLER 1
+- PUNTO 3. TALLER 1
+- PUNTO 4. TALLER 1
+- PUNTO 5. TALLER 1
 
 # Graphs
 
@@ -60,20 +66,4 @@ Todas las gráficas se pueden encontrar en la carpeta "views". Así mismo, los c
         3: 6-10 empleados.
         4: 11-50 empleados.
         5: >50 empleados.
-
-This is the template repository for the problem sets.
-
-The repo should contain at least four folders:
-
-- `document`: contains your final document in `pdf` format. Ideally, the document should pull figures and tables directly from the `views` folder. I've included a latex template I created for the Thesis Seminar. 
-- `scripts`: contains all your scripts
-- `stores`: contains all the data sets used. If files are "too big" for GitHub, include a document describing where people can access the data.
-- `views`: contains all figures and tables
-
-
-
-## Some general reminders: 
-
-- It is essential how you write up the document. Be sure to be organized and consistent in explaining your equations and findings. Make sure that there are no compilation errors.
-- Write understandable code, separating and commenting on each section. Coding, like in writing, style is critical for readability. If the code is well written, it should be self-contained. There is no need to write everything you did. I encourage you to follow the [tidyverse style guide](https://style.tidyverse.org/)
 
