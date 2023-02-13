@@ -16,7 +16,7 @@ rm(list = ls(all.names = TRUE))
 
 list.of.packages = c("readr", "readxl", "lubridate", "tidyverse", "pacman", "rio", 
                      "skimr", "caret", "rvest", "stargazer", "rlist", "Hmisc", 
-                     "corrplot", "dplyr", "boot", "caret","Ecdat","ggplot2")
+                     "corrplot", "dplyr", "boot", "caret","Ecdat","ggplot2", "car")
 
 new.packages = list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -640,9 +640,8 @@ with(test,mean((lnwage-model3)^2))
 
 ## Cuarto modelo ##
 
-model4<-lm(lnwage~totalHoursWorked+age+age^2+maxEducLevel+formal+sex+
-             estrato1+relab+sizeFirm+totalHoursWorked+sex:totalHoursWorked+age:totalHoursWorked,data=train)
-
+model4<-lm(lnwage~totalHoursWorked:formal+age+age^2+maxEducLevel+formal+sex+
+             estrato1+sizeFirm,data=train)
 test$model4<-predict(model4,newdata = test)
 
 with(test,mean((lnwage-model4)^2))
@@ -650,11 +649,13 @@ with(test,mean((lnwage-model4)^2))
 stargazer(model4, type = "text")
 
 ## Quinto modelo ##
-  model5<-lm(lnwage~poly(age,2,raw=TRUE):poly(maxEducLevel,4,raw=TRUE):sex:formal:relab:sizeFirm+poly(fulltime,6,raw=TRUE):maxEducLevel:sex:age+
-             poly(estrato1,5,raw=TRUE):maxEducLevel:sex:age+maxEducLevel+estrato1+poly(sizeFirm,5,raw=TRUE):poly(totalHoursWorked,8,raw=TRUE),data=train)
+model5<-lm(lnwage~totalHoursWorked:formal:sex+age+age^2+maxEducLevel+formal+sex+
+             +estrato1,data=train)
 test$model5<-predict(model5,newdata = test)
 
 with(test,mean((lnwage-model5)^2))
+
+stargazer(model5, type = "latex")
 
 ## comparar los MSE 
 msew_age2<-with(test,round(mean((lnwage-reg4a_hrtrain )^2),4))
@@ -666,6 +667,8 @@ mse4<-with(test,round(mean((lnwage-model4)^2),4))
 mse5<-with(test,round(mean((lnwage-model5)^2),4))
 
 comparacionmse<-data.frame(msew_age2,msew_fem,mse1,mse2,mse3,mse4, mse5)
+comparacionmse
+stargazer(model1,model2,model3,model4,model5, type="latex")
 
 ##c.
 
@@ -704,6 +707,7 @@ LOOCVm5<-cv.err$delta
 
 tabla2<-data.frame(LOOCVm4,LOOCVm5)
 tabla2
+stargazer(tabla2, type="latex")
 
 
 
