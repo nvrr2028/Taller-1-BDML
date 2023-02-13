@@ -14,7 +14,13 @@
 
 # Data files
 
+
+
 # Code files
+
+# Graphs
+
+Todas las gráficas se pueden encontrar en la carpeta "views". Así mismo, los códigos con los que fueron generados se encuentran en el script "Taller-1-BDML" de la carpeta "scripts".
 
 # Data dictionary
 - maxEducLevel3                          =1 si el nivel máximo de educación es primaria incompleta
