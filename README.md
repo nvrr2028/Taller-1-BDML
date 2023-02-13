@@ -11,9 +11,10 @@
 # Predicting income
 
 # Abstract
+La brecha fiscal es un de los principales problemas del mundo, esta, es la diferencia entre la cantidad de impuestos que el gobierno puede recaudar contra la cantidad de impuestos que realmente recauda. En Colombia, según Bonet (2016), la brecha fiscal en el 2014 fue de aproximadamente 46 billones de pesos, lo que demuestra un gran desperdicio de eficiencia tributaria. Es importante reducir esta brecha debido a que se debe mantener un sistema tributario justo, eficiente y efectivo, para garantizar el mayor recaudo posible para el estado y poder brindar servicios esenciales a la población. Para esto, se realizará un estudio de predicción de ingresos, el cual podría potencialmente ayudar a acumular casos de fraude que lograría la reducción de esta brecha. En términos generales el estudio concluye que en Colombia hay brechas salariales por discriminación por género, y además, el modelo propuesto puede ser un buen predictor del salario, ya que es efectivo prediciendo muestra dentro del grueso de la población pero no tanto en observaciones atípicas. 
 
 # Data files
-Todos los datos se encuentran fueron scrappeados de la 
+Todos los datos se encuentran fueron scrappeados del repositorio que se encuentra en la página "https://ignaciomsarmiento.github.io/GEIH2018_sample/labels.html". De allí, se tomaron 10 piezas de datos que se unieron en una sola base, cuyo código se puede encontrar en el script "Taller-1-BDML" de la carpeta "scripts".
 
 
 # Code files
@@ -25,6 +26,7 @@ Todas las gráficas se pueden encontrar en la carpeta "views". Así mismo, los c
 # Data dictionary
     ing_hr: variable continua que representa el ingreso laboral nominal por hora, incluyendo todas las ocupaciones, propinas y comisiones.
     ing_m: variable continua que representa el ingreso laboral nominal mensual, incluyendo todas las ocupaciones, propinas y comisiones.
+    lnwage: logaritmo natural del salario 
     maxEducLevel: variable categórica sobre el máximo nivel de educación alcanzado. 
         1: Ninguno.
         2: Preescolar.
@@ -55,10 +57,6 @@ Todas las gráficas se pueden encontrar en la carpeta "views". Así mismo, los c
         3: 6-10 empleados.
         4: 11-50 empleados.
         5: >50 empleados.
-
-
-
-
 
 This is the template repository for the problem sets.
 
