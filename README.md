@@ -23,7 +23,8 @@ Todos los datos se encuentran fueron scrappeados de la
 Todas las gráficas se pueden encontrar en la carpeta "views". Así mismo, los códigos con los que fueron generados se encuentran en el script "Taller-1-BDML" de la carpeta "scripts".
 
 # Data dictionary
-ing_hr: variable continua que representa el ingreso laboral nominal por hora, incluyendo todas las ocupaciones, propinas y comisiones.
+    ing_hr: variable continua que representa el ingreso laboral nominal por hora, incluyendo todas las ocupaciones, propinas y comisiones.
+    ing_m: variable continua que representa el ingreso laboral nominal mensual, incluyendo todas las ocupaciones, propinas y comisiones.
     maxEducLevel: variable categórica sobre el máximo nivel de educación alcanzado. 
         1: Ninguno.
         2: Preescolar.
