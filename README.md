@@ -17,9 +17,14 @@
 # Code files
 
 # Data dictionary
-- maxEducLevel3                          =1 si el nivel máximo de educación es  Minority x 0-25 Within Zip Toxic Concentration
-	- Minority_dec3                         =1 if Minority x 25-75 Within Zip Toxic Concentration
-	- Minority_dec4                        =1 if Minority x 75-100 Within Zip Toxic Concentration
+- maxEducLevel3                          =1 si el nivel máximo de educación es primaria incompleta
+- maxEducLevel4                          =1 si el nivel máximo de educación es primaria completa
+- maxEducLevel5                          =1 si el nivel máximo de educación es secundaria incompleta
+- maxEducLevel6                          =1 si el nivel máximo de educación es secundaria completa
+- maxEducLevel7                          =1 si el nivel máximo de educación es terciaria
+- estrato12                              =1 si la persona es de estrato 2
+- estrato13                              =1 si la persona es de estrato 3
+- estrato14                              =1 si la persona es de estrato 4
 
 
 
