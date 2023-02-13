@@ -303,6 +303,7 @@ set.seed(9876)
 results_peakage <- boot(base3, mod_peakage, R=1000)
 results_peakage 
 
+peakage<- results_peakage$t0
 
 #Calculemos peak wage
 mod_peakwage <- function(base3,index){
