@@ -13,7 +13,7 @@
 # Abstract
 
 # Data files
-Todos los datos se encuentran fueron scrappeados de la 
+Todos los datos se encuentran fueron scrappeados del repositorio que se encuentra en la página "https://ignaciomsarmiento.github.io/GEIH2018_sample/labels.html". De allí, se tomaron 10 piezas de datos que se unieron en una sola base, cuyo código se puede encontrar en el script "Taller-1-BDML" de la carpeta "scripts".
 
 
 # Code files
